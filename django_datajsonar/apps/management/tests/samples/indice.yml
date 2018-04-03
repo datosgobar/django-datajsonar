@@ -1,0 +1,5 @@
+sspm:
+  url: "django_datajsonar/apps/management/tests/samples/sample_data.json"
+  formato: "json"
+  federado: true
+
