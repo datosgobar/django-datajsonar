@@ -1,12 +1,9 @@
 #! coding: utf-8
-import logging
 import datetime
 
 from scheduler.models import RepeatableJob
 from django.core.management import BaseCommand
 from django.utils.timezone import now
-
-logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -42,7 +39,6 @@ class Command(BaseCommand):
                                                                  interval_unit=interval[1])
 
         if previously_scheduled_jobs:
-
             self.stdout.write(u'Ya hay un RepeatableJob registrado con ese metodo e intervalo')
             return
 
