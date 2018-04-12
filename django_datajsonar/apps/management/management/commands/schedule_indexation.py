@@ -59,4 +59,3 @@ class Command(BaseCommand):
                 'interval_unit': interval[1],
                 'repeat': None
             })
-
