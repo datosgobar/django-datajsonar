@@ -1,9 +1,10 @@
 #! coding: utf-8
-import datetime
+import logging
 
-from scheduler.models import RepeatableJob
 from django.core.management import BaseCommand
-from django.utils.timezone import now
+from ._utils import check_for_previously_scheduled_jobs, update_or_create_repeatable_jobs
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -31,31 +32,9 @@ class Command(BaseCommand):
                             )
 
     def handle(self, *args, **options):
-        # chequear que no haya un trabajo scheduleado previo
-        method = options['callable']
-        interval = options['interval']
-        previously_scheduled_jobs = RepeatableJob.objects.filter(callable=method,
-                                                                 interval=int(interval[0]),
-                                                                 interval_unit=interval[1])
-
-        if previously_scheduled_jobs:
-            self.stdout.write(u'Ya hay un RepeatableJob registrado con ese metodo e intervalo')
-            return
-
-        start_time = now() + datetime.timedelta(days=1)
-        time = map(int, options['time'])
-        start_time = start_time.replace(hour=time[0],
-                                        minute=time[1],
-                                        second=0,
-                                        microsecond=0)
-
-        RepeatableJob.objects.update_or_create(
-            name=options['name'],
-            defaults={
-                'callable': method,
-                'queue': 'indexing',
-                'scheduled_time': start_time,
-                'interval': int(interval[0]),
-                'interval_unit': interval[1],
-                'repeat': None
-            })
+        try:
+            check_for_previously_scheduled_jobs(options)
+        except ValueError as e:
+            logger.info('Ya hay un RepeatableJob registrado con ese metodo e intervalo')
+            raise e
+        update_or_create_repeatable_jobs(options)

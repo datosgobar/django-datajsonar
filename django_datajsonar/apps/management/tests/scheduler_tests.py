@@ -1,7 +1,6 @@
 #!coding=utf8
 
 import datetime
-from StringIO import StringIO
 from django.test import TestCase
 from django.core.management import call_command
 from django.utils.timezone import now
@@ -80,10 +79,10 @@ class ReadDataJsonTest(TestCase):
         args = ['aName']
         opts = {}
         call_command('schedule_indexation', *args, **opts)
-
         args = ['otherName']
         opts = {}
-        out = StringIO()
-        call_command('schedule_indexation', stdout=out, *args, **opts)
-        self.assertIn('Ya hay un RepeatableJob registrado con ese metodo e intervalo',
-                      out.getvalue())
+        with self.assertRaises(ValueError):
+            call_command('schedule_indexation', *args, **opts)
+
+        # No debería crear uno nuevo
+        self.assertEqual(1, RepeatableJob.objects.count())
