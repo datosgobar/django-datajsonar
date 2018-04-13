@@ -15,74 +15,89 @@ class ReadDataJsonTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.default_callable = 'django_datajsonar.libs.indexing.tasks.schedule_new_read_datajson_task'
-        cls.default_interval = 24
-        cls.default_unit = 'hours'
+        cls.profiles = [
+            {'command': 'schedule_indexation',
+             'default_callable': 'django_datajsonar.libs.indexing.tasks.schedule_new_read_datajson_task',
+             'default_interval': 24,
+             'default_unit': 'hours'
+             },
+            {'command': 'schedule_task_finisher',
+             'default_callable': 'django_datajsonar.libs.indexing.tasks.close_read_datajson_task',
+             'default_interval': 5,
+             'default_unit': 'minutes'
+             },
+        ]
 
     def test_pass_no_optional_arguments(self):
-        args = ['aName']
-        opts = {}
-        call_command('schedule_indexation', *args, **opts)
-        self.assertTrue(RepeatableJob.objects.filter(name='aName',
-                                                     callable=self.default_callable,
-                                                     interval=self.default_interval,
-                                                     interval_unit=self.default_unit))
+        for profile in self.profiles:
+            args = [profile['command']+'_name']
+            opts = {}
+            call_command(profile['command'], *args, **opts)
+            self.assertTrue(RepeatableJob.objects.filter(name=profile['command']+'_name',
+                                                         callable=profile['default_callable'],
+                                                         interval=profile['default_interval'],
+                                                         interval_unit=profile['default_unit']))
 
     def test_pass_time_argument(self):
-        args = ['aName']
-        opts = {'time': ['12', '45']}
-        call_command('schedule_indexation', *args, **opts)
-        start_time = now() + datetime.timedelta(days=1)
-        start_time = start_time.replace(hour=12, minute=45, second=0, microsecond=0)
-        self.assertTrue(RepeatableJob.objects.filter(name='aName',
-                                                     callable=self.default_callable,
-                                                     scheduled_time=start_time))
+        for profile in self.profiles:
+            args = [profile['command']+'_name']
+            opts = {'time': ['12', '45']}
+            call_command(profile['command'], *args, **opts)
+            start_time = now() + datetime.timedelta(days=1)
+            start_time = start_time.replace(hour=12, minute=45, second=0, microsecond=0)
+            self.assertTrue(RepeatableJob.objects.filter(name=profile['command']+'_name',
+                                                         callable=profile['default_callable'],
+                                                         scheduled_time=start_time))
 
     def test_pass_interval_argument(self):
-        args = ['aName']
-        opts = {'interval': ['300', 'minutes']}
-        call_command('schedule_indexation', *args, **opts)
-        self.assertTrue(RepeatableJob.objects.filter(name='aName',
-                                                     callable=self.default_callable,
-                                                     interval=300,
-                                                     interval_unit='minutes'))
+        for profile in self.profiles:
+            args = [profile['command']+'_name']
+            opts = {'interval': ['300', 'minutes']}
+            call_command(profile['command'], *args, **opts)
+            self.assertTrue(RepeatableJob.objects.filter(name=profile['command']+'_name',
+                                                         callable=profile['default_callable'],
+                                                         interval=300,
+                                                         interval_unit='minutes'))
+
 
     def test_pass_callable_argument(self):
-        args = ['aName']
-        method = 'django_datajsonar.apps.management.tests.scheduler_tests.callable_method'
-        opts = {'callable': method}
-        call_command('schedule_indexation', *args, **opts)
-        self.assertTrue(RepeatableJob.objects.filter(name='aName',
-                                                     callable=method))
+        for profile in self.profiles:
+            args = [profile['command']+'_name']
+            method = 'django_datajsonar.apps.management.tests.scheduler_tests.callable_method'
+            opts = {'callable': method}
+            call_command(profile['command'], *args, **opts)
+            self.assertTrue(RepeatableJob.objects.filter(name=profile['command']+'_name',
+                                                         callable=method,
+                                                         interval=profile['default_interval'],
+                                                         interval_unit=profile['default_unit']))
 
     def test_update_job(self):
-        args = ['aName']
-        opts = {}
-        call_command('schedule_indexation', *args, **opts)
-        self.assertTrue(RepeatableJob.objects.filter(name='aName',
-                                                     callable=self.default_callable,
-                                                     interval=self.default_interval,
-                                                     interval_unit=self.default_unit))
-        opts = {'interval': ['2', 'days']}
-        call_command('schedule_indexation', *args, **opts)
-        self.assertTrue(RepeatableJob.objects.filter(name='aName',
-                                                     callable=self.default_callable,
-                                                     interval=2,
-                                                     interval_unit='days'))
+        for profile in self.profiles:
+            args = [profile['command']+'_name']
+            opts = {}
+            call_command(profile['command'], *args, **opts)
+            self.assertTrue(RepeatableJob.objects.filter(name=profile['command']+'_name',
+                                                         callable=profile['default_callable'],
+                                                         interval=profile['default_interval'],
+                                                         interval_unit=profile['default_unit']))
 
-        self.assertFalse(RepeatableJob.objects.filter(name='aName',
-                                                      callable=self.default_callable,
-                                                      interval=self.default_interval,
-                                                      interval_unit=self.default_unit))
+            opts = {'interval': ['2', 'days']}
+            call_command(profile['command'], *args, **opts)
+            self.assertTrue(RepeatableJob.objects.filter(name=profile['command'] + '_name',
+                                                         callable=profile['default_callable'],
+                                                         interval=2,
+                                                         interval_unit='days'))
+            self.assertFalse(RepeatableJob.objects.filter(name=profile['command'] + '_name',
+                                                          callable=profile['default_callable'],
+                                                          interval=profile['default_interval'],
+                                                          interval_unit=profile['default_unit']))
 
     def test_notify_repeated_jobs(self):
-        args = ['aName']
-        opts = {}
-        call_command('schedule_indexation', *args, **opts)
-        args = ['otherName']
-        opts = {}
-        with self.assertRaises(ValueError):
-            call_command('schedule_indexation', *args, **opts)
+        for profile in self.profiles:
+            args = [profile['command'] + '_name']
+            opts = {}
+            call_command(profile['command'], *args, **opts)
 
-        # No debería crear uno nuevo
-        self.assertEqual(1, RepeatableJob.objects.count())
+            args = [profile['command'] + '_other_name']
+            with self.assertRaises(ValueError):
+                call_command(profile['command'], *args, **opts)
