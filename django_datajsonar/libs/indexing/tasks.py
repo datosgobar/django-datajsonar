@@ -63,3 +63,15 @@ def scheduler():
     if not get_queue('indexing').jobs:
         task.status = task.FINISHED
         task.save()
+
+
+def schedule_new_read_datajson_task():
+    try:
+        task = ReadDataJsonTask.objects.last()
+        if task.status in [ReadDataJsonTask.INDEXING, ReadDataJsonTask.RUNNING]:
+            return
+    except ReadDataJsonTask.DoesNotExist:
+        pass
+
+    new_task = ReadDataJsonTask()
+    new_task.save()
