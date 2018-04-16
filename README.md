@@ -8,7 +8,16 @@ Los comandos `schedule_indexation` y `schedule_task_finisher` permiten planifica
 periódica. Es posible definir un horario de inicio, un intervalo de tiempo entre corridas y la función a ejecutar. Los
 parámetros son idénticos para los dos comandos.
 
-`$[schedule_indexation|schedule_task_finisher] NAME -t HOUR MINUTE -i UNIT [weeks|days|hours|minutes] -c CALLABLE`
+Por default, `schedule_indexation` ejecuta periódicamente `schedule_new_read_datajson_task`. Esta función crea nuevas
+tareas que iteran sobre los nodos indexables de la red de catálogos y sobre sus datasets creando o actualizando su
+metadata en los modelos dependiendo del caso que corresponda. En el caso de `schedule_task_finisher`, por default corre
+`close_read_datajson_task`. Esta función marca como finalizadas los `ReadDataJsonTask` una vez que terminan para poder
+crear nuevas tareas. En conjunto, estos trabajos permiten crear, poblar y actualizar los modelos indexables de manera
+periódica y automática. 
+
+Para ejecutar el comando hay que llamar: 
+
+`$ python manage.py [schedule_indexation|schedule_task_finisher] NAME -t HOUR MINUTE -i UNIT [weeks|days|hours|minutes] -c CALLABLE`
 
 Los comandos toman los siguientes parámetros:
   - **Name**: Es el nombre con que queda registrado el trabajo. Si el nombre pertenece a un trabajo ya registrado, se
