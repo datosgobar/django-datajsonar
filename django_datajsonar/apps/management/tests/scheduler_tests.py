@@ -59,7 +59,6 @@ class ReadDataJsonTest(TestCase):
                                                          interval=300,
                                                          interval_unit='minutes'))
 
-
     def test_pass_callable_argument(self):
         for profile in self.profiles:
             args = [profile['command']+'_name']

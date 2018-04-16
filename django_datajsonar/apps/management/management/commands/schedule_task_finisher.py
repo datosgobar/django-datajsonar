@@ -10,10 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Comando para ejecutar la indexación manualmente de manera sincrónica,
-    útil para debugging. No correr junto con el rqscheduler para asegurar
-    la generación de reportes correcta."""
-
     def add_arguments(self, parser):
         add_common_arguments(parser)
         parser.set_defaults(callable='django_datajsonar.libs.indexing.tasks.close_read_datajson_task',
