@@ -55,7 +55,7 @@ def get_dataset(catalog, catalog_id, dataset_id, whitelist):
 
 
 # Para correr con el scheduler
-def scheduler():
+def close_read_datajson_task():
     task = ReadDataJsonTask.objects.last()
     if task.status == task.FINISHED:
         return
