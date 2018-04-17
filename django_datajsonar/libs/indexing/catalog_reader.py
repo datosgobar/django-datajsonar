@@ -41,7 +41,7 @@ def index_catalog(node, task, read_local=False, whitelist=False):
     Dataset.objects.filter(catalog__identifier=node.catalog_id).update(present=False, updated=False)
     # Borro de la lista de indexables a los datasets que ya no están presentes en el catálogo
     dataset_ids = [dataset['identifier'] for dataset in catalog.get_datasets()]
-    Dataset.objects.filter(~Q(identifier__in=dataset_ids)).update(indexable=False)
+    Dataset.objects.filter(~Q(identifier__in=dataset_ids), catalog__identifier=node.catalog_id).update(indexable=False)
 
     Distribution.objects.filter(dataset__catalog__identifier=node.catalog_id).update(updated=False)
     Field.objects.filter(distribution__dataset__catalog=catalog_model).update(updated=False)
