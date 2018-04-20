@@ -1,6 +1,6 @@
 Django==1.11.6
 django-environ==0.4.1
-requests==2.18.2
+requests>=2.18.2,<3
 python-dateutil==2.6.1
 iso8601==0.1.12
 pydatajson>=0.3.21
