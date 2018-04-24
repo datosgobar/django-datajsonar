@@ -1,11 +1,11 @@
 #! coding: utf-8
 import unicodecsv
 import yaml
+from django_rq import job
 
 from django_datajsonar.apps.api.models import Catalog, Dataset
 from .models import Node, NodeRegisterFile
 from .strings import DATASET_STATUS
-from .tasks import process_node_register_file
 
 CATALOG_HEADER = u'catalog_id'
 DATASET_ID_HEADER = u'dataset_identifier'
@@ -58,6 +58,7 @@ class DatasetIndexableToggler(object):
 
 def process_node_register_file_action(register_file):
     """Registra (crea objetos Node) los nodos marcados como federado en el registro"""
+    from .tasks import process_node_register_file
     process_node_register_file.delay(register_file.id)
 
 
