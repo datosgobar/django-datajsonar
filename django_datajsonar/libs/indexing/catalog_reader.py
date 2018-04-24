@@ -26,6 +26,7 @@ def index_catalog(node, task, read_local=False, whitelist=False):
 
     try:
         catalog = DataJson(node.catalog_url)
+        catalog.generate_distribution_ids()
         node.catalog = json.dumps(catalog)
         node.save()
     except Exception as e:
