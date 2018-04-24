@@ -1,6 +1,7 @@
 #! coding: utf-8
 import unicodecsv
 import yaml
+from django_rq import job
 
 from django_datajsonar.apps.api.models import Catalog, Dataset
 from .models import Node, NodeRegisterFile
@@ -55,6 +56,7 @@ class DatasetIndexableToggler(object):
                 self.logs.append(DATASET_STATUS.format(catalog, dataset, status))
 
 
+@job('indexing')
 def process_node_register_file(register_file):
     """Registra (crea objetos Node) los nodos marcados como federado en el registro"""
     indexing_file = register_file.indexing_file

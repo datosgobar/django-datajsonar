@@ -32,7 +32,7 @@ class NodeRegisterFileAdmin(BaseRegisterFileAdmin):
             model.state = NodeRegisterFile.state = NodeRegisterFile.PROCESSING
             model.logs = u'-'
             model.save()
-            process_node_register_file(model)
+            process_node_register_file.delay(model)
 
 
 class NodeAdmin(admin.ModelAdmin):
