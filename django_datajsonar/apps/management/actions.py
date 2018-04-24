@@ -61,7 +61,8 @@ def process_node_register_file(register_file):
     yml = indexing_file.read()
     nodes = yaml.load(yml)
     for node, values in nodes.items():
-        if bool(values['federado']) is True:  # evitar entrar al branch con un valor truthy
+        # evitar entrar al branch con un valor truthy
+        if bool(values['federado']) is True and values['formato'] == 'json':
             Node.objects.get_or_create(catalog_id=node,
                                        catalog_url=values['url'],
                                        indexable=True)
