@@ -46,6 +46,9 @@ def index_catalog(node, task, read_local=False, whitelist=False):
 
     Distribution.objects.filter(dataset__catalog__identifier=node.catalog_id).update(updated=False)
     Field.objects.filter(distribution__dataset__catalog=catalog_model).update(updated=False)
-    for distribution in catalog.get_distributions():
-        identifier = distribution['identifier']
-        index_distribution.delay(identifier, node.id, task, read_local, whitelist)
+    for dataset in catalog.datasets:
+        for distribution in dataset['distribution']:
+            dataset_identifier = dataset['identifier']
+            distribution_identifier = distribution['identifier']
+            index_distribution.delay(dataset_identifier, distribution_identifier,
+                                     node.id, task, read_local, whitelist)

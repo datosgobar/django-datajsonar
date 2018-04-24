@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from .actions import process_node_register_file, confirm_delete
+from .actions import process_node_register_file_action, confirm_delete
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask
 
@@ -32,7 +32,7 @@ class NodeRegisterFileAdmin(BaseRegisterFileAdmin):
             model.state = NodeRegisterFile.state = NodeRegisterFile.PROCESSING
             model.logs = u'-'
             model.save()
-            process_node_register_file.delay(model)
+            process_node_register_file_action(model)
 
 
 class NodeAdmin(admin.ModelAdmin):

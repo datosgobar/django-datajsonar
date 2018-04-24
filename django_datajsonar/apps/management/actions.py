@@ -6,6 +6,7 @@ from django_rq import job
 from django_datajsonar.apps.api.models import Catalog, Dataset
 from .models import Node, NodeRegisterFile
 from .strings import DATASET_STATUS
+from .tasks import process_node_register_file
 
 CATALOG_HEADER = u'catalog_id'
 DATASET_ID_HEADER = u'dataset_identifier'
@@ -56,21 +57,10 @@ class DatasetIndexableToggler(object):
                 self.logs.append(DATASET_STATUS.format(catalog, dataset, status))
 
 
-@job('indexing')
-def process_node_register_file(register_file):
-    """Registra (crea objetos Node) los nodos marcados como federado en el registro"""
-    indexing_file = register_file.indexing_file
-    yml = indexing_file.read()
-    nodes = yaml.load(yml)
-    for node, values in nodes.items():
-        # evitar entrar al branch con un valor truthy
-        if bool(values['federado']) is True and values['formato'] == 'json':
-            Node.objects.get_or_create(catalog_id=node,
-                                       catalog_url=values['url'],
-                                       indexable=True)
 
-    register_file.state = NodeRegisterFile.PROCESSED
-    register_file.save()
+def process_node_register_file_action(register_file):
+    """Registra (crea objetos Node) los nodos marcados como federado en el registro"""
+    process_node_register_file.delay(register_file.id)
 
 
 def confirm_delete(node, register_files):

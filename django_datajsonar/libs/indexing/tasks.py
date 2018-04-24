@@ -11,13 +11,14 @@ from .database_loader import DatabaseLoader
 
 
 @job('indexing', timeout=settings.DISTRIBUTION_INDEX_JOB_TIMEOUT)
-def index_distribution(distribution_id, node_id, task,
-                       read_local=False, whitelist=False):
+def index_distribution(dataset_identifier, distribution_id, node_id,
+                       task, read_local=False, whitelist=False):
 
     node = Node.objects.get(id=node_id)
     catalog = DataJson(json.loads(node.catalog))
+
     distribution = catalog.get_distribution(identifier=distribution_id)
-    dataset_model = get_dataset(catalog, node.catalog_id, distribution['dataset_identifier'], whitelist)
+    dataset_model = get_dataset(catalog, node.catalog_id, dataset_identifier, whitelist)
     if not dataset_model.indexable:
         return
 
