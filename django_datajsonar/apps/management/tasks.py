@@ -1,5 +1,7 @@
 #! coding: utf-8
 
+import logging
+
 from django.utils import timezone
 from django_rq import job
 
@@ -8,6 +10,7 @@ from django_datajsonar.apps.management.models import Node, DatasetIndexingFile
 from django_datajsonar.apps.management.strings import FILE_READ_ERROR
 from django_datajsonar.libs.indexing.catalog_reader import index_catalog
 
+logger = logging.getLogger(__name__)
 
 @job('indexing')
 def read_datajson(task, whitelist=False, read_local=False):
@@ -16,7 +19,10 @@ def read_datajson(task, whitelist=False, read_local=False):
     """
     nodes = Node.objects.filter(indexable=True)
     for node in nodes:
-        index_catalog(node, task, read_local, whitelist)
+        try:
+            index_catalog(node, task, read_local, whitelist)
+        except Exception as e:
+            logger.error(u"Excepción en leyendo nodo {}: {}".format(node.id, e.message))
 
 
 @job('indexing')
