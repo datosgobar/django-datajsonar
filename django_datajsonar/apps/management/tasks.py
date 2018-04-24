@@ -47,3 +47,27 @@ def bulk_whitelist(indexing_file_id):
     indexing_file_model.logs = logs
     indexing_file_model.modified = timezone.now()
     indexing_file_model.save()
+
+
+@job('indexing')
+def process_node_register_file(register_file_id):
+    register_file = NodeRegisterFile.objects.get(id=register_file_id)
+
+    indexing_file = register_file.indexing_file
+    yml = indexing_file.read()
+    nodes = yaml.load(yml)
+    for node, values in nodes.items():
+        try:
+            # evitar entrar al branch con un valor truthy
+            if bool(values['federado']) is True and values['formato'] == 'json':
+                Node.objects.get_or_create(catalog_id=node,
+                                        catalog_url=values['url'],
+                                        indexable=True)
+            register_file.logs = register_file.logs + (
+                " - Guardado Node Indexing File %s" % (node, ))    
+        except Exception as e:
+            register_file.logs = register_file.logs + (
+                " - Error guardando Node Indexing File %s - %s" % (node, e))
+
+    register_file.state = NodeRegisterFile.PROCESSED
+    register_file.save()
