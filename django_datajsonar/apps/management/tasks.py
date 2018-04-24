@@ -1,12 +1,13 @@
 #! coding: utf-8
 
 import logging
+import yaml
 
 from django.utils import timezone
 from django_rq import job
 
 from django_datajsonar.apps.management.actions import DatasetIndexableToggler
-from django_datajsonar.apps.management.models import Node, DatasetIndexingFile
+from django_datajsonar.apps.management.models import Node, DatasetIndexingFile, NodeRegisterFile
 from django_datajsonar.apps.management.strings import FILE_READ_ERROR
 from django_datajsonar.libs.indexing.catalog_reader import index_catalog
 
