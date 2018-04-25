@@ -6,7 +6,7 @@ from .models import Catalog, Dataset, Distribution, Field
 
 
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('identifier', 'catalog', 'present', 'indexable')
+    list_display = ('get_title', 'identifier', 'catalog', 'present', 'indexable')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'indexable')
     readonly_fields = ('identifier', 'catalog')
     actions = ['make_indexable', 'make_unindexable']
@@ -23,7 +23,8 @@ class DatasetAdmin(admin.ModelAdmin):
 
     def get_title(self, dataset_model):
         dataset = json.loads(dataset_model.metadata)
-        return dataset.get('title') or ''
+        fallback = 'Dataset de {}'.format(dataset_model.catalog.title)
+        return dataset.get('title') or fallback
     get_title.short_description = 'Title'
 
     def get_search_results(self, request, queryset, search_term):
