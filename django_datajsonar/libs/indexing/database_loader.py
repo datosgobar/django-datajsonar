@@ -12,6 +12,7 @@ from pydatajson import DataJson
 
 from . import constants
 from django_datajsonar.apps.api.models import Dataset, Catalog, Distribution, Field
+from django_datajsonar.apps.management.models import ReadDataJsonTask
 
 
 class DatabaseLoader(object):
@@ -25,7 +26,7 @@ class DatabaseLoader(object):
         self.read_local = read_local
         self.default_whitelist = default_whitelist
 
-    def run(self, distribution, catalog, catalog_id):
+    def run(self, distribution, catalog, catalog_id, dataset_id):
         """Guarda las distribuciones de la lista 'distributions',
         asociadas al catálogo 'catalog, en la base de datos, junto con
         todos los metadatos de distinto nivel (catalog, dataset)
@@ -34,12 +35,13 @@ class DatabaseLoader(object):
             distribution (dict)
             catalog (DataJson)
             catalog_id (str): Identificador único del catalogo a guardar
+            dataset_id (str): Identificador único del DataSet
         Returns:
             Distribution: distribución creada, o None si falla
         """
         self.catalog_id = catalog_id
         self.catalog_model = self._catalog_model(catalog, catalog_id)
-        dataset = catalog.get_dataset(distribution[constants.DATASET_IDENTIFIER])
+        dataset = catalog.get_dataset(dataset_id)
         dataset.pop(constants.DISTRIBUTION)
         dataset_model = self._dataset_model(dataset)
         fields = distribution.get(constants.FIELD, [])
