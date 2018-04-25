@@ -16,21 +16,24 @@ def index_distribution(dataset_identifier, distribution_id, node_id,
 
     node = Node.objects.get(id=node_id)
     catalog = DataJson(json.loads(node.catalog))
+    catalog.generate_distribution_ids()
 
     distribution = catalog.get_distribution(identifier=distribution_id)
     dataset_model = get_dataset(catalog, node.catalog_id, dataset_identifier, whitelist)
     if not dataset_model.indexable:
+        ReadDataJsonTask.info(task, u"Dataset no indexable {}".format(dataset_identifier))
         return
 
     try:
         loader = DatabaseLoader(task, read_local=read_local, default_whitelist=whitelist)
 
-        distribution_model = loader.run(distribution, catalog, node.catalog_id)
+        ReadDataJsonTask.info(task, u"Corriendo loader para distribución {}".format(distribution_id))
+        distribution_model = loader.run(distribution, catalog, node.catalog_id, dataset_identifier)
         if not distribution_model:
             return
 
     except Exception as e:
-        ReadDataJsonTask.info(task, u"Excepción en distrbución {}: {}".format(distribution_id, e.message))
+        ReadDataJsonTask.info(task, u"Excepción en distribución {}: {}".format(distribution_id, e))
         if settings.RQ_QUEUES['indexing'].get('ASYNC', True):
             raise e  # Django-rq / sentry logging
 
