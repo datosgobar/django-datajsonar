@@ -1,10 +1,9 @@
 #! coding: utf-8
+import six
 import unicodecsv
 import yaml
-from django_rq import job
 
 from django_datajsonar.apps.api.models import Catalog, Dataset
-from .models import Node, NodeRegisterFile
 from .strings import DATASET_STATUS
 
 CATALOG_HEADER = u'catalog_id'
@@ -25,7 +24,7 @@ class DatasetIndexableToggler(object):
     def read_dataset_csv(self, federation_file):
         reader = unicodecsv.reader(federation_file)
 
-        headers = reader.next()
+        headers = six.next(reader)
         if CATALOG_HEADER not in headers or DATASET_ID_HEADER not in headers:
             raise ValueError
 

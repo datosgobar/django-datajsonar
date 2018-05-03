@@ -13,6 +13,7 @@ from django_datajsonar.libs.indexing.catalog_reader import index_catalog
 
 logger = logging.getLogger(__name__)
 
+
 @job('indexing')
 def read_datajson(task, whitelist=False, read_local=False):
     """Tarea raíz de indexación. Itera sobre todos los nodos indexables (federados) e
