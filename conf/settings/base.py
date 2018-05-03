@@ -13,6 +13,7 @@ environ.Env.read_env(SETTINGS_DIR('.env'))
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+MEDIA_ROOT = str(APPS_DIR('media'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -28,16 +29,26 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
+
+DJANGO_BASE_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+VENDOR_APPS = [
+    'rq_scheduler',
+]
+
+APPS = [
     'django_datajsonar.apps.api',
     'django_datajsonar.apps.management',
 ]
+
+INSTALLED_APPS = DJANGO_BASE_APPS + VENDOR_APPS + APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
