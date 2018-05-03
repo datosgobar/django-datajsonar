@@ -164,3 +164,21 @@ RQ_QUEUES = {
 }
 
 DISTRIBUTION_INDEX_JOB_TIMEOUT = 100
+
+CATALOG_BLACKLIST = [
+    "themeTaxonomy"
+]
+
+DATASET_BLACKLIST = [
+
+]
+
+DISTRIBUTION_BLACKLIST = [
+    "scrapingFileSheet"
+]
+
+FIELD_BLACKLIST = [
+    "scrapingDataStartCell",
+    "scrapingIdentifierCell",
+    "scrapingDataStartCell",
+]
