@@ -40,7 +40,7 @@ DJANGO_BASE_APPS = [
 ]
 
 VENDOR_APPS = [
-    'rq_scheduler',
+    'scheduler',
 ]
 
 APPS = [
@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = ''
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -78,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tests.wsgi.application'
+WSGI_APPLICATION = 'conf.wsgi.application'
 
 
 # Database
