@@ -1,7 +1,7 @@
 
 .idea/*
 .vscode/*
-*.sqlite
+conf/*.sqlite
 *.pyc
 wks*.*
 conf/settings/local.py
