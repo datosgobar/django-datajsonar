@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from ..models import Node, NodeRegisterFile
-from ..actions import process_node_register_file, confirm_delete
+from ..actions import process_node_register_file_action, confirm_delete
 
 dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples')
 
@@ -41,7 +41,7 @@ class NodeRegisterFileTests(TestCase):
             nrf = NodeRegisterFile(indexing_file=SimpleUploadedFile(filepath, f.read()),
                                    uploader=self.user)
             nrf.save()
-            process_node_register_file(register_file=nrf)
+            process_node_register_file_action(register_file=nrf)
 
     def tearDown(self):
         self.user.delete()
@@ -59,7 +59,7 @@ class NodeTests(TestCase):
             nrf = NodeRegisterFile(indexing_file=SimpleUploadedFile(filepath, f.read()),
                                    uploader=self.user)
             nrf.save()
-            process_node_register_file(register_file=nrf)
+            process_node_register_file_action(register_file=nrf)
 
         register_files = NodeRegisterFile.objects.all()
         node = Node.objects.get(catalog_id='sspm')
@@ -70,11 +70,11 @@ class NodeTests(TestCase):
 
     def test_delete_non_federated_node(self):
         filepath = os.path.join(dir_path, 'indice.yml')
-        with open(filepath, 'r') as f:
+        with open(filepath, 'rb') as f:
             nrf = NodeRegisterFile(indexing_file=SimpleUploadedFile(filepath, f.read()),
                                    uploader=self.user)
             nrf.save()
-            process_node_register_file(register_file=nrf)
+            process_node_register_file_action(register_file=nrf)
 
         register_files = NodeRegisterFile.objects.all()
         register_files.delete()  # Fuerza a que los nodos no estén más federados
