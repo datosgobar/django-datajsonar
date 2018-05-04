@@ -11,8 +11,8 @@ from django.utils import timezone
 from pydatajson import DataJson
 
 from . import constants
-from django_datajsonar.apps.api.models import Dataset, Catalog, Distribution, Field
 from django_datajsonar.apps.management.models import ReadDataJsonTask
+from django_datajsonar.apps.api.models import Dataset, Catalog, Distribution, Field
 
 
 class DatabaseLoader(object):
@@ -26,109 +26,106 @@ class DatabaseLoader(object):
         self.read_local = read_local
         self.default_whitelist = default_whitelist
 
-    def run(self, distribution, catalog, catalog_id, dataset_id):
-        """Guarda las distribuciones de la lista 'distributions',
-        asociadas al catálogo 'catalog, en la base de datos, junto con
-        todos los metadatos de distinto nivel (catalog, dataset)
+    def run(self, catalog, catalog_id):
+        """Guarda la metadata del catalogo pasado por parametro
 
         Args:
-            distribution (dict)
             catalog (DataJson)
             catalog_id (str): Identificador único del catalogo a guardar
-            dataset_id (str): Identificador único del DataSet
         Returns:
-            Distribution: distribución creada, o None si falla
+            Catalog: el modelo de catalogo creado o actualizado
         """
         self.catalog_id = catalog_id
         self.catalog_model = self._catalog_model(catalog, catalog_id)
-        dataset = catalog.get_dataset(dataset_id)
-        dataset.pop(constants.DISTRIBUTION)
-        dataset_model = self._dataset_model(dataset)
-        fields = distribution.get(constants.FIELD, [])
-        periodicity = None
-        for field in fields:
-            if field.get(constants.SPECIAL_TYPE) == constants.TIME_INDEX:
-                periodicity = field.get(constants.SPECIAL_TYPE_DETAIL)
-                break
-        distribution_model = self._distribution_model(distribution, dataset_model, periodicity)
-
-        if distribution_model:
-            self._save_fields(distribution_model, fields)
-
-        return distribution_model if distribution_model.indexable else None
+        return self.catalog_model
 
     def _catalog_model(self, catalog, catalog_id):
         """Crea o actualiza el catalog model con el título pedido a partir
         de el diccionario de metadatos de un catálogo
         """
-        catalog = catalog.copy()
-        # Borro el dataset, de existir. Solo guardo metadatos
-        catalog.pop(constants.DATASET, None)
-        catalog_model = Catalog.objects.get(identifier=catalog_id)
-
-        catalog = self._remove_blacklisted_fields(
-            catalog,
-            settings.CATALOG_BLACKLIST
+        trimmed_catalog = self._trim_dict_fields(
+            catalog, settings.CATALOG_BLACKLIST, constants.DATASET)
+        catalog_meta = json.dumps(trimmed_catalog)
+        catalog_model, _ = Catalog.objects.update_or_create(
+            identifier=catalog_id,
+            defaults={'title': trimmed_catalog.get('title', 'No Title'),
+                      'metadata': catalog_meta
+                      }
         )
-        catalog_meta = json.dumps(catalog)
-
-        catalog_model.title = catalog.get(constants.FIELD_TITLE)
-        catalog_model.metadata = catalog_meta
-        catalog_model.save()
-
+        for dataset in catalog.get_datasets():
+            try:
+                self._dataset_model(dataset, catalog_model)
+            except Exception as e:
+                ReadDataJsonTask.info(self.task, u"Excepción en dataset {}: {}"
+                                      .format(dataset.get('identifier'), e))
+                continue
         return catalog_model
 
-    def _dataset_model(self, dataset):
+    def _dataset_model(self, dataset, catalog_model):
         """Crea o actualiza el modelo del dataset a partir de un
         diccionario que lo representa
         """
-
-        dataset = dataset.copy()
-        # Borro las distribuciones, de existir. Solo guardo metadatos
-        dataset.pop(constants.DISTRIBUTION, None)
-        identifier = dataset[constants.IDENTIFIER]
-        dataset_model = Dataset.objects.get(
+        trimmed_dataset = self._trim_dict_fields(
+            dataset, settings.DATASET_BLACKLIST, constants.DISTRIBUTION)
+        dataset_meta = json.dumps(trimmed_dataset)
+        identifier = trimmed_dataset[constants.IDENTIFIER]
+        dataset_model, _ = Dataset.objects.update_or_create(
+            catalog=catalog_model,
             identifier=identifier,
-            catalog=self.catalog_model,
+            defaults={'title': trimmed_dataset.get('title', 'No Title'),
+                      'metadata': dataset_meta,
+                      'present': True,
+                      }
         )
-
-        dataset = self._remove_blacklisted_fields(
-            dataset,
-            settings.DATASET_BLACKLIST
-        )
-        dataset_meta = json.dumps(dataset)
-        dataset_model.present = True
-        dataset_model.metadata = dataset_meta
-        dataset_model.save()
-
+        for distribution in dataset.get('distribution', []):
+            try:
+                self._distribution_model(distribution, dataset_model)
+            except Exception as e:
+                ReadDataJsonTask.info(self.task, u"Excepción en distribución {}: {}"
+                                      .format(distribution.get('identifier'), e))
+                continue
         return dataset_model
 
-    def _distribution_model(self, distribution, dataset_model, periodicity):
+    def _distribution_model(self, distribution, dataset_model):
         """Crea o actualiza el modelo de la distribución a partir de
         un diccionario que lo representa
         """
-        distribution = distribution.copy()
-        # Borro los fields, de existir. Sólo guardo metadatos
-        distribution.pop(constants.FIELD, None)
-        identifier = distribution[constants.IDENTIFIER]
-        url = distribution.get(constants.DOWNLOAD_URL)
-
-        distribution_model, created = Distribution.objects.get_or_create(
+        trimmed_distribution = self._trim_dict_fields(
+            distribution, settings.DISTRIBUTION_BLACKLIST, constants.FIELD)
+        identifier = trimmed_distribution[constants.IDENTIFIER]
+        url = trimmed_distribution.get(constants.DOWNLOAD_URL)
+        distribution_meta = json.dumps(trimmed_distribution)
+        distribution_model, created = Distribution.objects.update_or_create(
+            dataset=dataset_model,
             identifier=identifier,
-            dataset=dataset_model
+            defaults={'metadata': distribution_meta,
+                      'download_url': url
+                      }
         )
-        distribution = self._remove_blacklisted_fields(
-            distribution,
-            settings.DISTRIBUTION_BLACKLIST
-        )
-        distribution_meta = json.dumps(distribution)
-        distribution_model.download_url = url
-        distribution_model.periodicity = periodicity
         if dataset_model.indexable:
             self._read_file(url, distribution_model)
-        distribution_model.metadata = distribution_meta
-        distribution_model.save()
+            distribution_model.save()
+        for field in distribution.get('field', []):
+            try:
+                self._field_model(field, distribution_model)
+            except Exception as e:
+                ReadDataJsonTask.info(self.task, u"Excepción en field {}: {}"
+                                      .format(field.get('title'), e))
+                continue
+
         return distribution_model
+
+    def _field_model(self, field, distribution_model):
+        trimmed_field = self._trim_dict_fields(
+            field, settings.FIELD_BLACKLIST
+        )
+        field_meta = json.dumps(trimmed_field)
+        Field.objects.update_or_create(
+            distribution=distribution_model,
+            title=field.get('title'),
+            identifier=field.get('id'),
+            defaults={'metadata': field_meta}
+        )
 
     def _read_file(self, file_url, distribution_model):
         """Descarga y lee el archivo de la distribución. Por razones
@@ -168,40 +165,19 @@ class DatabaseLoader(object):
             distribution_model.indexable = False
             return False
 
-    def _save_fields(self, distribution_model, fields):
-        fields = [field for field in fields if field.get(constants.SPECIAL_TYPE) != constants.TIME_INDEX]
-        for field in fields:
-            field = self._remove_blacklisted_fields(
-                field,
-                settings.FIELD_BLACKLIST
-            )
-            # No vale get_or_create, distribution_model puede haber diferido desde la última ejecución
-            field_model = Field.objects.filter(metadata=json.dumps(field))
-            if not field_model:
-                field_model = Field(metadata=json.dumps(field))
-            else:
-                field_model = field_model[0]
-                old_catalog_id = field_model.distribution.dataset.catalog.identifier
-                if old_catalog_id != self.catalog_id:
-                    field_model.error = True
-                    field_model.save()
-                    raise FieldRepetitionError(u"Serie {} repetida en catálogos {} y {}".format(
-                        field['title'], old_catalog_id, self.catalog_id
-                    ))
-
-            field_model.distribution = distribution_model
-            field_model.save()
-
     @staticmethod
     def _remove_blacklisted_fields(metadata, blacklist):
         """Borra los campos listados en 'blacklist' de el diccionario
         'metadata'
         """
-
         for field in blacklist:
             metadata.pop(field, None)
         return metadata
 
-
-class FieldRepetitionError(Exception):
-    pass
+    def _trim_dict_fields(self, full_dict, blacklist, children=None):
+        trimmed_dict = full_dict.copy()
+        if children:
+            trimmed_dict.pop(children, None)
+        trimmed_dict = self._remove_blacklisted_fields(
+            trimmed_dict, blacklist)
+        return trimmed_dict
