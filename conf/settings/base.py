@@ -41,6 +41,7 @@ DJANGO_BASE_APPS = [
 
 VENDOR_APPS = [
     'scheduler',
+    'django_rq',
 ]
 
 APPS = [
