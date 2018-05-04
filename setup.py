@@ -4,9 +4,6 @@ from setuptools import setup, find_packages
 with open(os.path.join("requirements", "base.txt")) as f:
     requirements = [req.strip() for req in f.readlines()]
 
-with open(os.path.join("requirements", "production.txt")) as f:
-    requirements += [req.strip() for req in f.readlines()]
-
 with open(os.path.join("requirements", "testing.txt")) as f:
     test_requirements = [req.strip() for req in f.readlines()]
 
