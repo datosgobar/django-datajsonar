@@ -80,6 +80,7 @@ class DatabaseLoader(object):
             defaults={'title': trimmed_dataset.get('title', 'No Title'),
                       'metadata': dataset_meta,
                       'present': True,
+                      'indexable': True
                       }
         )
         for distribution in dataset.get('distribution', []):
