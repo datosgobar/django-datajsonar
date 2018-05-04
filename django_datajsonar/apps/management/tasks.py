@@ -24,7 +24,7 @@ def read_datajson(task, whitelist=False, read_local=False):
     nodes = Node.objects.filter(indexable=True)
     for node in nodes:
         try:
-            index_catalog(node, task, read_local, whitelist)
+            index_catalog.delay(node, task, read_local, whitelist)
         except Exception as e:
             logger.error(u"Excepción en leyendo nodo {}: {}".format(node.id, e.message))
 
