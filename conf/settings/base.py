@@ -40,7 +40,8 @@ DJANGO_BASE_APPS = [
 ]
 
 VENDOR_APPS = [
-    'rq_scheduler',
+    'scheduler',
+    'django_rq',
 ]
 
 APPS = [
@@ -60,7 +61,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = ''
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -78,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tests.wsgi.application'
+WSGI_APPLICATION = 'conf.wsgi.application'
 
 
 # Database
@@ -164,3 +165,21 @@ RQ_QUEUES = {
 }
 
 DISTRIBUTION_INDEX_JOB_TIMEOUT = 100
+
+CATALOG_BLACKLIST = [
+    "themeTaxonomy"
+]
+
+DATASET_BLACKLIST = [
+
+]
+
+DISTRIBUTION_BLACKLIST = [
+    "scrapingFileSheet"
+]
+
+FIELD_BLACKLIST = [
+    "scrapingDataStartCell",
+    "scrapingIdentifierCell",
+    "scrapingDataStartCell",
+]

@@ -4,10 +4,12 @@ import logging
 import yaml
 
 from django.utils import timezone
+from django.conf import settings
 from django_rq import job
 
 from django_datajsonar.apps.management.actions import DatasetIndexableToggler
-from django_datajsonar.apps.management.models import Node, DatasetIndexingFile, NodeRegisterFile
+from django_datajsonar.apps.management.models import Node, DatasetIndexingFile, NodeRegisterFile, \
+    ReadDataJsonTask
 from django_datajsonar.apps.management.strings import FILE_READ_ERROR
 from django_datajsonar.libs.indexing.catalog_reader import index_catalog
 
@@ -73,3 +75,21 @@ def process_node_register_file(register_file_id):
 
     register_file.state = NodeRegisterFile.PROCESSED
     register_file.save()
+
+
+def schedule_new_read_datajson_task():
+    try:
+        task = ReadDataJsonTask.objects.last()
+        if task and task.status in [ReadDataJsonTask.INDEXING, ReadDataJsonTask.RUNNING]:
+            return
+    except ReadDataJsonTask.DoesNotExist:
+        pass
+
+    new_task = ReadDataJsonTask()
+    new_task.save()
+    read_datajson.delay(new_task)
+
+    if not settings.RQ_QUEUES['indexing'].get('ASYNC'):
+        new_task = ReadDataJsonTask.objects.get(id=new_task.id)
+        new_task.status = new_task.FINISHED
+        new_task.save()
