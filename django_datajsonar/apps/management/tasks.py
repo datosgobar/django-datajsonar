@@ -4,6 +4,7 @@ import logging
 import yaml
 
 from django.utils import timezone
+from django.conf import settings
 from django_rq import job
 
 from django_datajsonar.apps.management.actions import DatasetIndexableToggler
@@ -87,3 +88,8 @@ def schedule_new_read_datajson_task():
     new_task = ReadDataJsonTask()
     new_task.save()
     read_datajson.delay(new_task)
+
+    if not settings.RQ_QUEUES['indexing'].get('ASYNC'):
+        new_task = ReadDataJsonTask.objects.get(id=new_task.id)
+        new_task.status = new_task.FINISHED
+        new_task.save()
