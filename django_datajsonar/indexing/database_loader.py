@@ -11,8 +11,8 @@ from django.utils import timezone
 from pydatajson import DataJson
 
 from . import constants
-from django_datajsonar.apps.management.models import ReadDataJsonTask
-from django_datajsonar.apps.api.models import Dataset, Catalog, Distribution, Field
+from django_datajsonar.models import ReadDataJsonTask
+from django_datajsonar.models import Dataset, Catalog, Distribution, Field
 
 
 class DatabaseLoader(object):

@@ -1,6 +1,6 @@
 #! coding: utf-8
 from django_rq import get_queue
-from django_datajsonar.apps.management.models import ReadDataJsonTask
+from django_datajsonar.models import ReadDataJsonTask
 
 
 # Para correr con el scheduler

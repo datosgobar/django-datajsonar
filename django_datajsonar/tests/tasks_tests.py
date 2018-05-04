@@ -1,18 +1,15 @@
 #!coding=utf8
 import os
 
-import mock
 import requests
-from django.conf import settings
-from django.contrib.auth.models import User, Group
-from django.core import mail
+from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.test import TestCase
 from unittest import skipIf
 
-from django_datajsonar.apps.api.models import Field
-from django_datajsonar.apps.management.tasks import read_datajson
-from django_datajsonar.apps.management.models import ReadDataJsonTask, Node
+from django_datajsonar.models import Field
+from django_datajsonar.tasks import read_datajson
+from django_datajsonar.models import ReadDataJsonTask, Node
 
 dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples')
 

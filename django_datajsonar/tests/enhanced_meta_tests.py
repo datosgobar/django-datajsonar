@@ -2,7 +2,7 @@
 
 
 from django.test import TestCase
-from django_datajsonar.apps.api.models import Catalog, Metadata
+from django_datajsonar.models import Catalog, Metadata
 
 
 class EnhancedMetaTests(TestCase):

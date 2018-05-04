@@ -3,8 +3,8 @@ import logging
 
 from django.core.management import BaseCommand
 
-from django_datajsonar.apps.management.models import ReadDataJsonTask
-from django_datajsonar.apps.management.tasks import read_datajson
+from django_datajsonar.models import ReadDataJsonTask
+from django_datajsonar.tasks import read_datajson
 
 logger = logging.getLogger(__name__)
 

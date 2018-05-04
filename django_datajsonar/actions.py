@@ -3,7 +3,7 @@ import six
 import unicodecsv
 import yaml
 
-from django_datajsonar.apps.api.models import Catalog, Dataset
+from django_datajsonar.models import Catalog, Dataset
 from .strings import DATASET_STATUS
 
 CATALOG_HEADER = u'catalog_id'
