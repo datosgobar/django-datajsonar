@@ -16,7 +16,7 @@ class Metadata(models.Model):
 
 
 class Catalog(models.Model):
-    title = models.CharField(max_length=2000)
+    title = models.CharField(max_length=200)
     identifier = models.CharField(max_length=200, unique=True)
     metadata = models.TextField()
     updated = models.BooleanField(default=False)
@@ -28,6 +28,7 @@ class Catalog(models.Model):
 
 
 class Dataset(models.Model):
+    title = models.CharField(max_length=200)
     identifier = models.CharField(max_length=200)
     metadata = models.TextField()
     catalog = models.ForeignKey(to=Catalog, on_delete=models.CASCADE)
@@ -66,15 +67,14 @@ class Distribution(models.Model):
     indexable = models.BooleanField(default=False)
     enhanced_meta = GenericRelation(Metadata)
 
-
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.dataset.catalog.identifier)
 
 
 class Field(models.Model):
+    title = models.CharField(max_length=200, null=True)
+    identifier = models.CharField(max_length=200, null=True)
     metadata = models.TextField()
     distribution = models.ForeignKey(to=Distribution, on_delete=models.CASCADE)
     updated = models.BooleanField(default=False)
-    error = models.BooleanField(default=False)
     enhanced_meta = GenericRelation(Metadata)
-
