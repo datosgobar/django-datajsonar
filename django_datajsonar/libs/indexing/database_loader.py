@@ -52,7 +52,6 @@ class DatabaseLoader(object):
                       'metadata': catalog_meta
                       }
         )
-
         only_time_series = getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False)
         datasets = catalog.get_datasets(only_time_series=only_time_series)
         for dataset in datasets:
