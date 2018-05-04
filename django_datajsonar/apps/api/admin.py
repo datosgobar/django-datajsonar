@@ -6,7 +6,7 @@ from .models import Catalog, Dataset, Distribution, Field
 
 
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('get_title', 'identifier', 'catalog', 'present', 'indexable')
+    list_display = ('title', 'identifier', 'catalog', 'present', 'indexable')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'indexable')
     readonly_fields = ('identifier', 'catalog')
     actions = ['make_indexable', 'make_unindexable']
@@ -20,12 +20,6 @@ class DatasetAdmin(admin.ModelAdmin):
     def make_indexable(self, _, queryset):
         queryset.update(indexable=True)
     make_indexable.short_description = 'Marcar como indexable'
-
-    def get_title(self, dataset_model):
-        dataset = json.loads(dataset_model.metadata)
-        fallback = 'Dataset de {}'.format(dataset_model.catalog.title)
-        return dataset.get('title') or fallback
-    get_title.short_description = 'Title'
 
     def get_search_results(self, request, queryset, search_term):
         queryset, distinct = \
