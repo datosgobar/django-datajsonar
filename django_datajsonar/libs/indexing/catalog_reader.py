@@ -3,6 +3,7 @@ from __future__ import division
 
 import json
 
+from django.conf import settings
 from django.db.models import Q
 from pydatajson import DataJson
 
@@ -46,9 +47,19 @@ def index_catalog(node, task, read_local=False, whitelist=False):
 
     Distribution.objects.filter(dataset__catalog__identifier=node.catalog_id).update(updated=False)
     Field.objects.filter(distribution__dataset__catalog=catalog_model).update(updated=False)
-    for dataset in catalog.datasets:
+
+    try:
+        only_time_series = settings.DATAJSON_AR_TIME_SERIES_ONLY
+    except AttributeError:
+        only_time_series = False
+    datasets = catalog.get_datasets(only_time_series=only_time_series)
+    for dataset in datasets:
         for distribution in dataset['distribution']:
             dataset_identifier = dataset['identifier']
             distribution_identifier = distribution['identifier']
             index_distribution.delay(dataset_identifier, distribution_identifier,
                                      node.id, task, read_local, whitelist)
+
+    if not datasets and only_time_series:
+        msg = "No fueron encontrados series de tiempo en el catálogo {}".format(node.catalog_id)
+        ReadDataJsonTask.info(task, msg)
