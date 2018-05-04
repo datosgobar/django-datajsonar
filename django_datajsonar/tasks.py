@@ -7,11 +7,11 @@ from django.utils import timezone
 from django.conf import settings
 from django_rq import job
 
-from django_datajsonar.apps.management.actions import DatasetIndexableToggler
-from django_datajsonar.apps.management.models import Node, DatasetIndexingFile, NodeRegisterFile, \
+from django_datajsonar.actions import DatasetIndexableToggler
+from django_datajsonar.models import Node, DatasetIndexingFile, NodeRegisterFile, \
     ReadDataJsonTask
-from django_datajsonar.apps.management.strings import FILE_READ_ERROR
-from django_datajsonar.libs.indexing.catalog_reader import index_catalog
+from django_datajsonar.strings import FILE_READ_ERROR
+from .indexing.catalog_reader import index_catalog
 
 logger = logging.getLogger(__name__)
 

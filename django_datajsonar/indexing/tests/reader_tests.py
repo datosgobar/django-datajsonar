@@ -4,9 +4,9 @@ import os
 from django.test import TestCase
 from django.conf import settings
 
-from django_datajsonar.apps.api.models import Distribution, Field
-from django_datajsonar.apps.management.models import ReadDataJsonTask, Node
-from django_datajsonar.libs.indexing.catalog_reader import index_catalog
+from django_datajsonar.models import Distribution, Field
+from django_datajsonar.models import ReadDataJsonTask, Node
+from django_datajsonar.indexing.catalog_reader import index_catalog
 
 SAMPLES_DIR = os.path.join('django_datajsonar', 'libs', 'indexing', 'tests', 'samples')
 CATALOG_ID = 'test_catalog'

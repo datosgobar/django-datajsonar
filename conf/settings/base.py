@@ -45,8 +45,7 @@ VENDOR_APPS = [
 ]
 
 APPS = [
-    'django_datajsonar.apps.api',
-    'django_datajsonar.apps.management',
+    'django_datajsonar',
 ]
 
 INSTALLED_APPS = DJANGO_BASE_APPS + VENDOR_APPS + APPS

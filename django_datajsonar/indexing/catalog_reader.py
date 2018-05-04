@@ -7,8 +7,8 @@ from django.db.models import Q
 from django_rq import job
 from pydatajson import DataJson
 
-from django_datajsonar.apps.api.models import Dataset, Catalog, Distribution, Field
-from django_datajsonar.apps.management.models import ReadDataJsonTask
+from django_datajsonar.models import Dataset, Catalog, Distribution, Field
+from django_datajsonar.models import ReadDataJsonTask
 from .database_loader import DatabaseLoader
 from .strings import READ_ERROR
 

@@ -8,10 +8,10 @@ from pydatajson import DataJson
 from nose.tools import raises
 
 
-from django_datajsonar.apps.api.models import Catalog, Dataset, Distribution, Field
-from django_datajsonar.apps.management.models import ReadDataJsonTask, Node
-from django_datajsonar.libs.indexing.database_loader import DatabaseLoader, FieldRepetitionError
-from django_datajsonar.libs.indexing.tests.reader_tests import SAMPLES_DIR, CATALOG_ID
+from django_datajsonar.models import Catalog, Dataset, Distribution, Field
+from django_datajsonar.models import ReadDataJsonTask, Node
+from django_datajsonar.indexing.database_loader import DatabaseLoader
+from .reader_tests import SAMPLES_DIR, CATALOG_ID
 
 dir_path = os.path.join('django_datajsonar', 'libs', 'indexing', 'tests', 'samples')
 
@@ -126,24 +126,3 @@ class DatabaseLoaderTests(TestCase):
         # Valores obtenidos del .json fuente
         self.assertEqual(Field.objects.get(metadata__contains="212.1_PSCIOS_IOS_0_0_25").distribution,
                          Distribution.objects.get(identifier="300.1"))
-
-    @raises(FieldRepetitionError)
-    def test_change_series_distributions_different_catalog(self):
-        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        distributions = catalog.distributions
-
-        self.loader.run(distributions[0], catalog, self.catalog_id)
-
-        other_catalog_id = 'other_catalog_id'
-        node = Node(catalog_id=other_catalog_id,
-                    catalog_url=os.path.join(SAMPLES_DIR, 'full_ts_data_changed_distribution.json'),
-                    indexable=True)
-        node.save()
-        loader = DatabaseLoader(self.task, read_local=True, default_whitelist=True)
-
-        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data_changed_distribution.json'))
-        distributions = catalog.distributions
-        self.node.catalog = json.dumps(catalog)
-        self.node.catalog_id = 'other_catalog_id'
-        self.init_datasets(self.node)
-        loader.run(distributions[0], catalog, 'other_catalog_id')
