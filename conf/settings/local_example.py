@@ -2,6 +2,16 @@ from .base import *
 
 AUTH_PASSWORD_VALIDATORS = []
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'HOST': env('DATABASE_HOST'),
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+    }
+}
+
 RQ_QUEUES = {
     'default': {
         'HOST': DEFAULT_REDIS_HOST,
