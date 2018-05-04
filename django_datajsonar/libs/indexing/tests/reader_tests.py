@@ -2,6 +2,7 @@
 import os
 
 from django.test import TestCase
+from django.conf import settings
 
 from django_datajsonar.apps.api.models import Distribution, Field
 from django_datajsonar.apps.management.models import ReadDataJsonTask, Node
@@ -63,3 +64,14 @@ class ReaderTests(TestCase):
         index_catalog(self.node, self.task, read_local=True, whitelist=True)
 
         self.assertGreater(len(ReadDataJsonTask.objects.get(id=self.task.id).logs), 10)
+
+    def test_index_only_time_series_if_specified(self):
+        settings.DATAJSON_AR_TIME_SERIES_ONLY = True
+        mixed_catalog = os.path.join(SAMPLES_DIR, 'mixed_time_series_catalog.json')
+        self.node.catalog_url = mixed_catalog
+        self.node.save()
+        index_catalog(self.node, self.task, read_local=True, whitelist=True)
+
+        self.assertEqual(Distribution.objects.count(), 2)
+        # La distribution ID 5.1 que no es serie de tiempo no fue creada
+        self.assertFalse(Distribution.objects.filter(identifier__in=["5.1"]))
