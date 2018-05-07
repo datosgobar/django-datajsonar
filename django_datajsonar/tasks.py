@@ -26,7 +26,7 @@ def read_datajson(task, whitelist=False, read_local=False):
         try:
             index_catalog.delay(node, task, read_local, whitelist)
         except Exception as e:
-            logger.error(u"Excepción en leyendo nodo {}: {}".format(node.id, e.message))
+            logger.error(u"Excepción en leyendo nodo {}: {}".format(node.id, e))
 
 
 @job('indexing')
@@ -65,8 +65,8 @@ def process_node_register_file(register_file_id):
             # evitar entrar al branch con un valor truthy
             if bool(values['federado']) is True and values['formato'] == 'json':
                 Node.objects.get_or_create(catalog_id=node,
-                                        catalog_url=values['url'],
-                                        indexable=True)
+                                           catalog_url=values['url'],
+                                           indexable=True)
             register_file.logs = register_file.logs + (
                 " - Guardado Node Indexing File %s" % (node, ))    
         except Exception as e:
