@@ -24,7 +24,9 @@ class Catalog(models.Model):
     title = models.CharField(max_length=200)
     identifier = models.CharField(max_length=200, unique=True)
     metadata = models.TextField()
+    present = models.BooleanField(default=True)
     updated = models.BooleanField(default=False)
+    error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata, null=True)
 
@@ -40,6 +42,7 @@ class Dataset(models.Model):
     indexable = models.BooleanField(default=False)
     present = models.BooleanField(default=True)
     updated = models.BooleanField(default=False)
+    error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
 
@@ -59,17 +62,17 @@ class Distribution(models.Model):
     metadata = models.TextField()
     dataset = models.ForeignKey(to=Dataset, on_delete=models.CASCADE)
     download_url = models.URLField(max_length=1024)
-    updated = models.BooleanField(default=False)
-
+    data_hash = models.CharField(max_length=128, default='')
+    last_updated = models.DateTimeField(blank=True, null=True)
     data_file = models.FileField(
         max_length=2000,
         upload_to=filepath,
         blank=True
     )
+    present = models.BooleanField(default=True)
+    updated = models.BooleanField(default=False)
+    error = models.BooleanField(default=False)
 
-    data_hash = models.CharField(max_length=128, default='')
-    last_updated = models.DateTimeField(blank=True, null=True)
-    indexable = models.BooleanField(default=False)
     enhanced_meta = GenericRelation(Metadata)
 
     def __unicode__(self):
@@ -81,7 +84,10 @@ class Field(models.Model):
     identifier = models.CharField(max_length=200, null=True)
     metadata = models.TextField()
     distribution = models.ForeignKey(to=Distribution, on_delete=models.CASCADE)
+    present = models.BooleanField(default=True)
     updated = models.BooleanField(default=False)
+    error = models.BooleanField(default=False)
+
     enhanced_meta = GenericRelation(Metadata)
 
 
