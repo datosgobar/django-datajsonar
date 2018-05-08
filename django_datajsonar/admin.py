@@ -10,8 +10,8 @@ from .models import Catalog, Dataset, Distribution, Field
 
 
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'identifier', 'catalog', 'present', 'indexable')
-    search_fields = ('identifier', 'catalog__identifier', 'present', 'indexable')
+    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable')
+    search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
     readonly_fields = ('identifier', 'catalog')
     actions = ['make_indexable', 'make_unindexable']
 
@@ -40,9 +40,14 @@ class DatasetAdmin(admin.ModelAdmin):
 
 
 class DistributionAdmin(admin.ModelAdmin):
-    list_display = ('identifier', 'dataset', 'get_catalog_id', 'last_updated')
+    list_display = ('identifier', 'title', 'get_dataset_title', 'get_catalog_id', 'last_updated', 'present', 'updated')
     search_fields = ('identifier', 'dataset__identifier', 'dataset__catalog__identifier')
     list_filter = ('dataset__catalog__identifier', )
+
+    def get_dataset_title(self, obj):
+        return obj.dataset.title
+    get_dataset_title.short_description = 'Dataset'
+    get_dataset_title.admin_order_field = 'dataset__title'
 
     def get_catalog_id(self, obj):
         return obj.dataset.catalog.identifier
@@ -64,7 +69,7 @@ class DistributionAdmin(admin.ModelAdmin):
 
 
 class FieldAdmin(admin.ModelAdmin):
-    list_display = ('distribution', 'get_dataset_id', 'get_catalog_id')
+    list_display = ('pk', 'title', 'identifier', 'get_distribution_title', 'get_dataset_title', 'get_catalog_id')
     search_fields = (
         'distribution__identifier',
         'distribution__dataset__identifier',
@@ -79,10 +84,15 @@ class FieldAdmin(admin.ModelAdmin):
     get_catalog_id.short_description = 'Catalog'
     get_catalog_id.admin_order_field = 'distribution__dataset__catalog__identifier'
 
-    def get_dataset_id(self, field):
-        return field.distribution.dataset.identifier
-    get_dataset_id.short_description = 'Dataset'
-    get_dataset_id.admin_order_field = 'distribution__dataset__identifier'
+    def get_dataset_title(self, field):
+        return field.distribution.dataset.title
+    get_dataset_title.short_description = 'Dataset'
+    get_dataset_title.admin_order_field = 'distribution__dataset__identifier'
+
+    def get_distribution_title(self, field):
+        return field.distribution.title
+    get_distribution_title.short_description = 'Distribution'
+    get_distribution_title.admin_order_field = 'distribution__title'
 
     def get_search_results(self, request, queryset, search_term):
         queryset, distinct = \
