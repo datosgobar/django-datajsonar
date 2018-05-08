@@ -14,7 +14,7 @@ from .strings import READ_ERROR
 from .utils import log_exception
 
 
-@job('indexing', timeout=1800)
+@job('indexing', timeout=getattr(settings, 'INDEX_CATALOG_TIMEOUT', 1800))
 def index_catalog(node, task, read_local=False, whitelist=False):
     """Ejecuta el pipeline de lectura, guardado e indexado de datos
     y metadatos sobre cada distribución del catálogo especificado
