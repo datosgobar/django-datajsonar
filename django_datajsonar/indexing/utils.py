@@ -15,8 +15,9 @@ def log_exception(task, msg, model, identifier):
         return None
 
 
-def update_model(created, trimmed_dict, model, data_change=False):
-    if not created and (trimmed_dict != json.loads(model.metadata) or data_change):
+def update_model(created, trimmed_dict, model, updated_children=False, data_change=False):
+    updated = (trimmed_dict != json.loads(model.metadata) or data_change or updated_children)
+    if not created and updated:
         model.metadata = json.dumps(trimmed_dict)
         model.updated = True
     model.present = True

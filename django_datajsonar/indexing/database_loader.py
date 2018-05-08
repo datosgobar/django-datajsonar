@@ -58,13 +58,13 @@ class DatabaseLoader(object):
                       }
         )
 
-        update_model(created, trimmed_catalog, catalog_model)
-
         only_time_series = getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False)
         datasets = catalog.get_datasets(only_time_series=only_time_series)
+        updated_datasets = False
         for dataset in datasets:
             try:
-                self._dataset_model(dataset, catalog_model)
+                dataset_model = self._dataset_model(dataset, catalog_model)
+                updated_datasets = updated_datasets or dataset_model.updated
             except Exception as e:
                 msg = u"Excepción en dataset {}: {}"\
                     .format(dataset.get('identifier'), e)
@@ -74,6 +74,8 @@ class DatabaseLoader(object):
         if not datasets and only_time_series:
             msg = u"No fueron encontrados series de tiempo en el catálogo {}".format(catalog_id)
             ReadDataJsonTask.info(self.task, msg)
+
+        update_model(created, trimmed_catalog, catalog_model, updated_children=updated_datasets)
         return catalog_model
 
     def _dataset_model(self, dataset, catalog_model):
@@ -92,17 +94,18 @@ class DatabaseLoader(object):
                       'indexable': False
                       }
         )
-
-        update_model(created, trimmed_dataset, dataset_model)
-
+        updated_distributions = False
         for distribution in dataset.get('distribution', []):
             try:
-                self._distribution_model(distribution, dataset_model)
+                distribution_model = self._distribution_model(distribution, dataset_model)
+                updated_distributions = updated_distributions or distribution_model.updated
             except Exception as e:
                 msg = u"Excepción en distribución {}: {}"\
                     .format(distribution.get('identifier'), e)
                 log_exception(self.task, msg, Distribution, distribution.get('identifier'))
                 continue
+
+        update_model(created, trimmed_dataset, dataset_model, updated_children=updated_distributions)
         return dataset_model
 
     def _distribution_model(self, distribution, dataset_model):
@@ -127,16 +130,19 @@ class DatabaseLoader(object):
         if dataset_model.indexable:
             data_change = self._read_file(url, distribution_model)
 
-        update_model(created, trimmed_distribution, distribution_model, data_change=data_change)
-
+        updated_fields = False
         for field in distribution.get('field', []):
             try:
-                self._field_model(field, distribution_model)
+                field_model = self._field_model(field, distribution_model)
+                updated_fields = updated_fields or field_model.updated
             except Exception as e:
                 msg = u"Excepción en field {}: {}"\
                     .format(field.get('title'), e)
                 log_exception(self.task, msg, Field, field.get('identifier'))
                 continue
+
+        update_model(created, trimmed_distribution, distribution_model,
+                     updated_children=updated_fields, data_change=data_change)
         return distribution_model
 
     def _field_model(self, field, distribution_model):
@@ -152,8 +158,8 @@ class DatabaseLoader(object):
                       'updated': True
                       }
         )
-
         update_model(created, trimmed_field, field_model)
+        return field_model
 
     def _read_file(self, file_url, distribution_model):
         """Descarga y lee el archivo de la distribución. Por razones
