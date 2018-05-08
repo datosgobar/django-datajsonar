@@ -25,7 +25,7 @@ class Catalog(models.Model):
     identifier = models.CharField(max_length=200, unique=True)
     metadata = models.TextField()
     present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=False)
+    updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata, null=True)
@@ -41,7 +41,7 @@ class Dataset(models.Model):
     catalog = models.ForeignKey(to=Catalog, on_delete=models.CASCADE)
     indexable = models.BooleanField(default=False)
     present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=False)
+    updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
@@ -70,7 +70,7 @@ class Distribution(models.Model):
         blank=True
     )
     present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=False)
+    updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
@@ -85,7 +85,7 @@ class Field(models.Model):
     metadata = models.TextField()
     distribution = models.ForeignKey(to=Distribution, on_delete=models.CASCADE)
     present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=False)
+    updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
