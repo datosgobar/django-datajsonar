@@ -8,6 +8,7 @@ from django.conf import settings
 from django_rq import job
 
 from django_datajsonar.actions import DatasetIndexableToggler
+from django_datajsonar.indexing.tasks import close_read_datajson_task
 from django_datajsonar.models import Node, DatasetIndexingFile, NodeRegisterFile, \
     ReadDataJsonTask
 from django_datajsonar.strings import FILE_READ_ERROR
@@ -27,6 +28,9 @@ def read_datajson(task, whitelist=False, read_local=False):
             index_catalog.delay(node, task, read_local, whitelist)
         except Exception as e:
             logger.error(u"Excepción en leyendo nodo {}: {}".format(node.id, e))
+
+    if not settings.RQ_QUEUES['indexing'].get('ASYNC'):
+        close_read_datajson_task()
 
 
 @job('indexing')

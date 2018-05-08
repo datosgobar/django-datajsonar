@@ -11,6 +11,7 @@ from django.utils import timezone
 from pydatajson import DataJson
 
 from . import constants
+from .utils import log_exception, update_model
 from django_datajsonar.models import ReadDataJsonTask
 from django_datajsonar.models import Dataset, Catalog, Distribution, Field
 
@@ -45,25 +46,30 @@ class DatabaseLoader(object):
         """
         trimmed_catalog = self._trim_dict_fields(
             catalog, settings.CATALOG_BLACKLIST, constants.DATASET)
-        catalog_meta = json.dumps(trimmed_catalog)
-        catalog_model, _ = Catalog.objects.update_or_create(
+
+        catalog_model, created = Catalog.objects.update_or_create(
             identifier=catalog_id,
-            defaults={'title': trimmed_catalog.get('title', 'No Title'),
-                      'metadata': catalog_meta
-                      }
+            defaults={'title': trimmed_catalog.get('title', 'No Title')}
         )
+
         only_time_series = getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False)
         datasets = catalog.get_datasets(only_time_series=only_time_series)
+        updated_datasets = False
         for dataset in datasets:
             try:
-                self._dataset_model(dataset, catalog_model)
+                dataset_model = self._dataset_model(dataset, catalog_model)
+                updated_datasets = updated_datasets or dataset_model.updated
             except Exception as e:
-                ReadDataJsonTask.info(self.task, u"Excepción en dataset {}: {}"
-                                      .format(dataset.get('identifier'), e))
+                msg = u"Excepción en dataset {}: {}"\
+                    .format(dataset.get('identifier'), e)
+                log_exception(self.task, msg, Dataset, dataset.get('identifier'))
                 continue
+
         if not datasets and only_time_series:
             msg = u"No fueron encontrados series de tiempo en el catálogo {}".format(catalog_id)
             ReadDataJsonTask.info(self.task, msg)
+
+        update_model(created, trimmed_catalog, catalog_model, updated_children=updated_datasets)
         return catalog_model
 
     def _dataset_model(self, dataset, catalog_model):
@@ -72,24 +78,24 @@ class DatabaseLoader(object):
         """
         trimmed_dataset = self._trim_dict_fields(
             dataset, settings.DATASET_BLACKLIST, constants.DISTRIBUTION)
-        dataset_meta = json.dumps(trimmed_dataset)
         identifier = trimmed_dataset[constants.IDENTIFIER]
-        dataset_model, _ = Dataset.objects.update_or_create(
+        dataset_model, created = Dataset.objects.update_or_create(
             catalog=catalog_model,
             identifier=identifier,
-            defaults={'title': trimmed_dataset.get('title', 'No Title'),
-                      'metadata': dataset_meta,
-                      'present': True,
-                      'indexable': True
-                      }
+            defaults={'title': trimmed_dataset.get('title', 'No Title')}
         )
+        updated_distributions = False
         for distribution in dataset.get('distribution', []):
             try:
-                self._distribution_model(distribution, dataset_model)
+                distribution_model = self._distribution_model(distribution, dataset_model)
+                updated_distributions = updated_distributions or distribution_model.updated
             except Exception as e:
-                ReadDataJsonTask.info(self.task, u"Excepción en distribución {}: {}"
-                                      .format(distribution.get('identifier'), e))
+                msg = u"Excepción en distribución {}: {}"\
+                    .format(distribution.get('identifier'), e)
+                log_exception(self.task, msg, Distribution, distribution.get('identifier'))
                 continue
+
+        update_model(created, trimmed_dataset, dataset_model, updated_children=updated_distributions)
         return dataset_model
 
     def _distribution_model(self, distribution, dataset_model):
@@ -100,25 +106,29 @@ class DatabaseLoader(object):
             distribution, settings.DISTRIBUTION_BLACKLIST, constants.FIELD)
         identifier = trimmed_distribution[constants.IDENTIFIER]
         url = trimmed_distribution.get(constants.DOWNLOAD_URL)
-        distribution_meta = json.dumps(trimmed_distribution)
         distribution_model, created = Distribution.objects.update_or_create(
             dataset=dataset_model,
             identifier=identifier,
-            defaults={'metadata': distribution_meta,
-                      'download_url': url
-                      }
+            defaults={'download_url': url}
         )
+
+        data_change = False
         if dataset_model.indexable:
-            self._read_file(url, distribution_model)
-            distribution_model.save()
+            data_change = self._read_file(url, distribution_model)
+
+        updated_fields = False
         for field in distribution.get('field', []):
             try:
-                self._field_model(field, distribution_model)
+                field_model = self._field_model(field, distribution_model)
+                updated_fields = updated_fields or field_model.updated
             except Exception as e:
-                ReadDataJsonTask.info(self.task, u"Excepción en field {}: {}"
-                                      .format(field.get('title'), e))
+                msg = u"Excepción en field {}: {}"\
+                    .format(field.get('title'), e)
+                log_exception(self.task, msg, Field, field.get('identifier'))
                 continue
 
+        update_model(created, trimmed_distribution, distribution_model,
+                     updated_children=updated_fields, data_change=data_change)
         return distribution_model
 
     def _field_model(self, field, distribution_model):
@@ -126,12 +136,14 @@ class DatabaseLoader(object):
             field, settings.FIELD_BLACKLIST
         )
         field_meta = json.dumps(trimmed_field)
-        Field.objects.update_or_create(
+        field_model, created = Field.objects.get_or_create(
             distribution=distribution_model,
             title=field.get('title'),
             identifier=field.get('id'),
             defaults={'metadata': field_meta}
         )
+        update_model(created, trimmed_field, field_model)
+        return field_model
 
     def _read_file(self, file_url, distribution_model):
         """Descarga y lee el archivo de la distribución. Por razones
