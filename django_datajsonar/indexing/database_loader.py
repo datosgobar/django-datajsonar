@@ -46,13 +46,10 @@ class DatabaseLoader(object):
         """
         trimmed_catalog = self._trim_dict_fields(
             catalog, settings.CATALOG_BLACKLIST, constants.DATASET)
-        catalog_meta = json.dumps(trimmed_catalog)
 
         catalog_model, created = Catalog.objects.update_or_create(
             identifier=catalog_id,
-            defaults={'title': trimmed_catalog.get('title', 'No Title'),
-                      'metadata': catalog_meta,
-                      }
+            defaults={'title': trimmed_catalog.get('title', 'No Title')}
         )
 
         only_time_series = getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False)
@@ -81,14 +78,11 @@ class DatabaseLoader(object):
         """
         trimmed_dataset = self._trim_dict_fields(
             dataset, settings.DATASET_BLACKLIST, constants.DISTRIBUTION)
-        dataset_meta = json.dumps(trimmed_dataset)
         identifier = trimmed_dataset[constants.IDENTIFIER]
         dataset_model, created = Dataset.objects.update_or_create(
             catalog=catalog_model,
             identifier=identifier,
-            defaults={'title': trimmed_dataset.get('title', 'No Title'),
-                      'metadata': dataset_meta,
-                      }
+            defaults={'title': trimmed_dataset.get('title', 'No Title')}
         )
         updated_distributions = False
         for distribution in dataset.get('distribution', []):
@@ -112,13 +106,10 @@ class DatabaseLoader(object):
             distribution, settings.DISTRIBUTION_BLACKLIST, constants.FIELD)
         identifier = trimmed_distribution[constants.IDENTIFIER]
         url = trimmed_distribution.get(constants.DOWNLOAD_URL)
-        distribution_meta = json.dumps(trimmed_distribution)
         distribution_model, created = Distribution.objects.update_or_create(
             dataset=dataset_model,
             identifier=identifier,
-            defaults={'metadata': distribution_meta,
-                      'download_url': url,
-                      }
+            defaults={'download_url': url}
         )
 
         data_change = False
@@ -145,12 +136,11 @@ class DatabaseLoader(object):
             field, settings.FIELD_BLACKLIST
         )
         field_meta = json.dumps(trimmed_field)
-        field_model, created = Field.objects.update_or_create(
+        field_model, created = Field.objects.get_or_create(
             distribution=distribution_model,
             title=field.get('title'),
             identifier=field.get('id'),
-            defaults={'metadata': field_meta,
-                      }
+            defaults={'metadata': field_meta}
         )
         update_model(created, trimmed_field, field_model)
         return field_model
