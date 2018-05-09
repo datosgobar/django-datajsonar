@@ -95,6 +95,9 @@ class DatabaseLoader(object):
                 log_exception(self.task, msg, Distribution, distribution.get('identifier'))
                 continue
 
+        if self.default_whitelist:
+            dataset_model.indexable = True
+
         update_model(created, trimmed_dataset, dataset_model, updated_children=updated_distributions)
         return dataset_model
 
