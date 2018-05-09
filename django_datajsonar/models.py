@@ -33,6 +33,9 @@ class Catalog(models.Model):
     def __unicode__(self):
         return u'%s (%s)' % (self.title, self.identifier)
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class Dataset(models.Model):
     title = models.CharField(max_length=200)
@@ -48,6 +51,9 @@ class Dataset(models.Model):
 
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.catalog.identifier)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 def filepath(instance, _):
@@ -78,6 +84,9 @@ class Distribution(models.Model):
 
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.dataset.catalog.identifier)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class Field(models.Model):
