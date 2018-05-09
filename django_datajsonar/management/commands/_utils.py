@@ -7,17 +7,20 @@ from scheduler.models import RepeatableJob
 
 def add_common_arguments(parser):
     parser.add_argument('name', type=str, help='The name for the repeatable job')
-    parser.add_argument('-c', '--callable', type=str,
-                        help='importable method to be called',
-                        )
-    parser.add_argument('-t', '--time', nargs=2,
-                        help='UTC hour and minutes to schedule first job',
-                        metavar=('HOURS', 'MINUTES'),
-                        )
-    parser.add_argument('-i', '--interval', nargs=2,
-                        help='interval and unit in which to repeat the job',
-                        metavar=('UNIT', '[weeks|days|hours|minutes]'),
-                        )
+    parser.add_argument(
+        '-c', '--callable', type=str,
+        help='importable method to be called',
+    )
+    parser.add_argument(
+        '-t', '--time', nargs=2,
+        help='UTC hour and minutes to schedule first job',
+        metavar=('HOURS', 'MINUTES'),
+    )
+    parser.add_argument(
+        '-i', '--interval', nargs=2,
+        help='interval and unit in which to repeat the job',
+        metavar=('UNIT', '[weeks|days|hours|minutes]'),
+    )
 
 
 def handle_command(options, logger):
