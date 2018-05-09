@@ -106,10 +106,14 @@ class DatabaseLoader(object):
             distribution, settings.DISTRIBUTION_BLACKLIST, constants.FIELD)
         identifier = trimmed_distribution[constants.IDENTIFIER]
         url = trimmed_distribution.get(constants.DOWNLOAD_URL)
+        title = trimmed_distribution.get(constants.TITLE)
         distribution_model, created = Distribution.objects.update_or_create(
             dataset=dataset_model,
             identifier=identifier,
-            defaults={'download_url': url}
+            defaults={
+                'title': title,
+                'download_url': url
+            }
         )
 
         data_change = False

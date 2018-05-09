@@ -4,6 +4,7 @@ from django.conf import settings
 IDENTIFIER = "identifier"
 DATASET_IDENTIFIER = "dataset_identifier"
 DOWNLOAD_URL = "downloadURL"
+TITLE = 'title'
 
 DATASET = 'dataset'
 DISTRIBUTION = 'distribution'

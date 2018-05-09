@@ -33,6 +33,9 @@ class Catalog(models.Model):
     def __unicode__(self):
         return u'%s (%s)' % (self.title, self.identifier)
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class Dataset(models.Model):
     title = models.CharField(max_length=200)
@@ -49,6 +52,9 @@ class Dataset(models.Model):
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.catalog.identifier)
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 def filepath(instance, _):
     """Método para asignar el nombre al archivo fuente del FileField
@@ -59,6 +65,7 @@ def filepath(instance, _):
 
 class Distribution(models.Model):
     identifier = models.CharField(max_length=200)
+    title = models.CharField(max_length=200)
     metadata = models.TextField()
     dataset = models.ForeignKey(to=Dataset, on_delete=models.CASCADE)
     download_url = models.URLField(max_length=1024)
@@ -77,6 +84,9 @@ class Distribution(models.Model):
 
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.dataset.catalog.identifier)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class Field(models.Model):
