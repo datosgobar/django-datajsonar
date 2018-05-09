@@ -9,6 +9,26 @@ from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTas
 from .models import Catalog, Dataset, Distribution, Field
 
 
+class CatalogAdmin(admin.ModelAdmin):
+    list_display = ('title', 'identifier', 'present', 'updated')
+    search_fields = ('identifier', 'present', 'updated')
+    readonly_fields = ('identifier',)
+    list_filter = ('present', 'updated')
+
+    def get_search_results(self, request, queryset, search_term):
+        queryset, distinct = \
+            super(CatalogAdmin, self).get_search_results(request, queryset, search_term)
+        if not search_term:
+            return queryset, distinct
+
+        ids_to_remove = []
+        for obj in queryset:
+            if search_term not in (obj.identifier,):
+                ids_to_remove.append(obj.id)
+
+        return queryset.exclude(id__in=ids_to_remove), distinct
+
+
 class DatasetAdmin(admin.ModelAdmin):
     list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
@@ -189,7 +209,7 @@ class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
             bulk_whitelist.delay(model.id)
 
 
-admin.site.register(Catalog)
+admin.site.register(Catalog, CatalogAdmin)
 admin.site.register(Dataset, DatasetAdmin)
 admin.site.register(Distribution, DistributionAdmin)
 admin.site.register(Field, FieldAdmin)
