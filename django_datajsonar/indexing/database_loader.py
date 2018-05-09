@@ -120,7 +120,7 @@ class DatabaseLoader(object):
         )
 
         data_change = False
-        if dataset_model.indexable:
+        if dataset_model.indexable or self.default_whitelist:
             data_change = self._read_file(url, distribution_model)
 
         updated_fields = False
