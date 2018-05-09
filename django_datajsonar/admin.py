@@ -69,7 +69,7 @@ class DistributionAdmin(admin.ModelAdmin):
 
 
 class FieldAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'title', 'identifier', 'get_distribution_title', 'get_dataset_title', 'get_catalog_id')
+    list_display = ('get_title', 'identifier', 'get_distribution_title', 'get_dataset_title', 'get_catalog_id')
     search_fields = (
         'distribution__identifier',
         'distribution__dataset__identifier',
@@ -93,6 +93,10 @@ class FieldAdmin(admin.ModelAdmin):
         return field.distribution.title
     get_distribution_title.short_description = 'Distribution'
     get_distribution_title.admin_order_field = 'distribution__title'
+
+    def get_title(self, obj):
+        return obj.title or 'No title'
+    get_title.short_description = 'Title'
 
     def get_search_results(self, request, queryset, search_term):
         queryset, distinct = \
