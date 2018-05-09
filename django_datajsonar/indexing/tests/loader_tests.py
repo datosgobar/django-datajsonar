@@ -107,11 +107,13 @@ class DatabaseLoaderTests(TestCase):
 
         self.loader.run(catalog, self.catalog_id)
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data_changed_distribution.json'))
-        self.node.catalog = json.dumps(catalog)
-        self.init_datasets(self.node)
+        models = [Catalog, Dataset, Distribution, Field]
+        for model in models:
+            model.objects.all().update(present=False, updated=False)
         loader = DatabaseLoader(self.task, read_local=True, default_whitelist=True)
         loader.run(catalog, self.catalog_id)
 
-        # Valores obtenidos del .json fuente
-        self.assertEqual(Field.objects.get(identifier="212.1_PSCIOS_IOS_0_0_25").distribution,
-                         Distribution.objects.get(identifier="300.1"))
+        # Al cambiar identificadores, se duplican los modelos, pero solo uno queda presente
+        self.assertEqual(Field.objects.filter(identifier="212.1_PSCIOS_IOS_0_0_25").count(), 2)
+        self.assertEqual(Field.objects.filter(identifier="212.1_PSCIOS_IOS_0_0_25", present=True,
+                                              updated=True).count(), 1)
