@@ -8,7 +8,8 @@ from django_datajsonar.models import Distribution, Field
 from django_datajsonar.models import ReadDataJsonTask, Node
 from django_datajsonar.indexing.catalog_reader import index_catalog
 
-SAMPLES_DIR = os.path.join('django_datajsonar', 'libs', 'indexing', 'tests', 'samples')
+
+SAMPLES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples')
 CATALOG_ID = 'test_catalog'
 
 
@@ -28,34 +29,6 @@ class ReaderTests(TestCase):
         count = Field.objects.filter(metadata__contains='212.1_PSCIOS_ERN_0_0_25').count()
 
         self.assertEqual(count, 1)
-
-    def test_dont_index_same_distribution_twice(self):
-        index_catalog(self.node, self.task, read_local=True, whitelist=True)
-        index_catalog(self.node, self.task, read_local=True, whitelist=True)
-
-        distribution = Distribution.objects.get(identifier='212.1')
-
-        # La distribucion es marcada como no indexable hasta que cambien sus datos
-        self.assertFalse(distribution.indexable)
-
-    def test_first_time_distribution_indexable(self):
-        index_catalog(self.node, self.task, read_local=True, whitelist=True)
-
-        distribution = Distribution.objects.get(identifier='212.1')
-
-        self.assertTrue(distribution.indexable)
-
-    def test_index_same_distribution_if_data_changed(self):
-        index_catalog(self.node, self.task, read_local=True, whitelist=True)
-        new_catalog = os.path.join(SAMPLES_DIR, 'full_ts_data_changed.json')
-        self.node.catalog_url = new_catalog
-        self.node.save()
-        index_catalog(self.node, self.task, read_local=True, whitelist=True)
-
-        distribution = Distribution.objects.get(identifier='212.1')
-
-        # La distribución fue indexada nuevamente, está marcada como indexable
-        self.assertTrue(distribution.indexable)
 
     def test_error_distribution_logs(self):
         catalog = os.path.join(SAMPLES_DIR, 'distribution_missing_downloadurl.json')

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     def add_arguments(self, parser):
         add_common_arguments(parser)
-        parser.set_defaults(callable='django_datajsonar.libs.indexing.tasks.schedule_new_read_datajson_task',
+        parser.set_defaults(callable='django_datajsonar.tasks.schedule_new_read_datajson_task',
                             time=[6, 0],
                             interval=[24, 'hours'])
 

@@ -31,7 +31,7 @@ def handle_command(options, logger):
 
     name = options['name']
     start_time = now() + datetime.timedelta(days=1)
-    time = map(int, options['time'])
+    time = [int(component) for component in options['time']]
     start_time = start_time.replace(hour=time[0],
                                     minute=time[1],
                                     second=0,

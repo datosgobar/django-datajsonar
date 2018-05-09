@@ -12,5 +12,3 @@ def close_read_datajson_task():
     if not get_queue('indexing').jobs:
         task.status = task.FINISHED
         task.save()
-
-
