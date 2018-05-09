@@ -24,3 +24,6 @@ script:
 - scripts/pylint.sh
 - scripts/pycodestyle.sh
 - scripts/tests.sh
+
+after_success:
+- coveralls
