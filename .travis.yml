@@ -14,13 +14,13 @@ env:
 
 before_install:
 - docker-compose pull
-- docker-compose up -d
+- docker-compose up -d redis
 - docker-compose ps
 
 install:
 - pip install -r requirements/testing_dev.txt
 
 script:
-- scripts/tests.sh
 - scripts/pylint.sh
 - scripts/pycodestyle.sh
+- scripts/tests.sh
