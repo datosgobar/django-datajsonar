@@ -23,6 +23,7 @@ def update_model(created, trimmed_dict, model, updated_children=False, data_chan
     if created or updated:
         model.metadata = json.dumps(trimmed_dict)
         model.updated = True
+    model.created = created
     model.present = True
     model.save()
     return

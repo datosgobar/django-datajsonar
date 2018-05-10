@@ -27,6 +27,7 @@ class Catalog(models.Model):
     present = models.BooleanField(default=True)
     updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
+    new = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata, null=True)
 
@@ -46,6 +47,7 @@ class Dataset(models.Model):
     present = models.BooleanField(default=True)
     updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
+    new = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
 
@@ -81,6 +83,7 @@ class Distribution(models.Model):
     error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
+    new = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.dataset.catalog.identifier)
@@ -99,6 +102,7 @@ class Field(models.Model):
     error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
+    new = models.BooleanField(default=False)
 
 
 class BaseRegisterFile(models.Model):
