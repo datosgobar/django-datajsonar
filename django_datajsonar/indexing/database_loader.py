@@ -125,10 +125,6 @@ class DatabaseLoader(object):
 
         updated_fields = False
         for field in distribution.get('field', []):
-            if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY') and \
-                    field.get(constants.SPECIAL_TYPE) == constants.TIME_INDEX:
-                continue
-
             try:
                 field_model = self._field_model(field, distribution_model)
                 updated_fields = updated_fields or field_model.updated
