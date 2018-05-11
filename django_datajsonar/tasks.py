@@ -27,7 +27,7 @@ def read_datajson(task, whitelist=False, read_local=False):
         try:
             index_catalog.delay(node, task, read_local, whitelist)
         except Exception as e:
-            logger.error(u"Excepción en leyendo nodo {}: {}".format(node.id, e))
+            logger.error(u"Excepción leyendo nodo %s: %s", node.id, e)
 
     if not settings.RQ_QUEUES['indexing'].get('ASYNC'):
         close_read_datajson_task()
@@ -72,7 +72,7 @@ def process_node_register_file(register_file_id):
                                            catalog_url=values['url'],
                                            indexable=True)
             register_file.logs = register_file.logs + (
-                " - Guardado Node Indexing File %s" % (node, ))    
+                " - Guardado Node Indexing File %s" % (node, ))
         except Exception as e:
             register_file.logs = register_file.logs + (
                 " - Error guardando Node Indexing File %s - %s" % (node, e))

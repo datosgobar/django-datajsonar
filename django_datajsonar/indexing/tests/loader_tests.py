@@ -5,7 +5,6 @@ import os
 from django.conf import settings
 from django.test import TestCase
 from pydatajson import DataJson
-from nose.tools import raises
 
 
 from django_datajsonar.models import Catalog, Dataset, Distribution, Field
@@ -13,7 +12,7 @@ from django_datajsonar.models import ReadDataJsonTask, Node
 from django_datajsonar.indexing.database_loader import DatabaseLoader
 from .reader_tests import SAMPLES_DIR, CATALOG_ID
 
-dir_path = os.path.join('django_datajsonar', 'libs', 'indexing', 'tests', 'samples')
+dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples')
 
 
 class DatabaseLoaderTests(TestCase):
@@ -55,9 +54,8 @@ class DatabaseLoaderTests(TestCase):
 
     def test_blacklisted_catalog_meta(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        distributions = catalog.distributions
 
-        self.loader.run(distributions[0], catalog, self.catalog_id)
+        self.loader.run(catalog, self.catalog_id)
         meta = Catalog.objects.first().metadata
         meta = json.loads(meta)
         for field in settings.CATALOG_BLACKLIST:
@@ -65,10 +63,8 @@ class DatabaseLoaderTests(TestCase):
 
     def test_blacklisted_dataset_meta(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        distributions = catalog.distributions
 
-        self.loader.run(distributions[0], catalog, self.catalog_id)
-
+        self.loader.run(catalog, self.catalog_id)
         meta = Dataset.objects.first().metadata
         meta = json.loads(meta)
         for field in settings.DATASET_BLACKLIST:
@@ -76,9 +72,8 @@ class DatabaseLoaderTests(TestCase):
 
     def test_blacklisted_distrib_meta(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        distributions = catalog.distributions
 
-        self.loader.run(distributions[0], catalog, self.catalog_id)
+        self.loader.run(catalog, self.catalog_id)
         distribution = Distribution.objects.first()
         meta = distribution.metadata
         meta = json.loads(meta)
@@ -87,10 +82,8 @@ class DatabaseLoaderTests(TestCase):
 
     def test_blacklisted_field_meta(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        distributions = catalog.distributions
 
-        self.loader.run(distributions[0], catalog, self.catalog_id)
-
+        self.loader.run(catalog, self.catalog_id)
         distribution = Distribution.objects.first()
         for field_model in distribution.field_set.all():
             for field in settings.FIELD_BLACKLIST:
@@ -100,11 +93,10 @@ class DatabaseLoaderTests(TestCase):
         Catalog.objects.all().delete()  # Fuerza a recrear los modelos
 
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        distributions = catalog.distributions
         self.node.catalog = json.dumps(catalog)
         self.init_datasets(self.node, whitelist=False)
         loader = DatabaseLoader(self.task, read_local=True, default_whitelist=False)
-        loader.run(distributions[0], catalog, self.catalog_id)
+        loader.run(catalog, self.catalog_id)
         dataset = Catalog.objects.get(identifier=CATALOG_ID).dataset_set
 
         self.assertEqual(dataset.count(), 1)
@@ -112,17 +104,16 @@ class DatabaseLoaderTests(TestCase):
 
     def test_change_series_distribution(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        distributions = catalog.distributions
 
-        self.loader.run(distributions[0], catalog, self.catalog_id)
-
+        self.loader.run(catalog, self.catalog_id)
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data_changed_distribution.json'))
-        self.node.catalog = json.dumps(catalog)
-        self.init_datasets(self.node)
-        distributions = catalog.distributions
+        models = [Catalog, Dataset, Distribution, Field]
+        for model in models:
+            model.objects.all().update(present=False, updated=False)
         loader = DatabaseLoader(self.task, read_local=True, default_whitelist=True)
-        loader.run(distributions[0], catalog, self.catalog_id)
+        loader.run(catalog, self.catalog_id)
 
-        # Valores obtenidos del .json fuente
-        self.assertEqual(Field.objects.get(metadata__contains="212.1_PSCIOS_IOS_0_0_25").distribution,
-                         Distribution.objects.get(identifier="300.1"))
+        # Al cambiar identificadores, se duplican los modelos, pero solo uno queda presente
+        self.assertEqual(Field.objects.filter(identifier="212.1_PSCIOS_IOS_0_0_25").count(), 2)
+        self.assertEqual(Field.objects.filter(identifier="212.1_PSCIOS_IOS_0_0_25", present=True,
+                                              updated=True).count(), 1)
