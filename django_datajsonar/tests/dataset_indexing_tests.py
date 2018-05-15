@@ -87,6 +87,20 @@ class BulkIndexingTests(TestCase):
         idx_file = DatasetIndexingFile.objects.first()
         self.assertEqual(idx_file.state, idx_file.FAILED)
 
+    def test_missing_catalog(self):
+        filepath = os.path.join(dir_path, 'test_missing_catalog.csv')
+        with open(filepath, 'rb') as f:
+            idx_file = DatasetIndexingFile(indexing_file=SimpleUploadedFile(filepath, f.read()),
+                                           uploader=self.user)
+            idx_file.save()
+
+            bulk_whitelist(idx_file.id)
+
+        idx_file = DatasetIndexingFile.objects.first()
+        dataset = Dataset.objects.get(catalog__identifier=self.test_catalog, identifier='1')
+        self.assertEqual(idx_file.state, idx_file.PROCESSED)
+        self.assertTrue(dataset.indexable)
+
     def tearDown(self):
         for catalog in self.catalogs:
             Catalog.objects.get(identifier=catalog).delete()

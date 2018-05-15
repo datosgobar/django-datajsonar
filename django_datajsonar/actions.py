@@ -4,7 +4,7 @@ import unicodecsv
 import yaml
 
 from django_datajsonar.models import Catalog, Dataset
-from .strings import DATASET_STATUS
+from .strings import DATASET_STATUS, CATALOG_STATUS
 
 CATALOG_HEADER = u'catalog_id'
 DATASET_ID_HEADER = u'dataset_identifier'
@@ -42,9 +42,15 @@ class DatasetIndexableToggler(object):
 
     def update_database(self):
         for catalog, datasets in self.catalogs.items():
-            dataset_models = Catalog.objects.get(identifier=catalog).dataset_set
+            status = 'OK'
+            try:
+                dataset_models = Catalog.objects.get(identifier=catalog).dataset_set
+            except Catalog.DoesNotExist:
+                status = 'ERROR'
+                self.logs.append(CATALOG_STATUS.format(catalog, status))
+                continue
+
             for dataset in datasets:
-                status = 'OK'
                 try:
                     dataset_model = dataset_models.get(identifier=dataset)
                     dataset_model.indexable = True
