@@ -48,7 +48,7 @@ class DatasetIndexableToggler(object):
             except Catalog.DoesNotExist:
                 status = 'ERROR'
                 self.logs.append(CATALOG_STATUS.format(catalog, status))
-                return
+                continue
 
             for dataset in datasets:
                 try:
