@@ -10,10 +10,11 @@ from django.core.files import File
 from django.utils import timezone
 from pydatajson import DataJson
 
-from . import constants
-from .utils import log_exception, update_model
 from django_datajsonar.models import ReadDataJsonTask
 from django_datajsonar.models import Dataset, Catalog, Distribution, Field
+from . import constants
+from .utils import log_exception, update_model
+
 
 
 class DatabaseLoader(object):
