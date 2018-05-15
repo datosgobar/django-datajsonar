@@ -107,14 +107,12 @@ class DatabaseLoader(object):
         """
         trimmed_distribution = self._trim_dict_fields(
             distribution, settings.DISTRIBUTION_BLACKLIST, constants.FIELD)
-        identifier = trimmed_distribution[constants.IDENTIFIER]
         url = trimmed_distribution.get(constants.DOWNLOAD_URL)
-        title = trimmed_distribution.get(constants.TITLE)
         distribution_model, created = Distribution.objects.update_or_create(
             dataset=dataset_model,
-            identifier=identifier,
+            identifier=trimmed_distribution[constants.IDENTIFIER],
             defaults={
-                'title': title,
+                'title': trimmed_distribution.get(constants.TITLE, 'No Title'),
                 'download_url': url
             }
         )
