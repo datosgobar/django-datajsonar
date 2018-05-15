@@ -10,10 +10,10 @@ from django.core.files import File
 from django.utils import timezone
 from pydatajson import DataJson
 
-from . import constants
-from .utils import log_exception, update_model
 from django_datajsonar.models import ReadDataJsonTask
 from django_datajsonar.models import Dataset, Catalog, Distribution, Field
+from . import constants
+from .utils import log_exception, update_model
 
 
 class DatabaseLoader(object):
@@ -107,14 +107,12 @@ class DatabaseLoader(object):
         """
         trimmed_distribution = self._trim_dict_fields(
             distribution, settings.DISTRIBUTION_BLACKLIST, constants.FIELD)
-        identifier = trimmed_distribution[constants.IDENTIFIER]
         url = trimmed_distribution.get(constants.DOWNLOAD_URL)
-        title = trimmed_distribution.get(constants.TITLE)
         distribution_model, created = Distribution.objects.update_or_create(
             dataset=dataset_model,
-            identifier=identifier,
+            identifier=trimmed_distribution[constants.IDENTIFIER],
             defaults={
-                'title': title,
+                'title': trimmed_distribution.get(constants.TITLE, 'No Title'),
                 'download_url': url
             }
         )
@@ -184,11 +182,8 @@ class DatabaseLoader(object):
         if distribution_model.data_hash != data_hash:
             distribution_model.data_hash = data_hash
             distribution_model.last_updated = timezone.now()
-            distribution_model.indexable = True
-            return True
-        else:  # No cambió respecto a la corrida anterior
-            distribution_model.indexable = False
-            return False
+
+        return distribution_model.data_hash != data_hash
 
     @staticmethod
     def _remove_blacklisted_fields(metadata, blacklist):
