@@ -16,7 +16,6 @@ from . import constants
 from .utils import log_exception, update_model
 
 
-
 class DatabaseLoader(object):
     """Carga la base de datos. No hace validaciones"""
 
