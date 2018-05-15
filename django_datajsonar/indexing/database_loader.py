@@ -184,11 +184,8 @@ class DatabaseLoader(object):
         if distribution_model.data_hash != data_hash:
             distribution_model.data_hash = data_hash
             distribution_model.last_updated = timezone.now()
-            distribution_model.indexable = True
-            return True
-        else:  # No cambió respecto a la corrida anterior
-            distribution_model.indexable = False
-            return False
+
+        return distribution_model.data_hash != data_hash
 
     @staticmethod
     def _remove_blacklisted_fields(metadata, blacklist):
