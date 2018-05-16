@@ -170,16 +170,15 @@ class Node(models.Model):
         super(Node, self).save(force_insert, force_update, using, update_fields)
 
 
-class ReadDataJsonTask(models.Model):
+class AbstractTask(models.Model):
+
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     RUNNING = "RUNNING"
-    INDEXING = "INDEXING"
     FINISHED = "FINISHED"
     ERROR = "ERROR"
 
     STATUS_CHOICES = (
         (RUNNING, "Procesando catálogos"),
-        (INDEXING, "Indexando series"),
         (FINISHED, "Finalizada"),
         (ERROR, "Error"),
     )
@@ -188,8 +187,6 @@ class ReadDataJsonTask(models.Model):
     created = models.DateTimeField()
     finished = models.DateTimeField(null=True)
     logs = models.TextField(default='-')
-    catalogs = models.ManyToManyField(to=Node, blank=True)
-
     stats = models.TextField(default='{}')
 
     def save(self, force_insert=False, force_update=False, using=None,
@@ -198,7 +195,7 @@ class ReadDataJsonTask(models.Model):
             self.created = timezone.now()
             self.status = self.RUNNING
 
-        super(ReadDataJsonTask, self).save(force_insert, force_update, using, update_fields)
+        super(AbstractTask, self).save(force_insert, force_update, using, update_fields)
 
     def __unicode__(self):
         return "Task at %s" % self._format_date(self.created)
@@ -212,3 +209,14 @@ class ReadDataJsonTask(models.Model):
             task = cls.objects.select_for_update().get(id=task.id)
             task.logs += msg + '\n'
             task.save()
+
+    class Meta:
+        abstract = True
+
+
+class ReadDataJsonTask(AbstractTask):
+    INDEXING = "INDEXING"
+
+    STATUS_CHOICES = AbstractTask.STATUS_CHOICES + ((INDEXING, "Indexando series"),)
+    catalogs = models.ManyToManyField(to=Node, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
