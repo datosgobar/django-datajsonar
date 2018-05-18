@@ -62,7 +62,9 @@ class DatabaseLoader(object):
             except Exception as e:
                 msg = u"Excepción en dataset {}: {}"\
                     .format(dataset.get('identifier'), e)
-                log_exception(self.task, msg, Dataset, dataset.get('identifier'))
+                keywords = {'identifier': dataset.get('identifier'),
+                            'catalog': catalog_model}
+                log_exception(self.task, msg, Dataset, keywords)
                 continue
 
         if not datasets and only_time_series:
@@ -92,7 +94,9 @@ class DatabaseLoader(object):
             except Exception as e:
                 msg = u"Excepción en distribución {}: {}"\
                     .format(distribution.get('identifier'), e)
-                log_exception(self.task, msg, Distribution, distribution.get('identifier'))
+                keywords = {'identifier': distribution.get('identifier'),
+                            'dataset': dataset_model}
+                log_exception(self.task, msg, Distribution, keywords)
                 continue
 
         if self.default_whitelist:
@@ -129,7 +133,9 @@ class DatabaseLoader(object):
             except Exception as e:
                 msg = u"Excepción en field {}: {}"\
                     .format(field.get('title'), e)
-                log_exception(self.task, msg, Field, field.get('identifier'))
+                keywords = {'identifier': field.get('identifier'),
+                            'distribution': distribution_model}
+                log_exception(self.task, msg, Field, keywords)
                 continue
 
         update_model(created, trimmed_distribution, distribution_model,

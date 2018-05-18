@@ -53,6 +53,6 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         loader.run(catalog, node.catalog_id)
     except Exception as e:
         msg = u"Excepcion en catalogo {}: {}".format(node.catalog_id, e)
-        log_exception(task, msg, Catalog, node.catalog_id)
+        log_exception(task, msg, Catalog, {'identifier': node.catalog_id})
         if settings.RQ_QUEUES['indexing'].get('ASYNC', True):
             raise e  # Django-rq / sentry logging
