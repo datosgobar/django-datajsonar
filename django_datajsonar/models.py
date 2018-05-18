@@ -216,7 +216,9 @@ class AbstractTask(models.Model):
 
 class ReadDataJsonTask(AbstractTask):
     INDEXING = "INDEXING"
-
-    STATUS_CHOICES = AbstractTask.STATUS_CHOICES + ((INDEXING, "Indexando series"),)
+    # Inserto indexing en la posicion que estaba antes para evitar una migracion
+    status_choices_list = list(AbstractTask.STATUS_CHOICES)
+    status_choices_list.insert(1, (INDEXING, "Indexando series"))
+    STATUS_CHOICES = tuple(status_choices_list)
     catalogs = models.ManyToManyField(to=Node, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
