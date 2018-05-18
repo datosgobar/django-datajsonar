@@ -3,10 +3,10 @@ import json
 from django_datajsonar.models import ReadDataJsonTask
 
 
-def log_exception(task, msg, model, identifier):
+def log_exception(task, msg, model, field_kw):
     ReadDataJsonTask.info(task, msg)
     try:
-        error_model = model.objects.get(identifier=identifier)
+        error_model = model.objects.get(**field_kw)
         error_model.error = True
         error_model.save()
         return error_model
