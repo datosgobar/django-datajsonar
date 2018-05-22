@@ -145,3 +145,9 @@ class DatabaseLoaderTests(TestCase):
 
         self.assertTrue(Distribution.objects.get(dataset=dataset1, identifier='212.1').error)
         self.assertFalse(Distribution.objects.get(dataset=dataset2, identifier='212.1').error)
+
+    def test_no_url_distribution_triggers_error_bit(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'distribution_missing_downloadurl.json'))
+        self.loader.run(catalog, self.catalog_id)
+        invalid_distribution = Distribution.objects.get(identifier='212.1')
+        self.assertTrue(invalid_distribution.error)
