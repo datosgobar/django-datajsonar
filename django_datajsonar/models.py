@@ -106,7 +106,7 @@ class Field(models.Model):
 
     def __unicode__(self):
         return u'%s (%s)' %\
-               (self.identifier or self.distribution.identifier,
+               (self.title or 'Field sin title',
                 self.distribution.dataset.catalog.identifier)
 
     def __str__(self):
