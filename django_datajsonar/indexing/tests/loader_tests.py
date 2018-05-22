@@ -147,7 +147,11 @@ class DatabaseLoaderTests(TestCase):
         self.assertFalse(Distribution.objects.get(dataset=dataset2, identifier='212.1').error)
 
     def test_no_url_distribution_triggers_error_bit(self):
+        loader = DatabaseLoader(self.task, read_local=True, default_whitelist=False)
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'distribution_missing_downloadurl.json'))
-        self.loader.run(catalog, self.catalog_id)
+        loader.run(catalog, self.catalog_id)
         invalid_distribution = Distribution.objects.get(identifier='212.1')
+        # Marca la distribucion como erronea
         self.assertTrue(invalid_distribution.error)
+        # Pero igualmente crea los fields
+        self.assertEqual(4, Field.objects.filter(distribution=invalid_distribution).count())
