@@ -104,6 +104,14 @@ class Field(models.Model):
     enhanced_meta = GenericRelation(Metadata)
     new = models.BooleanField(default=False)
 
+    def __unicode__(self):
+        return u'%s (%s)' %\
+               (self.title or 'Field sin title',
+                self.distribution.dataset.catalog.identifier)
+
+    def __str__(self):
+        return self.__unicode__()
+
 
 class BaseRegisterFile(models.Model):
     """Base de los archivos de registro de datasets y de nodos.
@@ -141,10 +149,16 @@ class NodeRegisterFile(BaseRegisterFile):
     def __unicode__(self):
         return "Node register file: {}".format(self.created)
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class DatasetIndexingFile(BaseRegisterFile):
     def __unicode__(self):
         return "Indexing file: {}".format(self.created)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class Node(models.Model):
@@ -156,6 +170,9 @@ class Node(models.Model):
 
     def __unicode__(self):
         return self.catalog_id
+
+    def __str__(self):
+        return self.__unicode__()
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -202,6 +219,9 @@ class ReadDataJsonTask(models.Model):
 
     def __unicode__(self):
         return "Task at %s" % self._format_date(self.created)
+
+    def __str__(self):
+        return self.__unicode__()
 
     def _format_date(self, date):
         return timezone.localtime(date).strftime(self.DATE_FORMAT)
