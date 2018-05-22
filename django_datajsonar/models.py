@@ -104,6 +104,14 @@ class Field(models.Model):
     enhanced_meta = GenericRelation(Metadata)
     new = models.BooleanField(default=False)
 
+    def __unicode__(self):
+        return u'%s (%s)' %\
+               (self.identifier or self.distribution.identifier,
+                self.distribution.dataset.catalog.identifier)
+
+    def __str__(self):
+        return self.__unicode__()
+
 
 class BaseRegisterFile(models.Model):
     """Base de los archivos de registro de datasets y de nodos.
