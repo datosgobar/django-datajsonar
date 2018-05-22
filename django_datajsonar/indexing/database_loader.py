@@ -135,7 +135,7 @@ class DatabaseLoader(object):
                 continue
 
         data_change = False
-        if dataset_model.indexable or self.default_whitelist:
+        if (dataset_model.indexable or self.default_whitelist) and url:
             data_change = self._read_file(url, distribution_model)
 
         # En caso de que no descargue el archivo.
