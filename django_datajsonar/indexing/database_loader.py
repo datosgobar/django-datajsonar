@@ -90,7 +90,7 @@ class DatabaseLoader(object):
         updated_distributions = False
         distributions = dataset.get('distribution', [])
         if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False):
-            distributions = [dist for dist in distributions if distribution_has_time_index(dist)]
+            distributions = filter(distribution_has_time_index, distributions)
         for distribution in distributions:
             try:
                 distribution_model = self._distribution_model(distribution, dataset_model)
