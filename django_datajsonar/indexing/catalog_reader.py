@@ -43,9 +43,14 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         catalog_model[0].error = False
         catalog_model[0].save()
 
-    Dataset.objects.filter(catalog__identifier=node.catalog_id).update(present=False, updated=False, error=False)
-    Distribution.objects.filter(dataset__catalog__identifier=node.catalog_id).update(present=False, updated=False, error=False)
-    Field.objects.filter(distribution__dataset__catalog=catalog_model).update(present=False, updated=False, error=False)
+    reset_fields = {'present': False,
+                    'updated': False,
+                    'error': False,
+                    'new': False}
+
+    Dataset.objects.filter(catalog__identifier=node.catalog_id).update(**reset_fields)
+    Distribution.objects.filter(dataset__catalog__identifier=node.catalog_id).update(**reset_fields)
+    Field.objects.filter(distribution__dataset__catalog__identifier=node.catalog_id).update(**reset_fields)
 
     try:
         loader = DatabaseLoader(task, read_local=read_local, default_whitelist=whitelist)
@@ -53,6 +58,6 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         loader.run(catalog, node.catalog_id)
     except Exception as e:
         msg = u"Excepcion en catalogo {}: {}".format(node.catalog_id, e)
-        log_exception(task, msg, Catalog, node.catalog_id)
+        log_exception(task, msg, Catalog, {'identifier': node.catalog_id})
         if settings.RQ_QUEUES['indexing'].get('ASYNC', True):
             raise e  # Django-rq / sentry logging

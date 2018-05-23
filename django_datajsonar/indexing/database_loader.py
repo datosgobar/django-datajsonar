@@ -62,7 +62,9 @@ class DatabaseLoader(object):
             except Exception as e:
                 msg = u"Excepción en dataset {}: {}"\
                     .format(dataset.get('identifier'), e)
-                log_exception(self.task, msg, Dataset, dataset.get('identifier'))
+                model_fields = {'identifier': dataset.get('identifier'),
+                                'catalog': catalog_model}
+                log_exception(self.task, msg, Dataset, model_fields)
                 continue
 
         if not datasets and only_time_series:
@@ -92,7 +94,9 @@ class DatabaseLoader(object):
             except Exception as e:
                 msg = u"Excepción en distribución {}: {}"\
                     .format(distribution.get('identifier'), e)
-                log_exception(self.task, msg, Distribution, distribution.get('identifier'))
+                model_fields = {'identifier': distribution.get('identifier'),
+                                'dataset': dataset_model}
+                log_exception(self.task, msg, Distribution, model_fields)
                 continue
 
         if self.default_whitelist:
@@ -117,10 +121,6 @@ class DatabaseLoader(object):
             }
         )
 
-        data_change = False
-        if dataset_model.indexable or self.default_whitelist:
-            data_change = self._read_file(url, distribution_model)
-
         updated_fields = False
         for field in distribution.get('field', []):
             try:
@@ -129,8 +129,18 @@ class DatabaseLoader(object):
             except Exception as e:
                 msg = u"Excepción en field {}: {}"\
                     .format(field.get('title'), e)
-                log_exception(self.task, msg, Field, field.get('identifier'))
+                model_fields = {'identifier': field.get('identifier'),
+                                'distribution': distribution_model}
+                log_exception(self.task, msg, Field, model_fields)
                 continue
+
+        data_change = False
+        if (dataset_model.indexable or self.default_whitelist) and url:
+            data_change = self._read_file(url, distribution_model)
+
+        # En caso de que no descargue el archivo.
+        if not url:
+            distribution_model.error = True
 
         update_model(created, trimmed_distribution, distribution_model,
                      updated_children=updated_fields, data_change=data_change)
