@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.files import File
 from django.utils import timezone
 from pydatajson import DataJson
+from pydatajson.time_series import distribution_has_time_index
 
 from django_datajsonar.models import ReadDataJsonTask
 from django_datajsonar.models import Dataset, Catalog, Distribution, Field
@@ -87,7 +88,10 @@ class DatabaseLoader(object):
             defaults={'title': trimmed_dataset.get('title', 'No Title')}
         )
         updated_distributions = False
-        for distribution in dataset.get('distribution', []):
+        distributions = dataset.get('distribution', [])
+        if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False):
+            distributions = filter(distribution_has_time_index, distributions)
+        for distribution in distributions:
             try:
                 distribution_model = self._distribution_model(distribution, dataset_model)
                 updated_distributions = updated_distributions or distribution_model.updated

@@ -115,8 +115,8 @@ class DatabaseLoaderTests(TestCase):
 
         # Al cambiar identificadores, se duplican los modelos, pero solo uno queda presente
         self.assertEqual(Field.objects.filter(identifier="212.1_PSCIOS_IOS_0_0_25").count(), 2)
-        self.assertEqual(Field.objects.filter(identifier="212.1_PSCIOS_IOS_0_0_25", present=True,
-                                              updated=True).count(), 1)
+        self.assertEqual(Field.objects.filter(identifier="212.1_PSCIOS_IOS_0_0_25",
+                                              present=True, updated=True).count(), 1)
 
     def test_same_dataset_identifier_only_one_error(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
