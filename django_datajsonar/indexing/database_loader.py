@@ -88,7 +88,7 @@ class DatabaseLoader(object):
             defaults={'title': trimmed_dataset.get('title', 'No Title')}
         )
         updated_distributions = False
-        distributions = set(dataset.get('distribution', []))
+        distributions = dataset.get('distribution', [])
         if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False):
             distributions = [dist for dist in distributions if distribution_has_time_index(dist)]
         for distribution in distributions:
