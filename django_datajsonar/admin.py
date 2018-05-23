@@ -164,6 +164,7 @@ class NodeRegisterFileAdmin(BaseRegisterFileAdmin):
 class NodeAdmin(admin.ModelAdmin):
 
     list_display = ('catalog_id', 'indexable')
+    exclude = ('catalog',)
     actions = ('delete_model', 'run_indexing', 'make_indexable', 'make_unindexable')
 
     def get_actions(self, request):
@@ -189,12 +190,11 @@ class NodeAdmin(admin.ModelAdmin):
 
 
 class DataJsonAdmin(admin.ModelAdmin):
-    readonly_fields = ('status', 'created', 'finished', 'logs', 'catalogs', 'stats')
+    readonly_fields = ('status', 'created', 'finished', 'logs',)
     list_display = ('__unicode__', 'status')
 
     def save_model(self, request, obj, form, change):
-        running_status = [ReadDataJsonTask.RUNNING, ReadDataJsonTask.INDEXING]
-        if ReadDataJsonTask.objects.filter(status__in=running_status):
+        if ReadDataJsonTask.objects.filter(status=ReadDataJsonTask.RUNNING):
             return  # Ya hay tarea corriendo, no ejecuto una nueva
         super(DataJsonAdmin, self).save_model(request, obj, form, change)
         read_datajson.delay(obj)  # Ejecuta indexación

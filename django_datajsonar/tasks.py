@@ -84,7 +84,7 @@ def process_node_register_file(register_file_id):
 def schedule_new_read_datajson_task():
     try:
         task = ReadDataJsonTask.objects.last()
-        if task and task.status in [ReadDataJsonTask.INDEXING, ReadDataJsonTask.RUNNING]:
+        if task and task.status == ReadDataJsonTask.RUNNING:
             return
     except ReadDataJsonTask.DoesNotExist:
         pass

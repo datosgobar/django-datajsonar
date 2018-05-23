@@ -52,7 +52,7 @@ class ReadDataJsonTest(TestCase):
              catalog_url=os.path.join(dir_path, 'sample_data.json'),
              indexable=True).save()
 
-        ReadDataJsonTask(status=ReadDataJsonTask.INDEXING).save()
+        ReadDataJsonTask(status=ReadDataJsonTask.RUNNING).save()
 
         # Esperado: no se crea una segunda tarea
         call_command('read_datajson')

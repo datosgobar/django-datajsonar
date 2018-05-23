@@ -174,37 +174,22 @@ class Node(models.Model):
     def __str__(self):
         return self.__unicode__()
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        try:
-            catalog_request = requests.get(self.catalog_url)
-            if catalog_request.status_code != 200:
-                return
-            self.catalog = catalog_request.content
-        except requests.exceptions.RequestException:
-            self.catalog = open(self.catalog_url).read()
-
-        super(Node, self).save(force_insert, force_update, using, update_fields)
-
 
 class AbstractTask(models.Model):
 
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     RUNNING = "RUNNING"
     FINISHED = "FINISHED"
-    ERROR = "ERROR"
 
     STATUS_CHOICES = (
         (RUNNING, "Procesando catálogos"),
         (FINISHED, "Finalizada"),
-        (ERROR, "Error"),
     )
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created = models.DateTimeField()
     finished = models.DateTimeField(null=True)
-    logs = models.TextField(default='-')
-    stats = models.TextField(default='{}')
+    logs = models.TextField()
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -235,10 +220,4 @@ class AbstractTask(models.Model):
 
 
 class ReadDataJsonTask(AbstractTask):
-    INDEXING = "INDEXING"
-    # Inserto indexing en la posicion que estaba antes para evitar una migracion
-    status_choices_list = list(AbstractTask.STATUS_CHOICES)
-    status_choices_list.insert(1, (INDEXING, "Indexando series"))
-    STATUS_CHOICES = tuple(status_choices_list)
-    catalogs = models.ManyToManyField(to=Node, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    pass
