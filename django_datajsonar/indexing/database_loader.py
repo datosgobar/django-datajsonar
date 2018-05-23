@@ -121,10 +121,6 @@ class DatabaseLoader(object):
             }
         )
 
-        data_change = False
-        if dataset_model.indexable or self.default_whitelist:
-            data_change = self._read_file(url, distribution_model)
-
         updated_fields = False
         for field in distribution.get('field', []):
             try:
@@ -137,6 +133,14 @@ class DatabaseLoader(object):
                                 'distribution': distribution_model}
                 log_exception(self.task, msg, Field, model_fields)
                 continue
+
+        data_change = False
+        if (dataset_model.indexable or self.default_whitelist) and url:
+            data_change = self._read_file(url, distribution_model)
+
+        # En caso de que no descargue el archivo.
+        if not url:
+            distribution_model.error = True
 
         update_model(created, trimmed_distribution, distribution_model,
                      updated_children=updated_fields, data_change=data_change)

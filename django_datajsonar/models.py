@@ -70,7 +70,7 @@ class Distribution(models.Model):
     title = models.CharField(max_length=200)
     metadata = models.TextField()
     dataset = models.ForeignKey(to=Dataset, on_delete=models.CASCADE)
-    download_url = models.URLField(max_length=1024)
+    download_url = models.URLField(max_length=1024, null=True)
     data_hash = models.CharField(max_length=128, default='')
     last_updated = models.DateTimeField(blank=True, null=True)
     data_file = models.FileField(
