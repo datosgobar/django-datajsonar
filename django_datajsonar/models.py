@@ -174,40 +174,22 @@ class Node(models.Model):
     def __str__(self):
         return self.__unicode__()
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        try:
-            catalog_request = requests.get(self.catalog_url)
-            if catalog_request.status_code != 200:
-                return
-            self.catalog = catalog_request.content
-        except requests.exceptions.RequestException:
-            self.catalog = open(self.catalog_url).read()
 
-        super(Node, self).save(force_insert, force_update, using, update_fields)
+class AbstractTask(models.Model):
 
-
-class ReadDataJsonTask(models.Model):
     DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     RUNNING = "RUNNING"
-    INDEXING = "INDEXING"
     FINISHED = "FINISHED"
-    ERROR = "ERROR"
 
     STATUS_CHOICES = (
         (RUNNING, "Procesando catálogos"),
-        (INDEXING, "Indexando series"),
         (FINISHED, "Finalizada"),
-        (ERROR, "Error"),
     )
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     created = models.DateTimeField()
     finished = models.DateTimeField(null=True)
-    logs = models.TextField(default='-')
-    catalogs = models.ManyToManyField(to=Node, blank=True)
-
-    stats = models.TextField(default='{}')
+    logs = models.TextField()
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -215,7 +197,7 @@ class ReadDataJsonTask(models.Model):
             self.created = timezone.now()
             self.status = self.RUNNING
 
-        super(ReadDataJsonTask, self).save(force_insert, force_update, using, update_fields)
+        super(AbstractTask, self).save(force_insert, force_update, using, update_fields)
 
     def __unicode__(self):
         return "Task at %s" % self._format_date(self.created)
@@ -232,3 +214,10 @@ class ReadDataJsonTask(models.Model):
             task = cls.objects.select_for_update().get(id=task.id)
             task.logs += msg + '\n'
             task.save()
+
+    class Meta:
+        abstract = True
+
+
+class ReadDataJsonTask(AbstractTask):
+    pass

@@ -18,8 +18,7 @@ class Command(BaseCommand):
         parser.add_argument('--whitelist', action='store_true')
 
     def handle(self, *args, **options):
-        status = [ReadDataJsonTask.INDEXING, ReadDataJsonTask.RUNNING]
-        if ReadDataJsonTask.objects.filter(status__in=status):
+        if ReadDataJsonTask.objects.filter(status=ReadDataJsonTask.RUNNING):
             logger.info(u'Ya está corriendo una indexación')
             return
 
