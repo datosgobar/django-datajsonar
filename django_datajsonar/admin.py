@@ -199,6 +199,12 @@ class DataJsonAdmin(admin.ModelAdmin):
         super(DataJsonAdmin, self).save_model(request, obj, form, change)
         read_datajson.delay(obj)  # Ejecuta indexación
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields + ('indexing_mode',)
+        else:
+            return self.readonly_fields
+
 
 class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
     def process_register_file(self, _, queryset):
