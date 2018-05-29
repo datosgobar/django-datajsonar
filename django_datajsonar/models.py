@@ -1,9 +1,8 @@
 #! coding: utf-8
 from __future__ import unicode_literals
 
-import requests
-
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -220,4 +219,8 @@ class AbstractTask(models.Model):
 
 
 class ReadDataJsonTask(AbstractTask):
-    pass
+    COMPLETE_RUN = True
+    METADATA_ONLY = False
+    INDEXING_CHOICES = ((COMPLETE_RUN, 'Corrida completa'), (METADATA_ONLY, 'Corrida solo de metadatos'),)
+    default_mode = getattr(settings, 'DATAJSON_AR_DOWNLOAD_RESOURCES', True)
+    indexing_mode = models.BooleanField(choices=INDEXING_CHOICES, default=default_mode)
