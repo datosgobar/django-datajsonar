@@ -88,6 +88,8 @@ class DatabaseLoader(object):
         )
         updated_distributions = False
         distributions = dataset.get('distribution', [])
+        if self.default_whitelist:
+            dataset_model.indexable = True
         if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False):
             distributions = filter(distribution_has_time_index, distributions)
         for distribution in distributions:
@@ -101,9 +103,6 @@ class DatabaseLoader(object):
                                 'dataset': dataset_model}
                 log_exception(self.task, msg, Distribution, model_fields)
                 continue
-
-        if self.default_whitelist:
-            dataset_model.indexable = True
 
         update_model(created, trimmed_dataset, dataset_model, updated_children=updated_distributions)
         return dataset_model
@@ -137,10 +136,7 @@ class DatabaseLoader(object):
                 continue
 
         data_change = False
-        download_resource = self.task.indexing_mode
-        download_resource = download_resource and (dataset_model.indexable or self.default_whitelist)
-        download_resource = download_resource and distribution_model.download_url
-        if download_resource:
+        if self.task.indexing_mode and dataset_model.indexable:
             data_change = self._read_file(distribution_model)
 
         # En caso de que no descargue el archivo.
@@ -174,10 +170,11 @@ class DatabaseLoader(object):
             distribution_model (Distribution)
         """
         file_url = distribution_model.download_url
+        if not file_url:
+            return False
         if self.read_local:  # Usado en debug y testing
             with open(file_url) as f:
                 data_hash = hashlib.sha512(f.read().encode('utf-8')).hexdigest()
-
             distribution_model.data_file = File(open(file_url))
 
         else:
