@@ -24,7 +24,6 @@ class DatabaseLoader(object):
         self.task = task
         self.catalog_model = None
         self.catalog_id = None
-        self.stats = {}
         self.read_local = read_local
         self.default_whitelist = default_whitelist
 
@@ -89,6 +88,8 @@ class DatabaseLoader(object):
         )
         updated_distributions = False
         distributions = dataset.get('distribution', [])
+        if self.default_whitelist:
+            dataset_model.indexable = True
         if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False):
             distributions = filter(distribution_has_time_index, distributions)
         for distribution in distributions:
@@ -103,9 +104,6 @@ class DatabaseLoader(object):
                 log_exception(self.task, msg, Distribution, model_fields)
                 continue
 
-        if self.default_whitelist:
-            dataset_model.indexable = True
-
         update_model(created, trimmed_dataset, dataset_model, updated_children=updated_distributions)
         return dataset_model
 
@@ -115,13 +113,12 @@ class DatabaseLoader(object):
         """
         trimmed_distribution = self._trim_dict_fields(
             distribution, settings.DISTRIBUTION_BLACKLIST, constants.FIELD)
-        url = trimmed_distribution.get(constants.DOWNLOAD_URL)
         distribution_model, created = Distribution.objects.update_or_create(
             dataset=dataset_model,
             identifier=trimmed_distribution[constants.IDENTIFIER],
             defaults={
                 'title': trimmed_distribution.get(constants.TITLE, 'No Title'),
-                'download_url': url
+                'download_url': trimmed_distribution.get(constants.DOWNLOAD_URL)
             }
         )
 
@@ -139,11 +136,11 @@ class DatabaseLoader(object):
                 continue
 
         data_change = False
-        if (dataset_model.indexable or self.default_whitelist) and url:
-            data_change = self._read_file(url, distribution_model)
+        if self.task.indexing_mode and dataset_model.indexable:
+            data_change = self._read_file(distribution_model)
 
         # En caso de que no descargue el archivo.
-        if not url:
+        if not distribution_model.download_url:
             distribution_model.error = True
 
         update_model(created, trimmed_distribution, distribution_model,
@@ -164,23 +161,26 @@ class DatabaseLoader(object):
         update_model(created, trimmed_field, field_model)
         return field_model
 
-    def _read_file(self, file_url, distribution_model):
+    def _read_file(self, distribution_model):
         """Descarga y lee el archivo de la distribución. Por razones
         de performance, NO hace un save() a la base de datos.
         Marca el modelo de distribución como 'indexable' si el archivo tiene datos
         distintos a los actuales. El chequeo de cambios se hace hasheando el archivo entero
         Args:
-            file_url (str)
             distribution_model (Distribution)
         """
+        file_url = distribution_model.download_url
+        if not file_url:
+            return False
         if self.read_local:  # Usado en debug y testing
             with open(file_url) as f:
                 data_hash = hashlib.sha512(f.read().encode('utf-8')).hexdigest()
-
             distribution_model.data_file = File(open(file_url))
 
         else:
-            request = requests.get(file_url, stream=True)
+            user_agent = getattr(settings, 'DATAJSON_AR_USER_AGENT', 'aUserAgent')
+            headers = {'User-Agent': user_agent}
+            request = requests.get(file_url, headers=headers, stream=True)
             request.raise_for_status()  # Excepción si es inválido
 
             lf = NamedTemporaryFile()
