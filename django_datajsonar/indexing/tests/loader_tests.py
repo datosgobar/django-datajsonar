@@ -7,9 +7,9 @@ from django.test import TestCase
 from pydatajson import DataJson
 
 try:
-    from mock import MagicMock
+    from mock import MagicMock, patch
 except ImportError:
-    from unittest.mock import MagicMock
+    from unittest.mock import MagicMock, patch
 
 
 from django_datajsonar.models import Catalog, Dataset, Distribution, Field
@@ -160,12 +160,14 @@ class DatabaseLoaderTests(TestCase):
         # Pero igualmente crea los fields
         self.assertEqual(4, Field.objects.filter(distribution=invalid_distribution).count())
 
-    def test_loader_downloads_resource_if_full_run(self):
+    @patch('django_datajsonar.indexing.database_loader.requests', autospec=True)
+    def test_loader_downloads_resource_if_full_run(self, request_mock):
+        request_mock.get.return_value = {'content': 'aFile'}
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
         self.task.indexing_mode = ReadDataJsonTask.COMPLETE_RUN
-        self.loader._read_file = MagicMock(return_value=True)
+        self.loader.read_local = False
         self.loader.run(catalog, self.catalog_id)
-        self.loader._read_file.assert_called()
+        request_mock.get.assert_called()
 
     def test_loader_doesnt_download_resource_if_metadata_only_run(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
