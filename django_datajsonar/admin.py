@@ -2,8 +2,11 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
+from django.utils.timezone import now
+from django.http import HttpResponse
 
 from .actions import process_node_register_file_action, confirm_delete
+from .utils import generate_csv
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask
 from .models import Catalog, Dataset, Distribution, Field
@@ -33,7 +36,7 @@ class DatasetAdmin(admin.ModelAdmin):
     list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
     readonly_fields = ('identifier', 'catalog')
-    actions = ['make_indexable', 'make_unindexable']
+    actions = ['make_indexable', 'make_unindexable', 'generate_config_file']
 
     list_filter = ('catalog__identifier', 'present', 'indexable')
 
@@ -44,6 +47,14 @@ class DatasetAdmin(admin.ModelAdmin):
     def make_indexable(self, _, queryset):
         queryset.update(indexable=True)
     make_indexable.short_description = 'Marcar como indexable'
+
+    def generate_config_file(self, _, queryset):
+        indexables = queryset.filter(indexable=True)
+        response = HttpResponse(content_type='text/csv')
+        filename = 'config_%s.csv' % now().strftime("%Y-%m-%d_%H:%M:%S")
+        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+        return generate_csv(indexables, response)
+    generate_config_file.short_description = 'Generar csv de configuración'
 
     def get_search_results(self, request, queryset, search_term):
         queryset, distinct = \
