@@ -27,13 +27,13 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         whitelist (bool): Marcar los datasets nuevos como indexables por defecto. Default False
     """
     catalog_model = Catalog.objects.filter(identifier=node.catalog_id)
-    try:
-        # Seteo inicial de variables a usar durante la indexación
-        if catalog_model:
-            catalog_model[0].updated = False
-            catalog_model[0].error = False
-            catalog_model[0].save()
+    # Seteo inicial de variables a usar durante la indexación
+    if catalog_model:
+        catalog_model[0].updated = False
+        catalog_model[0].error = False
+        catalog_model[0].save()
 
+    try:
         catalog = DataJson(node.catalog_url)
         catalog.generate_distribution_ids()
         node.catalog = json.dumps(catalog)
