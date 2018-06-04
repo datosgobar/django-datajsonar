@@ -26,22 +26,25 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         local o como URL. Default False
         whitelist (bool): Marcar los datasets nuevos como indexables por defecto. Default False
     """
-
+    catalog_model = Catalog.objects.filter(identifier=node.catalog_id)
     try:
+        # Seteo inicial de variables a usar durante la indexación
+        if catalog_model:
+            catalog_model[0].updated = False
+            catalog_model[0].error = False
+            catalog_model[0].save()
+
         catalog = DataJson(node.catalog_url)
         catalog.generate_distribution_ids()
         node.catalog = json.dumps(catalog)
         node.save()
     except Exception as e:
+        if catalog_model:
+            catalog_model[0].present = False
+            catalog_model[0].error = True
+            catalog_model[0].save()
         ReadDataJsonTask.info(task, READ_ERROR.format(node.catalog_id, e))
         return
-
-    # Seteo inicial de variables a usar durante la indexación
-    catalog_model = Catalog.objects.filter(identifier=node.catalog_id)
-    if catalog_model:
-        catalog_model[0].updated = False
-        catalog_model[0].error = False
-        catalog_model[0].save()
 
     reset_fields = {'present': False,
                     'updated': False,
