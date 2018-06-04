@@ -4,7 +4,7 @@ import os
 from django.test import TestCase
 from django.conf import settings
 
-from django_datajsonar.models import Distribution, Field
+from django_datajsonar.models import Catalog, Distribution, Field
 from django_datajsonar.models import ReadDataJsonTask, Node
 from django_datajsonar.indexing.catalog_reader import index_catalog
 
@@ -48,3 +48,17 @@ class ReaderTests(TestCase):
         self.assertEqual(Distribution.objects.count(), 2)
         # La distribution ID 5.1 que no es serie de tiempo no fue creada
         self.assertFalse(Distribution.objects.filter(identifier__in=["5.1"]))
+
+    def test_catalog_is_present_on_connection_success(self):
+        index_catalog(self.node, self.task, read_local=True, whitelist=True)
+        catalog_model = Catalog.objects.get(identifier=self.catalog_id)
+        self.assertFalse(catalog_model.error)
+        self.assertTrue(catalog_model.present)
+
+    def test_catalog_is_not_present_on_connection_failure(self):
+        index_catalog(self.node, self.task, read_local=True, whitelist=True)
+        self.node.catalog_url = 'invalid_url'
+        index_catalog(self.node, self.task, read_local=False, whitelist=True)
+        catalog_model = Catalog.objects.get(identifier=self.catalog_id)
+        self.assertTrue(catalog_model.error)
+        self.assertFalse(catalog_model.present)
