@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from django.utils.timezone import now
-from django.http import HttpResponse
+from django.conf.urls import url
 
+from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
-from .utils import generate_csv
+from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask
 from .models import Catalog, Dataset, Distribution, Field
@@ -50,11 +50,13 @@ class DatasetAdmin(admin.ModelAdmin):
 
     def generate_config_file(self, _, queryset):
         indexables = queryset.filter(indexable=True)
-        response = HttpResponse(content_type='text/csv')
-        filename = 'config_%s.csv' % now().strftime("%Y-%m-%d_%H:%M:%S")
-        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
-        return generate_csv(indexables, response)
+        return download_config_csv(indexables)
     generate_config_file.short_description = 'Generar csv de configuración'
+
+    def get_urls(self):
+        urls = super(DatasetAdmin, self).get_urls()
+        extra_urls = [url(r'^federacion-config\.csv/$', config_csv, name='config_csv'), ]
+        return extra_urls + urls
 
     def get_search_results(self, request, queryset, search_term):
         queryset, distinct = \
