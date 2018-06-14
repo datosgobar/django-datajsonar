@@ -115,7 +115,6 @@ class BulkIndexingTests(TestCase):
             idx_file.save()
             bulk_whitelist(idx_file.id)
 
-        self.client.login(username='test_admin', password='test_pass')
         response = self.client.get(reverse('admin:config_csv'))
         self.assertEqual(response.status_code, 200)
         content = response.content.decode('utf-8')
