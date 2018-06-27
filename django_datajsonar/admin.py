@@ -231,6 +231,12 @@ class DataJsonAdmin(AbstractTaskAdmin):
     model = ReadDataJsonTask
     task = read_datajson
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields + ('indexing_mode',)
+        else:
+            return self.readonly_fields
+
 
 class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
     def process_register_file(self, _, queryset):
