@@ -1,7 +1,7 @@
 #!coding=utf8
 from __future__ import unicode_literals
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.conf.urls import url
 
 from .views import config_csv
@@ -202,21 +202,34 @@ class NodeAdmin(admin.ModelAdmin):
                 confirm_delete(node, register_files)
 
 
-class DataJsonAdmin(admin.ModelAdmin):
+class AbstractTaskAdmin(admin.ModelAdmin):
     readonly_fields = ('status', 'created', 'finished', 'logs',)
     list_display = ('__unicode__', 'status')
 
-    def save_model(self, request, obj, form, change):
-        if ReadDataJsonTask.objects.filter(status=ReadDataJsonTask.RUNNING):
-            return  # Ya hay tarea corriendo, no ejecuto una nueva
-        super(DataJsonAdmin, self).save_model(request, obj, form, change)
-        read_datajson.delay(obj)  # Ejecuta indexación
+    # Clase del modelo asociado
+    model = None
 
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return self.readonly_fields + ('indexing_mode',)
-        else:
-            return self.readonly_fields
+    # Task (callable) a correr asincrónicamente. Por default recible solo una instancia
+    # del AbstractTask asociado a este admin, overridear save_model
+    # si se quiere otro comportamiento
+    task = None
+
+    def save_model(self, request, obj, form, change):
+        super(AbstractTaskAdmin, self).save_model(request, obj, form, change)
+        self.task.delay(obj)  # Ejecuta callable
+
+    def add_view(self, request, form_url='', extra_context=None):
+        # Bloqueo la creación de nuevos modelos cuando está corriendo la tarea
+        if self.model.objects.filter(status=self.model.RUNNING):
+            messages.error(request, "Ya está corriendo una indexación")
+            return super(AbstractTaskAdmin, self).changelist_view(request, None)
+
+        return super(AbstractTaskAdmin, self).add_view(request, form_url, extra_context)
+
+
+class DataJsonAdmin(AbstractTaskAdmin):
+    model = ReadDataJsonTask
+    task = read_datajson
 
 
 class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
