@@ -1,6 +1,7 @@
 ## Uso
 
-###Carga de Nodos
+
+### Carga de Nodos
 
 Despues de iniciar sesion como Administrador, debemos cargar un nuevo `Node Register file`.
 Esta pagina se encuentra en la ruta `/admin/django_datajsonar/noderegisterfile/`.
@@ -25,16 +26,16 @@ transporte-bis:
 Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como
 la siguiente imagen:
 
-![Node register file list](docs/images/node_register_file.png)
+![Node register file list](images/node_register_file.png)
 
 Luego seleccionamos la instancia y usamos la accion "Process node file", como se muestra en la imagen:
 
-![Process Node register file list](docs/images/process_node_register_file.png)
+![Process Node register file list](images/process_node_register_file.png)
 
 Eso procesara el archivo (puede tardar un poco), y al terminar veremos los nodos detectados en
 `/admin/django_datajsonar/node/`, algo parecido a
 
-![Nodes list](docs/images/nodes_list.png)
+![Nodes list](images/nodes_list.png)
 
 
 ### Lectura de catalogos
@@ -45,7 +46,7 @@ Esta instancia no requiere ningun parametro, ya que leera los datos necesarios d
 del proceso anterior.
 Esta instancia ira registrando los "logs" y "resultados" del proceso. Podremos ver algo como:
 
-![Read DataJson Task](docs/images/read_datajson_task.png)
+![Read DataJson Task](images/read_datajson_task.png)
 
 ### Cierre de la tarea
 
@@ -61,7 +62,7 @@ Finalmente en **interval** ponemos `10` y en **interval unit** `minutes`.
 Luego de guardar la instancia deberiamos tener algo como:
 
 ![Close Read DataJson Task]()
-![Close Read DataJson Task](docs/images/close_read_datajson_task.png)
+![Close Read DataJson Task](images/close_read_datajson_task.png)
 
 
 ### Lectura periodica
@@ -78,7 +79,7 @@ En los campos **fecha** y **hora** de **scheduled time** hacemos click en "Hoy" 
 Finalmente en **interval** ponemos `1` y en **interval unit** `days`.
 Luego de guardar la instancia deberiamos tener algo como:
 
-![New Read DataJson Task](docs/images/new_read_datajson_task.png)
+![New Read DataJson Task](images/new_read_datajson_task.png)
 
 Una alternativa a este método es usar un management command. Los comandos `schedule_indexation` y
 `schedule_task_finisher` permiten planificar trabajos que se ejecutarán de manera periódica. Es posible definir un
@@ -121,7 +122,7 @@ Este archivo tiene un registro de los datasets _indexables_. Ese un archivo de e
 tiene un aspecto como el siguiente:
 
 
-```csv
+```
 catalog_id,dataset_identifier
 sspm,399
 sspm,330
@@ -136,11 +137,11 @@ como indexable.
 Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como
 la siguiente imagen:
 
-![Node register file list](docs/images/dataset_indexing_file.png)
+![Node register file list](images/dataset_indexing_file.png)
 
 Luego seleccionamos la instancia y usamos la accion "Process node file", como se muestra en la imagen:
 
-![Process Node register file list](docs/images/process_indexing_file.png)
+![Process Node register file list](images/process_indexing_file.png)
 
 Eso procesa el archivo (puede tardar un poco), y al terminar veremos los datasets marcados como indexables en
 `/admin/django_datajsonar/node/`.
