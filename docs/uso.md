@@ -1,45 +1,3 @@
-# django-datajsonar
-
-## Instalación
-
-Los requerimientos del proyecto se encuentran en la carpeta requirements. Se pueden instalar con
-`pip install -r requirements/<tipo de instancia>`. `django-datajsonar` usa `django-rq` y `django-rq-scheduler`. Hay que
-instalar las aplicaciones en los `settings`:
-```
-INSTALLED_APPS=[
-...
-'scheduler',
-'django-rq',
-'django_datajsonar'
-...
-]
-```
-
-Además usa una cola llamada `indexing`, para agregarla es necesario definir en los `settings`:
-```
-RQ_QUEUES = {
-    'indexing': {
-        'HOST': <REDIS_HOST>,
-        'PORT': <REDIS_PORT>,
-        'DB': <REDIS_DB>,
-    },
-}
-``` 
-
-Finalmente es necesario definir la lista de campos que deseamos ignorar de la red de nodos en los `settings``:
-
-```python
-CATALOG_BLACKLIST = []
-
-DATASET_BLACKLIST = []
-
-DISTRIBUTION_BLACKLIST = []
-
-FIELD_BLACKLIST = []
-```
-
-Los campos definidos en esas listas no se cargan a la hora de generar los modelos.
-
 ## Uso
 
 ###Carga de Nodos
@@ -64,7 +22,7 @@ transporte-bis:
 # Mas nodos...
 ```
 
-Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como 
+Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como
 la siguiente imagen:
 
 ![Node register file list](docs/images/node_register_file.png)
@@ -106,7 +64,7 @@ Luego de guardar la instancia deberiamos tener algo como:
 ![Close Read DataJson Task](docs/images/close_read_datajson_task.png)
 
 
-### Lectura periodica 
+### Lectura periodica
 
 Para que la lectura de los catalogos se ejecute periodicamente, debemos crear un `RepeatableJob`.
 
@@ -132,9 +90,9 @@ tareas que iteran sobre los nodos indexables de la red de catálogos y sobre sus
 metadata en los modelos dependiendo del caso que corresponda. En el caso de `schedule_task_finisher`, por default corre
 `close_read_datajson_task`. Esta función marca como finalizadas los `ReadDataJsonTask` una vez que terminan para poder
 crear nuevas tareas. En conjunto, estos trabajos permiten crear, poblar y actualizar los modelos indexables de manera
-periódica y automática. 
+periódica y automática.
 
-Para ejecutar el comando hay que llamar: 
+Para ejecutar el comando hay que llamar:
 
 `$ python manage.py [schedule_indexation|schedule_task_finisher] NAME -t HOUR MINUTE -i UNIT [weeks|days|hours|minutes] -c CALLABLE`
 
@@ -175,7 +133,7 @@ acumar,cb351aa5-731b-458b-8227-a0c5b828356f
 La primera columna tiene el identificador del catalogo, y la segunda el identificador del dataset que se desea marcar
 como indexable.
 
-Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como 
+Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como
 la siguiente imagen:
 
 ![Node register file list](docs/images/dataset_indexing_file.png)
