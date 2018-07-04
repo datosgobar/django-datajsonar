@@ -1,48 +1,7 @@
-# django-datajsonar
-
-## Instalación
-
-Los requerimientos del proyecto se encuentran en la carpeta requirements. Se pueden instalar con
-`pip install -r requirements/<tipo de instancia>`. `django-datajsonar` usa `django-rq` y `django-rq-scheduler`. Hay que
-instalar las aplicaciones en los `settings`:
-```
-INSTALLED_APPS=[
-...
-'scheduler',
-'django-rq',
-'django_datajsonar'
-...
-]
-```
-
-Además usa una cola llamada `indexing`, para agregarla es necesario definir en los `settings`:
-```
-RQ_QUEUES = {
-    'indexing': {
-        'HOST': <REDIS_HOST>,
-        'PORT': <REDIS_PORT>,
-        'DB': <REDIS_DB>,
-    },
-}
-``` 
-
-Finalmente es necesario definir la lista de campos que deseamos ignorar de la red de nodos en los `settings``:
-
-```python
-CATALOG_BLACKLIST = []
-
-DATASET_BLACKLIST = []
-
-DISTRIBUTION_BLACKLIST = []
-
-FIELD_BLACKLIST = []
-```
-
-Los campos definidos en esas listas no se cargan a la hora de generar los modelos.
-
 ## Uso
 
-###Carga de Nodos
+
+### Carga de Nodos
 
 Despues de iniciar sesion como Administrador, debemos cargar un nuevo `Node Register file`.
 Esta pagina se encuentra en la ruta `/admin/django_datajsonar/noderegisterfile/`.
@@ -64,19 +23,19 @@ transporte-bis:
 # Mas nodos...
 ```
 
-Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como 
+Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como
 la siguiente imagen:
 
-![Node register file list](docs/images/node_register_file.png)
+![Node register file list](images/node_register_file.png)
 
 Luego seleccionamos la instancia y usamos la accion "Process node file", como se muestra en la imagen:
 
-![Process Node register file list](docs/images/process_node_register_file.png)
+![Process Node register file list](images/process_node_register_file.png)
 
 Eso procesara el archivo (puede tardar un poco), y al terminar veremos los nodos detectados en
 `/admin/django_datajsonar/node/`, algo parecido a
 
-![Nodes list](docs/images/nodes_list.png)
+![Nodes list](images/nodes_list.png)
 
 
 ### Lectura de catalogos
@@ -87,7 +46,7 @@ Esta instancia no requiere ningun parametro, ya que leera los datos necesarios d
 del proceso anterior.
 Esta instancia ira registrando los "logs" y "resultados" del proceso. Podremos ver algo como:
 
-![Read DataJson Task](docs/images/read_datajson_task.png)
+![Read DataJson Task](images/read_datajson_task.png)
 
 ### Cierre de la tarea
 
@@ -103,10 +62,10 @@ Finalmente en **interval** ponemos `10` y en **interval unit** `minutes`.
 Luego de guardar la instancia deberiamos tener algo como:
 
 ![Close Read DataJson Task]()
-![Close Read DataJson Task](docs/images/close_read_datajson_task.png)
+![Close Read DataJson Task](images/close_read_datajson_task.png)
 
 
-### Lectura periodica 
+### Lectura periodica
 
 Para que la lectura de los catalogos se ejecute periodicamente, debemos crear un `RepeatableJob`.
 
@@ -120,7 +79,7 @@ En los campos **fecha** y **hora** de **scheduled time** hacemos click en "Hoy" 
 Finalmente en **interval** ponemos `1` y en **interval unit** `days`.
 Luego de guardar la instancia deberiamos tener algo como:
 
-![New Read DataJson Task](docs/images/new_read_datajson_task.png)
+![New Read DataJson Task](images/new_read_datajson_task.png)
 
 Una alternativa a este método es usar un management command. Los comandos `schedule_indexation` y
 `schedule_task_finisher` permiten planificar trabajos que se ejecutarán de manera periódica. Es posible definir un
@@ -132,9 +91,9 @@ tareas que iteran sobre los nodos indexables de la red de catálogos y sobre sus
 metadata en los modelos dependiendo del caso que corresponda. En el caso de `schedule_task_finisher`, por default corre
 `close_read_datajson_task`. Esta función marca como finalizadas los `ReadDataJsonTask` una vez que terminan para poder
 crear nuevas tareas. En conjunto, estos trabajos permiten crear, poblar y actualizar los modelos indexables de manera
-periódica y automática. 
+periódica y automática.
 
-Para ejecutar el comando hay que llamar: 
+Para ejecutar el comando hay que llamar:
 
 `$ python manage.py [schedule_indexation|schedule_task_finisher] NAME -t HOUR MINUTE -i UNIT [weeks|days|hours|minutes] -c CALLABLE`
 
@@ -163,7 +122,7 @@ Este archivo tiene un registro de los datasets _indexables_. Ese un archivo de e
 tiene un aspecto como el siguiente:
 
 
-```csv
+```
 catalog_id,dataset_identifier
 sspm,399
 sspm,330
@@ -175,14 +134,14 @@ acumar,cb351aa5-731b-458b-8227-a0c5b828356f
 La primera columna tiene el identificador del catalogo, y la segunda el identificador del dataset que se desea marcar
 como indexable.
 
-Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como 
+Luego de que creamos la nueva instancia, volvemos a la pagina del listado y deberiamos ver algo como
 la siguiente imagen:
 
-![Node register file list](docs/images/dataset_indexing_file.png)
+![Node register file list](images/dataset_indexing_file.png)
 
 Luego seleccionamos la instancia y usamos la accion "Process node file", como se muestra en la imagen:
 
-![Process Node register file list](docs/images/process_indexing_file.png)
+![Process Node register file list](images/process_indexing_file.png)
 
 Eso procesa el archivo (puede tardar un poco), y al terminar veremos los datasets marcados como indexables en
 `/admin/django_datajsonar/node/`.
