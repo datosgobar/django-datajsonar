@@ -1,10 +1,10 @@
-.. django-datajsonar documentation master file, created by
-   sphinx-quickstart on Tue Jul  3 10:27:26 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. archivo maestro de la documentación de django-datajsonar, creado por
+   sphinx-quickstart el Mar 3 Jul 10:27:26 2018.
+   Podes adaptar este archivo completamente a gusto, pero por lo menos debería
+   contener la directiva raíz `toctree`.
 
-Welcome to django-datajsonar's documentation!
-=============================================
+¡Bienvenido a la documentación de django-datajsonar!
+====================================================
 
 .. toctree::
    :maxdepth: 2
