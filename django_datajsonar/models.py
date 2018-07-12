@@ -38,6 +38,17 @@ class Catalog(models.Model):
 
 
 class Dataset(models.Model):
+
+    REVIEWED = "REVIEWED"
+    ON_REVISION = "ON_REVISION"
+    NOT_REVIEWED = "NOT_REVIEWED"
+
+    REVIEWED_STATUS = (
+        (REVIEWED, "Revisado"),
+        (ON_REVISION, "En revisión"),
+        (NOT_REVIEWED, "No revisado"),
+    )
+
     title = models.CharField(max_length=200)
     identifier = models.CharField(max_length=200)
     metadata = models.TextField()
@@ -47,6 +58,7 @@ class Dataset(models.Model):
     updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
     new = models.BooleanField(default=False)
+    reviewed = models.CharField(max_length=20, choices=REVIEWED_STATUS, default=NOT_REVIEWED)
 
     enhanced_meta = GenericRelation(Metadata)
 
