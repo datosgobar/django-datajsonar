@@ -175,3 +175,42 @@ class DatabaseLoaderTests(TestCase):
         self.loader._read_file = MagicMock(return_value=True)
         self.loader.run(catalog, self.catalog_id)
         self.loader._read_file.assert_not_called()
+
+    def test_not_reviewed_dataset_stays_the_same_on_update(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.task.indexing_mode = ReadDataJsonTask.METADATA_ONLY
+        self.loader.run(catalog, self.catalog_id)
+        dataset = Dataset.objects.get(identifier='99db6631-d1c9-470b-a73e-c62daa32c777')
+        dataset.reviewed = dataset.NOT_REVIEWED
+        dataset.save()
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data_changed.json'))
+        self.loader.run(catalog, self.catalog_id)
+        dataset.refresh_from_db()
+        self.assertTrue(dataset.updated)
+        self.assertEqual(Dataset.NOT_REVIEWED, dataset.reviewed)
+
+    def test_reviewed_dataset_stays_the_same_on_update(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.task.indexing_mode = ReadDataJsonTask.METADATA_ONLY
+        self.loader.run(catalog, self.catalog_id)
+        dataset = Dataset.objects.get(identifier='99db6631-d1c9-470b-a73e-c62daa32c777')
+        dataset.reviewed = dataset.REVIEWED
+        dataset.save()
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data_changed.json'))
+        self.loader.run(catalog, self.catalog_id)
+        dataset.refresh_from_db()
+        self.assertTrue(dataset.updated)
+        self.assertEqual(Dataset.REVIEWED, dataset.reviewed)
+
+    def test_dataset_on_revision_changes_to_not_reviewed_on_update(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.task.indexing_mode = ReadDataJsonTask.METADATA_ONLY
+        self.loader.run(catalog, self.catalog_id)
+        dataset = Dataset.objects.get(identifier='99db6631-d1c9-470b-a73e-c62daa32c777')
+        dataset.reviewed = dataset.ON_REVISION
+        dataset.save()
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data_changed.json'))
+        self.loader.run(catalog, self.catalog_id)
+        dataset.refresh_from_db()
+        self.assertTrue(dataset.updated)
+        self.assertEqual(Dataset.NOT_REVIEWED, dataset.reviewed)
