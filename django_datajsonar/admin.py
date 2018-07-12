@@ -33,12 +33,25 @@ class CatalogAdmin(admin.ModelAdmin):
 
 
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable')
+    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable', 'reviewed')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
     readonly_fields = ('identifier', 'catalog')
-    actions = ['make_indexable', 'make_unindexable', 'generate_config_file']
+    actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
+               'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
 
-    list_filter = ('catalog__identifier', 'present', 'indexable')
+    list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
+
+    def mark_as_reviewed(self, _, queryset):
+        queryset.update(reviewed=Dataset.REVIEWED)
+    mark_as_reviewed.short_description = 'Marcar como revisado'
+
+    def mark_on_revision(self, _, queryset):
+        queryset.update(reviewed=Dataset.ON_REVISION)
+    mark_on_revision.short_description = 'Marcar en revisión'
+
+    def mark_as_not_reviewed(self, _, queryset):
+        queryset.update(reviewed=Dataset.NOT_REVIEWED)
+    mark_as_not_reviewed.short_description = 'Marcar como no revisado'
 
     def make_unindexable(self, _, queryset):
         queryset.update(indexable=False)
