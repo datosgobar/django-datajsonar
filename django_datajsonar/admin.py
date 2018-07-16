@@ -3,13 +3,30 @@ from __future__ import unicode_literals
 
 from django.contrib import admin, messages
 from django.conf.urls import url
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
 from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
-from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask
+from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata
 from .models import Catalog, Dataset, Distribution, Field
+
+
+class EnhancedMetaAdmin(GenericTabularInline):
+    class Media:
+        css = {
+            'all': ('django_datajsonar/css/hide_title.css', )
+        }
+
+    readonly_fields = ('key', 'value')
+    model = Metadata
+    extra = 0
+    can_delete = False
+
+    def has_add_permission(self, request):
+        # Borra el botoncito de add new
+        return False
 
 
 class CatalogAdmin(admin.ModelAdmin):
@@ -17,6 +34,10 @@ class CatalogAdmin(admin.ModelAdmin):
     search_fields = ('identifier', 'present', 'updated')
     readonly_fields = ('identifier',)
     list_filter = ('present', 'updated')
+
+    inlines = (
+        EnhancedMetaAdmin,
+    )
 
     def get_search_results(self, request, queryset, search_term):
         queryset, distinct = \
@@ -39,6 +60,10 @@ class DatasetAdmin(admin.ModelAdmin):
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file']
 
     list_filter = ('catalog__identifier', 'present', 'indexable')
+
+    inlines = (
+        EnhancedMetaAdmin,
+    )
 
     def make_unindexable(self, _, queryset):
         queryset.update(indexable=False)
@@ -77,6 +102,10 @@ class DistributionAdmin(admin.ModelAdmin):
     search_fields = ('identifier', 'dataset__identifier', 'dataset__catalog__identifier')
     list_filter = ('dataset__catalog__identifier', )
 
+    inlines = (
+        EnhancedMetaAdmin,
+    )
+
     def get_dataset_title(self, obj):
         return obj.dataset.title
     get_dataset_title.short_description = 'Dataset'
@@ -110,6 +139,10 @@ class FieldAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'distribution__dataset__catalog__identifier',
+    )
+
+    inlines = (
+        EnhancedMetaAdmin,
     )
 
     def get_catalog_id(self, obj):
