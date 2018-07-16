@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.contrib import admin, messages
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
-from django.contrib.admin.filters import SimpleListFilter
 
 from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
@@ -12,24 +11,6 @@ from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata
 from .models import Catalog, Dataset, Distribution, Field
-
-
-class MetaFilter(SimpleListFilter):
-
-    title = 'entidad'
-
-    parameter_name = 'metadata'
-
-    def lookups(self, request, model_admin):
-        return (
-            ('catalog', 'Catálogo'),
-            ('dataset', 'Dataset'),
-        )
-
-    def queryset(self, request, queryset):
-        if self.value():
-            ids = [x.pk for x in queryset if x.content_type.name == self.value()]
-            return queryset.filter(pk__in=ids)
 
 
 class EnhancedMetaAdmin(GenericTabularInline):
