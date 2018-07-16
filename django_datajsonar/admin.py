@@ -54,6 +54,10 @@ class CatalogAdmin(admin.ModelAdmin):
     readonly_fields = ('identifier',)
     list_filter = ('present', 'updated')
 
+    inlines = (
+        EnhancedMetaAdmin,
+    )
+
     def get_search_results(self, request, queryset, search_term):
         queryset, distinct = \
             super(CatalogAdmin, self).get_search_results(request, queryset, search_term)
@@ -75,6 +79,10 @@ class DatasetAdmin(admin.ModelAdmin):
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file']
 
     list_filter = ('catalog__identifier', 'present', 'indexable')
+
+    inlines = (
+        EnhancedMetaAdmin,
+    )
 
     def make_unindexable(self, _, queryset):
         queryset.update(indexable=False)
@@ -112,6 +120,10 @@ class DistributionAdmin(admin.ModelAdmin):
     list_display = ('identifier', 'title', 'get_dataset_title', 'get_catalog_id', 'last_updated', 'present', 'updated')
     search_fields = ('identifier', 'dataset__identifier', 'dataset__catalog__identifier')
     list_filter = ('dataset__catalog__identifier', )
+
+    inlines = (
+        EnhancedMetaAdmin,
+    )
 
     def get_dataset_title(self, obj):
         return obj.dataset.title
