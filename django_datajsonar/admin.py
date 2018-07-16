@@ -33,6 +33,11 @@ class MetaFilter(SimpleListFilter):
 
 
 class EnhancedMetaAdmin(GenericTabularInline):
+    class Media:
+        css = {
+            'all': ('django_datajsonar/css/hide_title.css', )
+        }
+
     readonly_fields = ('key', 'value')
     model = Metadata
     extra = 0
