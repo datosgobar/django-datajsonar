@@ -1,6 +1,7 @@
 #!coding=utf8
 from __future__ import unicode_literals
 
+from django import forms
 from django.contrib import admin, messages
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
@@ -19,10 +20,19 @@ class EnhancedMetaAdmin(GenericTabularInline):
             'all': ('django_datajsonar/css/hide_title.css', )
         }
 
-    readonly_fields = ('key', 'value')
     model = Metadata
     extra = 0
     can_delete = False
+
+    class Form(forms.ModelForm):
+        class Meta:
+            model = Metadata
+            fields = ['key', 'value']
+
+        key = forms.CharField()
+        value = forms.CharField()
+
+    form = Form
 
     def has_add_permission(self, request):
         # Borra el botoncito de add new
