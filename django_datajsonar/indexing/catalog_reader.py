@@ -3,7 +3,6 @@ from __future__ import division
 
 import json
 from django.conf import settings
-from django.db.models import Q
 from django_rq import job
 from pydatajson import DataJson
 

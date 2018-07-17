@@ -105,6 +105,11 @@ class DatabaseLoader(object):
                 continue
 
         update_model(created, trimmed_dataset, dataset_model, updated_children=updated_distributions)
+        # Si se actualizó y está en revisión lo marco como no revisado
+        if dataset_model.updated and dataset_model.reviewed == Dataset.ON_REVISION:
+            dataset_model.reviewed = Dataset.NOT_REVIEWED
+            dataset_model.save()
+
         return dataset_model
 
     def _distribution_model(self, distribution, dataset_model):
