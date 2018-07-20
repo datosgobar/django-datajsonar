@@ -181,6 +181,7 @@ class Node(models.Model):
     catalog_url = models.URLField()
     indexable = models.BooleanField()
     catalog = models.TextField(default='{}')
+    admins = models.ManyToManyField(User)
 
     def __unicode__(self):
         return self.catalog_id
