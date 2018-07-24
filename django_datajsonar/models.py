@@ -62,6 +62,7 @@ class Dataset(models.Model):
     error = models.BooleanField(default=False)
     new = models.BooleanField(default=False)
     reviewed = models.CharField(max_length=20, choices=REVIEWED_STATUS, default=NOT_REVIEWED)
+    last_reviewed = models.DateField(null=True, blank=True, default=None)
 
     enhanced_meta = GenericRelation(Metadata)
 
@@ -181,7 +182,7 @@ class Node(models.Model):
     catalog_url = models.URLField()
     indexable = models.BooleanField()
     catalog = models.TextField(default='{}')
-    admins = models.ManyToManyField(User)
+    admins = models.ManyToManyField(User, blank=True)
 
     def __unicode__(self):
         return self.catalog_id
