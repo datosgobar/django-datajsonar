@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.contrib import admin, messages
+from django.utils import timezone
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
 
@@ -64,24 +65,24 @@ class CatalogAdmin(admin.ModelAdmin):
 
 
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable', 'reviewed')
+    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
-    readonly_fields = ('identifier', 'catalog')
+    readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed')
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
                'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
 
     list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
 
     def mark_as_reviewed(self, _, queryset):
-        queryset.update(reviewed=Dataset.REVIEWED)
+        queryset.update(reviewed=Dataset.REVIEWED, last_reviewed=timezone.localdate())
     mark_as_reviewed.short_description = 'Marcar como revisado'
 
     def mark_on_revision(self, _, queryset):
-        queryset.update(reviewed=Dataset.ON_REVISION)
+        queryset.update(reviewed=Dataset.ON_REVISION, last_reviewed=timezone.localdate())
     mark_on_revision.short_description = 'Marcar en revisión'
 
     def mark_as_not_reviewed(self, _, queryset):
-        queryset.update(reviewed=Dataset.NOT_REVIEWED)
+        queryset.update(reviewed=Dataset.NOT_REVIEWED, last_reviewed=timezone.localdate())
     mark_as_not_reviewed.short_description = 'Marcar como no revisado'
 
     inlines = (
