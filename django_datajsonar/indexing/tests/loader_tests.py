@@ -1,6 +1,7 @@
 #! coding: utf-8
 import json
 import os
+import shutil
 
 from django.conf import settings
 from django.test import TestCase
@@ -214,3 +215,24 @@ class DatabaseLoaderTests(TestCase):
         dataset.refresh_from_db()
         self.assertTrue(dataset.updated)
         self.assertEqual(Dataset.NOT_REVIEWED, dataset.reviewed)
+
+    def test_set_distribution_updated_on_data_change(self):
+        backup_file = 'backup'
+        distribution_id = '212.1'  # Sacado del catálogo full_ts_data.json
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+
+        # Actualizo el csv de datos
+        url = catalog.get_distribution(identifier=distribution_id)['downloadURL']
+        shutil.copy(url, backup_file)
+        shutil.copy(os.path.join(SAMPLES_DIR, 'one_distribution_data_changed.csv'), url)
+
+        Distribution.objects.update(updated=False)
+        Field.objects.update(updated=False)
+
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+
+        shutil.copy(backup_file, url)
+        os.remove(backup_file)
+        self.assertEqual(True, Distribution.objects.get(identifier=distribution_id).updated)
