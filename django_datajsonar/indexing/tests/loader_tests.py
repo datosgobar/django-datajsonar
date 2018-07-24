@@ -235,4 +235,7 @@ class DatabaseLoaderTests(TestCase):
 
         shutil.copy(backup_file, url)
         os.remove(backup_file)
-        self.assertEqual(True, Distribution.objects.get(identifier=distribution_id).updated)
+        distribution = Distribution.objects.get(identifier=distribution_id)
+        self.assertEqual(True, distribution.updated)
+        for updated in distribution.field_set.values_list('updated', flat=True):
+            self.assertEqual(True, updated)
