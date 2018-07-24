@@ -198,11 +198,13 @@ class DatabaseLoader(object):
             distribution_model.data_file = File(lf)
             data_hash = hashlib.sha512(request.content).hexdigest()
 
-        if distribution_model.data_hash != data_hash:
+        changed = distribution_model.data_hash != data_hash
+        if changed:
             distribution_model.data_hash = data_hash
             distribution_model.last_updated = timezone.now()
+            distribution_model.field_set.update(updated=True)
 
-        return distribution_model.data_hash != data_hash
+        return changed
 
     @staticmethod
     def _remove_blacklisted_fields(metadata, blacklist):
