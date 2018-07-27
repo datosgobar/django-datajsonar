@@ -64,6 +64,8 @@ class Dataset(models.Model):
     reviewed = models.CharField(max_length=20, choices=REVIEWED_STATUS, default=NOT_REVIEWED)
     last_reviewed = models.DateField(null=True, blank=True, default=None)
 
+    themes = models.TextField(blank=True, null=True)
+
     enhanced_meta = GenericRelation(Metadata)
 
     def __unicode__(self):

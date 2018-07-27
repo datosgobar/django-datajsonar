@@ -22,10 +22,10 @@ class DatabaseLoader(object):
 
     def __init__(self, task, read_local=False, default_whitelist=False):
         self.task = task
-        self.catalog_model = None
-        self.catalog_id = None
         self.read_local = read_local
         self.default_whitelist = default_whitelist
+
+        self.theme_taxonomy = {}
 
     def run(self, catalog, catalog_id):
         """Guarda la metadata del catalogo pasado por parametro
@@ -36,9 +36,9 @@ class DatabaseLoader(object):
         Returns:
             Catalog: el modelo de catalogo creado o actualizado
         """
-        self.catalog_id = catalog_id
-        self.catalog_model = self._catalog_model(catalog, catalog_id)
-        return self.catalog_model
+        self.init_theme(catalog)
+        catalog_model = self._catalog_model(catalog, catalog_id)
+        return catalog_model
 
     def _catalog_model(self, catalog, catalog_id):
         """Crea o actualiza el catalog model con el título pedido a partir
@@ -86,6 +86,7 @@ class DatabaseLoader(object):
             identifier=identifier,
             defaults={'title': trimmed_dataset.get('title', 'No Title')}
         )
+        self.assign_theme_fields(dataset, dataset_model)
         updated_distributions = False
         distributions = dataset.get('distribution', [])
         if self.default_whitelist:
@@ -222,3 +223,19 @@ class DatabaseLoader(object):
         trimmed_dict = self._remove_blacklisted_fields(
             trimmed_dict, blacklist)
         return trimmed_dict
+
+    def init_theme(self, catalog):
+        self.theme_taxonomy = catalog.get('themeTaxonomy', {})
+
+    def assign_theme_fields(self, dataset, dataset_model):
+        theme_ids = dataset.get('theme', [])
+
+        if not theme_ids:
+            return
+
+        themes = []
+        for theme in self.theme_taxonomy:
+            if theme.get('id') in theme_ids:
+                themes.append(theme)
+
+        dataset_model.themes = json.dumps(themes)
