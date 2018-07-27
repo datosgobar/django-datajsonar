@@ -239,3 +239,11 @@ class DatabaseLoaderTests(TestCase):
         self.assertEqual(True, distribution.updated)
         for updated in distribution.field_set.values_list('updated', flat=True):
             self.assertEqual(True, updated)
+
+    def test_dataset_theme(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+
+        themes = json.loads(Dataset.objects.first().themes)
+        self.assertEqual(len(themes), 3)
+        self.assertTrue(isinstance(themes, list))
