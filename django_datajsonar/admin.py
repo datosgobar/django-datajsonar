@@ -3,11 +3,12 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.contrib import admin, messages
+
 from django.utils import timezone
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
 
-from .views import config_csv
+from .views import config_csv, schedule_task
 from .actions import process_node_register_file_action, confirm_delete
 from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
@@ -263,6 +264,8 @@ class AbstractTaskAdmin(admin.ModelAdmin):
     readonly_fields = ('status', 'created', 'finished', 'logs',)
     list_display = ('__unicode__', 'status')
 
+    change_list_template = 'change_list.html'
+
     # Clase del modelo asociado
     model = None
 
@@ -283,10 +286,18 @@ class AbstractTaskAdmin(admin.ModelAdmin):
 
         return super(AbstractTaskAdmin, self).add_view(request, form_url, extra_context)
 
+    def get_urls(self):
+        urls = super(AbstractTaskAdmin, self).get_urls()
+        extra_urls = [url(r'^schedule_task$', schedule_task,
+                          {'callable_str': self.callable_str},
+                          name='schedule_task'), ]
+        return extra_urls + urls
+
 
 class DataJsonAdmin(AbstractTaskAdmin):
     model = ReadDataJsonTask
     task = read_datajson
+    callable_str = 'django_datajsonar.tasks.read_datajson'
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
