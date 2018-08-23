@@ -183,3 +183,22 @@ FIELD_BLACKLIST = [
     "scrapingIdentifierCell",
     "scrapingDataStartCell",
 ]
+
+DEFAULT_TASKS = [
+    {
+        'name': 'Read Datajson Task',
+        'callable': 'django_datajsonar.tasks.schedule_new_read_datajson_task',
+        'start_hour': 3,
+        'start_minute': 0,
+        'interval': 6,
+        'interval_unit': 'hours'
+    },
+    {
+        'name': 'Close Indexing Task',
+        'callable': 'django_datajsonar.indexing.tasks.close_read_datajson_task',
+        'start_hour': 3,
+        'start_minute': 15,
+        'interval': 30,
+        'interval_unit': 'minutes'
+    }
+]
