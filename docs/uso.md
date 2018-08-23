@@ -145,3 +145,30 @@ Luego seleccionamos la instancia y usamos la accion "Process node file", como se
 
 Eso procesa el archivo (puede tardar un poco), y al terminar veremos los datasets marcados como indexables en
 `/admin/django_datajsonar/node/`.
+
+### Definición de tareas default
+
+Es posible definir tareas default en los settings de la aplicación. En el archivo de settings definir la lista:
+
+```
+DEFAULT_TASKS = [
+
+    ...
+
+    {
+        'name': <nombre>,
+        'callable': <callable del metodo a ejecutar>,
+        'start_hour': <hora de inicio>,
+        'start_minute': <minuto de inicio>,
+        'interval': <intervalo con el cual se repite el job>,
+        'interval_unit': <minutes|hours|days|weeks>,
+    },
+    
+    ...
+}
+``` 
+
+Cada diccionario define una tarea a ser programada por `django-rq-scheduling`. LlamaR al comando 
+`python manage.py schedule_default_tasks` crea los repeatable jobs ahí definidos. (Nota: en caso de 
+tener una tarea con un nombre ya definido en los defaults, llamar el comando actualizará esta tarea
+con los valores definidos en `DEFAULT_TASKS`)
