@@ -23,6 +23,8 @@ def schedule_task(request, callable_str=None):
             return redirect('admin:scheduler_repeatablejob_changelist')
         else:
             display_errors = True
-    form.fields['callable'].widget.attrs['readonly'] = True
+
+    if callable_str is not None:
+        form.fields['callable'].widget.attrs['readonly'] = True
     form.fields['queue'].widget.attrs['readonly'] = True
     return render(request, 'scheduler.html', {'form': form, 'display_errors': display_errors})

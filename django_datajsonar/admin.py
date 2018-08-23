@@ -273,6 +273,7 @@ class AbstractTaskAdmin(admin.ModelAdmin):
     # del AbstractTask asociado a este admin, overridear save_model
     # si se quiere otro comportamiento
     task = None
+    callable_str = None
 
     def save_model(self, request, obj, form, change):
         super(AbstractTaskAdmin, self).save_model(request, obj, form, change)
@@ -281,7 +282,7 @@ class AbstractTaskAdmin(admin.ModelAdmin):
     def add_view(self, request, form_url='', extra_context=None):
         # Bloqueo la creación de nuevos modelos cuando está corriendo la tarea
         if self.model.objects.filter(status=self.model.RUNNING):
-            messages.error(request, "Ya está corriendo una indexación")
+            messages.error(request, "Ya está corriendo una tarea")
             return super(AbstractTaskAdmin, self).changelist_view(request, None)
 
         return super(AbstractTaskAdmin, self).add_view(request, form_url, extra_context)
