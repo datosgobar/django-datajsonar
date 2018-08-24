@@ -3,17 +3,21 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import helpers
 
 from django.utils import timezone
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
+from django.shortcuts import render, redirect
 
-from .views import config_csv, schedule_task
+
+from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
 from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata
 from .models import Catalog, Dataset, Distribution, Field
+from .forms import ScheduleJobForm
 
 
 class EnhancedMetaAdmin(GenericTabularInline):
@@ -289,10 +293,35 @@ class AbstractTaskAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super(AbstractTaskAdmin, self).get_urls()
-        extra_urls = [url(r'^schedule_task$', schedule_task,
+        extra_urls = [url(r'^schedule_task$',
+                          self.admin_site.admin_view(self.schedule_task),
                           {'callable_str': self.callable_str},
                           name='schedule_task'), ]
         return extra_urls + urls
+
+    def schedule_task(self, request, callable_str):
+        form = ScheduleJobForm(initial={'callable': callable_str, 'queue': 'indexing'})
+
+        context = {
+            'title': 'Schedule new task',
+            'app_label': self.model._meta.app_label,
+            'opts': self.model._meta,
+            'has_change_permission': self.has_change_permission(request)
+        }
+
+        if request.method == 'POST':
+            form = ScheduleJobForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('admin:scheduler_repeatablejob_changelist')
+
+        if callable_str is not None:
+            form.fields['callable'].widget.attrs['readonly'] = True
+        form.fields['queue'].widget.attrs['readonly'] = True
+
+        context['adminform'] = helpers.AdminForm(form, list([(None, {'fields': form.base_fields})]),
+                                                 self.get_prepopulated_fields(request))
+        return render(request, 'scheduler.html', context)
 
 
 class DataJsonAdmin(AbstractTaskAdmin):
