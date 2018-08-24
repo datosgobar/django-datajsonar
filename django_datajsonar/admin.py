@@ -298,7 +298,7 @@ class AbstractTaskAdmin(admin.ModelAdmin):
 class DataJsonAdmin(AbstractTaskAdmin):
     model = ReadDataJsonTask
     task = read_datajson
-    callable_str = 'django_datajsonar.tasks.read_datajson'
+    callable_str = 'django_datajsonar.tasks.schedule_new_read_datajson_task'
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
