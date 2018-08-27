@@ -168,7 +168,7 @@ DEFAULT_TASKS = [
 }
 ``` 
 
-Cada diccionario define una tarea a ser programada por `django-rq-scheduling`. LlamaR al comando 
+Cada diccionario define una tarea a ser programada por `django-rq-scheduling`. Llamar al comando 
 `python manage.py schedule_default_tasks` crea los repeatable jobs ahí definidos. (Nota: en caso de 
 tener una tarea con un nombre ya definido en los defaults, llamar el comando actualizará esta tarea
 con los valores definidos en `DEFAULT_TASKS`)

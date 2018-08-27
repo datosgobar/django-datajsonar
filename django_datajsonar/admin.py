@@ -277,6 +277,9 @@ class AbstractTaskAdmin(admin.ModelAdmin):
     # del AbstractTask asociado a este admin, overridear save_model
     # si se quiere otro comportamiento
     task = None
+
+    # String con el fully qualified name del método a llamar cuando
+    # se programa una tarea periódica.
     callable_str = None
 
     def save_model(self, request, obj, form, change):
