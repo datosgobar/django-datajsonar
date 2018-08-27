@@ -91,7 +91,7 @@ class Distribution(models.Model):
     data_hash = models.CharField(max_length=128, default='')
     last_updated = models.DateTimeField(blank=True, null=True)
     data_file = models.FileField(
-        storage=getattr(settings, 'DATAJSONAR_AR_DISTRIBUTION_STORAGE', None),
+        storage=getattr(settings, 'DATAJSON_AR_DISTRIBUTION_STORAGE', None),
         max_length=2000,
         upload_to=filepath,
         blank=True
