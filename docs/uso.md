@@ -172,3 +172,8 @@ Cada diccionario define una tarea a ser programada por `django-rq-scheduling`. L
 `python manage.py schedule_default_tasks` crea los repeatable jobs ahí definidos. (Nota: en caso de 
 tener una tarea con un nombre ya definido en los defaults, llamar el comando actualizará esta tarea
 con los valores definidos en `DEFAULT_TASKS`)
+
+
+### Definir un storage para las distribuciones 
+
+En los settings se puede definir una clase que herede de `Storage` de django para guardar los archivos de distribuciones: `DATAJSON_AR_DISTRIBUTION_STORAGE`
