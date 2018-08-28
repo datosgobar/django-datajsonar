@@ -1,7 +1,9 @@
 #! coding: utf-8
 from __future__ import unicode_literals
+from importlib import import_module
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
@@ -82,6 +84,21 @@ def filepath(instance, _):
     return u'distribution_raw/{}.csv'.format(instance.identifier)
 
 
+def get_distribution_storage():
+    data_file_storage_path = getattr(settings, 'DATAJSON_AR_DISTRIBUTION_STORAGE', None)
+    if data_file_storage_path is None:
+        return None
+
+    split = data_file_storage_path.split('.')
+    module = import_module('.'.join(split[:-1]))
+
+    storage = getattr(module, split[-1], None)
+    if storage is None:
+        raise ImproperlyConfigured
+
+    return storage
+
+
 class Distribution(models.Model):
     identifier = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
@@ -90,8 +107,9 @@ class Distribution(models.Model):
     download_url = models.URLField(max_length=1024, null=True)
     data_hash = models.CharField(max_length=128, default='')
     last_updated = models.DateTimeField(blank=True, null=True)
+
     data_file = models.FileField(
-        storage=getattr(settings, 'DATAJSON_AR_DISTRIBUTION_STORAGE', None),
+        storage=get_distribution_storage(),
         max_length=2000,
         upload_to=filepath,
         blank=True
