@@ -181,7 +181,7 @@ class DatabaseLoader(object):
         if self.read_local:  # Usado en debug y testing
             with open(file_url) as f:
                 data_hash = hashlib.sha512(f.read().encode('utf-8')).hexdigest()
-            distribution_model.data_file = File(open(file_url))
+            distribution_model.data_file = File(open(file_url, 'rb'))
 
         else:
             user_agent = getattr(settings, 'DATAJSON_AR_USER_AGENT', 'aUserAgent')
