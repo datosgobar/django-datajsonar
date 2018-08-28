@@ -5,6 +5,7 @@ from importlib import import_module
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
@@ -85,9 +86,13 @@ def filepath(instance, _):
 
 
 def get_distribution_storage():
+    """Importa dinámicamente el módulo configurado en el setting
+    DATAJSON_AR_DISTRIBUTION_STORAGE, y devuelve una instancia
+    del objeto determinado. De no existir, devuelve el storage default
+    """
     data_file_storage_path = getattr(settings, 'DATAJSON_AR_DISTRIBUTION_STORAGE', None)
     if data_file_storage_path is None:
-        return None
+        return default_storage
 
     split = data_file_storage_path.split('.')
     module = import_module('.'.join(split[:-1]))
@@ -96,7 +101,7 @@ def get_distribution_storage():
     if storage is None:
         raise ImproperlyConfigured
 
-    return storage
+    return storage()
 
 
 class Distribution(models.Model):
