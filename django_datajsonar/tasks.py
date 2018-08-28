@@ -89,6 +89,8 @@ def schedule_new_read_datajson_task(mode=None):
     except ReadDataJsonTask.DoesNotExist:
         pass
 
+    if mode is None:
+        mode = getattr(settings, 'DATAJSON_AR_DOWNLOAD_RESOURCES', True)
     new_task = ReadDataJsonTask.objects.create(indexing_mode=mode)
     read_datajson.delay(new_task)
 
