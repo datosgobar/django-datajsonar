@@ -296,10 +296,11 @@ class AbstractTaskAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super(AbstractTaskAdmin, self).get_urls()
+        info = self.model._meta.app_label, self.model._meta.model_name
         extra_urls = [url(r'^schedule_task$',
                           self.admin_site.admin_view(self.schedule_task),
                           {'callable_str': self.callable_str},
-                          name='schedule_task'), ]
+                          name='%s_%s_schedule_task' % info), ]
         return extra_urls + urls
 
     def schedule_task(self, request, callable_str):

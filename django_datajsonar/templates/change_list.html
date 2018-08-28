@@ -4,6 +4,6 @@
 {% block object-tools-items %}
 {{ block.super }}
 <li>
-    <a href="{% url 'admin:schedule_task' %}" class="btn btn-high btn-success">Schedule Task</a>
+    <a href="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_schedule_task' %}" class="btn btn-high btn-success">Schedule Task</a>
 </li>
 {% endblock %}
