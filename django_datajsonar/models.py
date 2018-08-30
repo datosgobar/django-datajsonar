@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
+from django_rq import get_queue
+
 
 class Metadata(models.Model):
     class Meta:
@@ -267,3 +269,48 @@ class ReadDataJsonTask(AbstractTask):
     INDEXING_CHOICES = ((COMPLETE_RUN, 'Corrida completa'), (METADATA_ONLY, 'Corrida solo de metadatos'),)
     default_mode = getattr(settings, 'DATAJSON_AR_DOWNLOAD_RESOURCES', True)
     indexing_mode = models.BooleanField(choices=INDEXING_CHOICES, default=default_mode)
+
+
+class Orchestrator(object):
+
+    def __init__(self, config=None):
+        self.task_scheduling = config or getattr(settings, 'DATAJSON_AR_DEFAULT_TASK_SYNCHRO', [])
+        self.closers = []
+
+    def open_task(self, task_config):
+        task = self.run_callable(task_config['callable'])
+        queue = task_config.get('queue')
+        closer = Closer(self, queue, task)
+        self.closers.append(closer)
+
+    def close_queue(self, queue):
+        for task_config in self.task_scheduling:
+            if task_config.get('depends') == queue:
+                self.open_task(task_config)
+
+    def check_closers(self):
+        self.closers = [closer for closer in self.closers if not
+                        closer.close_task_if_finished()]
+
+    def run_callable(self, callable_str):
+        split = callable_str.split('.')
+        module = import_module('.'.join(split[:-1]))
+        method = getattr(module, split[-1], None)
+        return method()
+
+
+class Closer(object):
+
+    def __init__(self, orchestrator, queue, task):
+        self.orchestrator = orchestrator
+        self.queue = queue
+        self.task = task
+
+    def close_task_if_finished(self):
+        if not get_queue(self.queue).jobs:
+            self.task.status = self.task.FINISHED
+            finished = True
+        else:
+            finished = False
+
+        return finished
