@@ -8,7 +8,8 @@ from django.test import TestCase
 from unittest import skipIf
 
 from django_datajsonar.models import Field
-from django_datajsonar.tasks import read_datajson
+from django_datajsonar.tasks import read_datajson, schedule_new_read_datajson_task,\
+    schedule_full_read_task, schedule_metadata_read_task
 from django_datajsonar.models import ReadDataJsonTask, Node
 
 dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples')
@@ -57,3 +58,49 @@ class ReadDataJsonTest(TestCase):
         # Esperado: no se crea una segunda tarea
         call_command('read_datajson')
         self.assertEqual(ReadDataJsonTask.objects.all().count(), 1)
+
+
+class SchedulingMethodsTest(TestCase):
+
+    def test_read_datajson_task_is_created_without_default_value(self):
+        self.assertEqual(0, ReadDataJsonTask.objects.all().count())
+        schedule_new_read_datajson_task()
+        self.assertEqual(1, ReadDataJsonTask.objects.all().count())
+        task = ReadDataJsonTask.objects.all().first()
+        self.assertEqual(ReadDataJsonTask.COMPLETE_RUN, task.indexing_mode)
+
+    def test_read_datajson_task_is_created_with_default_value(self):
+        with self.settings(DATAJSON_AR_DOWNLOAD_RESOURCES=False):
+            self.assertEqual(0, ReadDataJsonTask.objects.all().count())
+            schedule_new_read_datajson_task()
+            self.assertEqual(1, ReadDataJsonTask.objects.all().count())
+            task = ReadDataJsonTask.objects.all().first()
+            self.assertEqual(ReadDataJsonTask.METADATA_ONLY, task.indexing_mode)
+
+    def test_only_one_running_task_is_allowed(self):
+        self.assertEqual(0, ReadDataJsonTask.objects.all().count())
+        schedule_new_read_datajson_task()
+        self.assertEqual(1, ReadDataJsonTask.objects.all().count())
+
+        # Asincrónicamente, las tareas se marcan como terminadas al final de la ejecución.
+        # Marco esta como corriendo para salvar eso.
+        task = ReadDataJsonTask.objects.all().first()
+        task.status = ReadDataJsonTask.RUNNING
+        task.save()
+
+        schedule_new_read_datajson_task()
+        self.assertEqual(1, ReadDataJsonTask.objects.all().count())
+
+    def test_full_run_creates_task_with_correct_attribute(self):
+        self.assertEqual(0, ReadDataJsonTask.objects.all().count())
+        schedule_full_read_task()
+        self.assertEqual(1, ReadDataJsonTask.objects.all().count())
+        task = ReadDataJsonTask.objects.all().first()
+        self.assertEqual(ReadDataJsonTask.COMPLETE_RUN, task.indexing_mode)
+
+    def test_metadata_only_run_creates_task_with_correct_attribute(self):
+        self.assertEqual(0, ReadDataJsonTask.objects.all().count())
+        schedule_metadata_read_task()
+        self.assertEqual(1, ReadDataJsonTask.objects.all().count())
+        task = ReadDataJsonTask.objects.all().first()
+        self.assertEqual(ReadDataJsonTask.METADATA_ONLY, task.indexing_mode)
