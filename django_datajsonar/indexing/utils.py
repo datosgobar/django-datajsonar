@@ -8,6 +8,7 @@ def log_exception(task, msg, model, field_kw):
     try:
         error_model = model.objects.get(**field_kw)
         error_model.error = True
+        error_model.error_msg = msg
         error_model.save()
         return error_model
     except model.DoesNotExist:
