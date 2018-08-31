@@ -247,3 +247,17 @@ class DatabaseLoaderTests(TestCase):
         themes = json.loads(Dataset.objects.first().themes)
         self.assertEqual(len(themes), 3)
         self.assertTrue(isinstance(themes, list))
+
+    def test_distribution_downloadurl_error_msg(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'distribution_missing_downloadurl.json'))
+        self.loader.run(catalog, self.catalog_id)
+
+        self.assertTrue(Distribution.objects.first().error_msg)
+
+    def test_error_msg(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        catalog.datasets[0]['distribution'] = 'garbage'
+
+        self.loader.run(catalog, self.catalog_id)
+
+        self.assertTrue(Dataset.objects.first().error_msg)

@@ -147,7 +147,7 @@ class DatabaseLoader(object):
 
         # En caso de que no descargue el archivo.
         if not distribution_model.download_url:
-            distribution_model.error = True
+            raise ValueError("DownloadURL no encontrado")
 
         update_model(created, trimmed_distribution, distribution_model,
                      updated_children=updated_fields, data_change=data_change)
