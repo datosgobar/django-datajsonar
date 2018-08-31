@@ -15,7 +15,7 @@ from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
 from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
-from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata
+from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata, Synchronizer
 from .models import Catalog, Dataset, Distribution, Field
 from .forms import ScheduleJobForm
 
@@ -358,3 +358,5 @@ admin.site.register(DatasetIndexingFile, DatasetIndexingFileAdmin)
 admin.site.register(NodeRegisterFile, NodeRegisterFileAdmin)
 admin.site.register(Node, NodeAdmin)
 admin.site.register(ReadDataJsonTask, DataJsonAdmin)
+
+admin.site.register(Synchronizer)

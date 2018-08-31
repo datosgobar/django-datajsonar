@@ -271,40 +271,15 @@ class ReadDataJsonTask(AbstractTask):
     indexing_mode = models.BooleanField(choices=INDEXING_CHOICES, default=default_mode)
 
 
-class Orchestrator(object):
+class Stage(models.Model):
 
-    def __init__(self, config=None):
-        self.task_scheduling = config or getattr(settings, 'DATAJSON_AR_DEFAULT_TASK_SYNCHRO', [])
-        self.closers = []
+    ACTIVE = True
+    INACTIVE = False
 
-    def open_task(self, task_config):
-        task = self.run_callable(task_config['callable'])
-        queue = task_config.get('queue')
-        closer = Closer(self, queue, task)
-        self.closers.append(closer)
-
-    def close_queue(self, queue):
-        for task_config in self.task_scheduling:
-            if task_config.get('depends') == queue:
-                self.open_task(task_config)
-
-    def check_closers(self):
-        self.closers = [closer for closer in self.closers if not
-                        closer.close_task_if_finished()]
-
-    def run_callable(self, callable_str):
-        split = callable_str.split('.')
-        module = import_module('.'.join(split[:-1]))
-        method = getattr(module, split[-1], None)
-        return method()
-
-
-class Closer(object):
-
-    def __init__(self, orchestrator, queue, task):
-        self.orchestrator = orchestrator
-        self.queue = queue
-        self.task = task
+    task = models.ForeignKey(to=AbstractTask, on_delete=models.CASCADE)
+    callable_str = models.CharField(max_length=100)
+    queue = models.CharField(max_length=50)
+    next_stage = models.ForeignKey('self', null=True)
 
     def close_task_if_finished(self):
         if not get_queue(self.queue).jobs:
@@ -314,3 +289,37 @@ class Closer(object):
             finished = False
 
         return finished
+
+
+class Synchronizer(models.Model):
+
+    RUNNING = True
+    STAND_BY = False
+
+    start_stage = models.ForeignKey(to=Stage)
+    actual_stage = models.ForeignKey(to=Stage)
+
+    def begin_stage(self, stage=None):
+        stage = stage or self.start_stage
+        stage.status = Stage.ACTIVE
+        stage.task = self.run_callable(self.start.callable_str)
+        stage.save()
+        self.actual_stage = stage
+        self.actual_stage.save()
+
+    def check_completion(self):
+        finished = False
+        if self.actual_stage.close_task_if_finished():
+            self.actual_stage.status = self.actual_stage.INACTIVE
+            self.actual_stage.save()
+            if self.actual_stage.next_stage is None:
+                finished = True
+            else:
+                self.begin_stage(self.actual_stage.next_stage)
+        return finished
+
+    def run_callable(self, callable_str):
+        split = callable_str.split('.')
+        module = import_module('.'.join(split[:-1]))
+        method = getattr(module, split[-1], None)
+        return method()

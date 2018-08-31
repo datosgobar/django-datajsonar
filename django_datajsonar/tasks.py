@@ -97,3 +97,5 @@ def schedule_new_read_datajson_task():
         new_task = ReadDataJsonTask.objects.get(id=new_task.id)
         new_task.status = new_task.FINISHED
         new_task.save()
+
+    return new_task
