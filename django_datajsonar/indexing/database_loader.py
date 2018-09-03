@@ -186,7 +186,7 @@ class DatabaseLoader(object):
         else:
             user_agent = getattr(settings, 'DATAJSON_AR_USER_AGENT', 'aUserAgent')
             headers = {'User-Agent': user_agent}
-            request = requests.get(file_url, headers=headers, stream=True)
+            request = requests.get(file_url, headers=headers, stream=True, verify=False)
             request.raise_for_status()  # Excepción si es inválido
 
             lf = NamedTemporaryFile()
