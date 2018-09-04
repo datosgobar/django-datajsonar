@@ -234,6 +234,7 @@ class AbstractTask(models.Model):
     created = models.DateTimeField()
     finished = models.DateTimeField(null=True)
     logs = models.TextField()
+    stage = GenericRelation('Stage', content_type_field='task')
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -293,12 +294,19 @@ class Stage(models.Model):
 
     def close_task_if_finished(self):
         if not get_queue(self.queue).jobs:
-            self.task.status = self.task.FINISHED
+            self.content_object.status = self.content_object.FINISHED
+            self.content_object.save()
             finished = True
         else:
             finished = False
 
         return finished
+
+    def __unicode__(self):
+        return u'Stage' + str(self.pk)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class Synchronizer(models.Model):
@@ -319,10 +327,12 @@ class Synchronizer(models.Model):
     def begin_stage(self, stage=None):
         stage = stage or self.start_stage
         stage.status = Stage.ACTIVE
-        stage.task = self.run_callable(stage.callable_str)
+        task = self.run_callable(stage.callable_str)
+        stage.content_object = task
+        stage.object_id = task.pk
         stage.save()
         self.actual_stage = stage
-        self.actual_stage.save()
+        self.save()
 
     def check_completion(self):
         finished = False
@@ -340,3 +350,9 @@ class Synchronizer(models.Model):
         module = import_module('.'.join(split[:-1]))
         method = getattr(module, split[-1], None)
         return method()
+
+    def __unicode__(self):
+        return u'Synchro' + str(self.pk)
+
+    def __str__(self):
+        return self.__unicode__()
