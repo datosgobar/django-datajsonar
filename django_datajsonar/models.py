@@ -276,10 +276,20 @@ class Stage(models.Model):
     ACTIVE = True
     INACTIVE = False
 
-    task = models.ForeignKey(to=AbstractTask, on_delete=models.CASCADE)
+    STATUS_CHOICES = (
+        (ACTIVE, "Tarea activa"),
+        (INACTIVE, "Tarea inactiva"),
+    )
+
+    status = models.BooleanField(default=False, choices=STATUS_CHOICES)
     callable_str = models.CharField(max_length=100)
     queue = models.CharField(max_length=50)
-    next_stage = models.ForeignKey('self', null=True)
+    next_stage = models.ForeignKey('self', null=True, blank=True)
+
+    # Generic foreign key magics
+    task = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('task', 'object_id')
 
     def close_task_if_finished(self):
         if not get_queue(self.queue).jobs:
@@ -296,13 +306,20 @@ class Synchronizer(models.Model):
     RUNNING = True
     STAND_BY = False
 
-    start_stage = models.ForeignKey(to=Stage)
-    actual_stage = models.ForeignKey(to=Stage)
+    STATUS_CHOICES = (
+        (RUNNING, "Corriendo procesos"),
+        (STAND_BY, "En espera"),
+    )
+
+    status = models.BooleanField(default=False, choices=STATUS_CHOICES)
+
+    start_stage = models.ForeignKey(to=Stage, related_name='synchronizer')
+    actual_stage = models.ForeignKey(to=Stage, related_name='running_synchronizer', null=True, blank=True)
 
     def begin_stage(self, stage=None):
         stage = stage or self.start_stage
         stage.status = Stage.ACTIVE
-        stage.task = self.run_callable(self.start.callable_str)
+        stage.task = self.run_callable(stage.callable_str)
         stage.save()
         self.actual_stage = stage
         self.actual_stage.save()

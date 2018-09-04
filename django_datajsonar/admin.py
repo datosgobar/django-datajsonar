@@ -15,7 +15,7 @@ from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
 from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
-from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata, Synchronizer
+from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata, Synchronizer, Stage
 from .models import Catalog, Dataset, Distribution, Field
 from .forms import ScheduleJobForm
 
@@ -349,6 +349,20 @@ class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
             bulk_whitelist.delay(model.id)
 
 
+class SynchronizerAdmin(admin.ModelAdmin):
+
+    def adddd_view(self, request, form_url='', extra_context=None):
+        form = 'un form'
+        context = {}
+        if request.method == 'POST':
+            # Validar data?
+            # Crear los stages
+            # Crear el synchro
+            return super(SynchronizerAdmin, self).changelist_view(request, None)
+        return render(request, 'scheduler.html', context)
+
+
+
 admin.site.register(Catalog, CatalogAdmin)
 admin.site.register(Dataset, DatasetAdmin)
 admin.site.register(Distribution, DistributionAdmin)
@@ -359,4 +373,5 @@ admin.site.register(NodeRegisterFile, NodeRegisterFileAdmin)
 admin.site.register(Node, NodeAdmin)
 admin.site.register(ReadDataJsonTask, DataJsonAdmin)
 
-admin.site.register(Synchronizer)
+admin.site.register(Synchronizer, SynchronizerAdmin)
+admin.site.register(Stage)
