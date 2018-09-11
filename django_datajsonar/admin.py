@@ -362,7 +362,6 @@ class SynchronizerAdmin(admin.ModelAdmin):
         return render(request, 'scheduler.html', context)
 
 
-
 admin.site.register(Catalog, CatalogAdmin)
 admin.site.register(Dataset, DatasetAdmin)
 admin.site.register(Distribution, DistributionAdmin)
@@ -372,6 +371,3 @@ admin.site.register(DatasetIndexingFile, DatasetIndexingFileAdmin)
 admin.site.register(NodeRegisterFile, NodeRegisterFileAdmin)
 admin.site.register(Node, NodeAdmin)
 admin.site.register(ReadDataJsonTask, DataJsonAdmin)
-
-admin.site.register(Synchronizer, SynchronizerAdmin)
-admin.site.register(Stage)
