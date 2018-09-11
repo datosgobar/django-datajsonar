@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from unittest.mock import patch
+try:
+    from mock import patch
+except ImportError:
+    from unittest.mock import patch
 
 from django.test import TestCase
 
