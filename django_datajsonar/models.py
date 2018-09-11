@@ -288,14 +288,14 @@ class Stage(models.Model):
     next_stage = models.ForeignKey('self', null=True, blank=True)
 
     # Generic foreign key magics
-    task = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('task', 'object_id')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    object_id = models.PositiveIntegerField(null=True)
+    task = GenericForeignKey()
 
     def close_task_if_finished(self):
         if not get_queue(self.queue).jobs:
-            self.content_object.status = self.content_object.FINISHED
-            self.content_object.save()
+            self.task.status = self.task.FINISHED
+            self.task.save()
             finished = True
         else:
             finished = False
@@ -319,6 +319,7 @@ class Synchronizer(models.Model):
         (STAND_BY, "En espera"),
     )
 
+    name = models.CharField(max_length=100)
     status = models.BooleanField(default=False, choices=STATUS_CHOICES)
 
     start_stage = models.ForeignKey(to=Stage, related_name='synchronizer')
@@ -328,7 +329,7 @@ class Synchronizer(models.Model):
         stage = stage or self.start_stage
         stage.status = Stage.ACTIVE
         task = self.run_callable(stage.callable_str)
-        stage.content_object = task
+        stage.task = task
         stage.object_id = task.pk
         stage.save()
         self.actual_stage = stage
@@ -352,7 +353,7 @@ class Synchronizer(models.Model):
         return method()
 
     def __unicode__(self):
-        return u'Synchro' + str(self.pk)
+        return self.name
 
     def __str__(self):
         return self.__unicode__()

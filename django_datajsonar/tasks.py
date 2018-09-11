@@ -5,7 +5,7 @@ import yaml
 
 from django.utils import timezone
 from django.conf import settings
-from django_rq import job
+from django_rq import job, get_queue
 
 from django_datajsonar.actions import DatasetIndexableToggler
 from django_datajsonar.indexing.tasks import close_read_datajson_task
@@ -23,9 +23,10 @@ def read_datajson(task, whitelist=False, read_local=False):
     inicia la tarea de indexación sobre cada uno de ellos
     """
     nodes = Node.objects.filter(indexable=True)
+    queue = get_queue('indexing')
     for node in nodes:
         try:
-            index_catalog.delay(node, task, read_local, whitelist)
+            queue.enqueue(index_catalog, node, task, read_local, whitelist)
         except Exception as e:
             logger.error(u"Excepción leyendo nodo %s: %s", node.id, e)
 
@@ -85,7 +86,7 @@ def schedule_new_read_datajson_task():
     try:
         task = ReadDataJsonTask.objects.last()
         if task and task.status == ReadDataJsonTask.RUNNING:
-            return
+            return task
     except ReadDataJsonTask.DoesNotExist:
         pass
 
