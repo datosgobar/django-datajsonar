@@ -242,7 +242,6 @@ class AbstractTask(models.Model):
     created = models.DateTimeField()
     finished = models.DateTimeField(null=True)
     logs = models.TextField()
-    stage = GenericRelation('Stage', content_type_field='task')
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
