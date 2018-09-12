@@ -304,7 +304,9 @@ class AbstractTaskAdmin(admin.ModelAdmin):
         return extra_urls + urls
 
     def schedule_task(self, request, callable_str):
-        form = ScheduleJobForm(initial={'callable': callable_str, 'queue': 'indexing'})
+        form = ScheduleJobForm(initial={'callable': callable_str,
+                                        'queue': 'indexing',
+                                        'name': self.model._meta.verbose_name_plural})
 
         context = {
             'title': 'Schedule new task',
