@@ -349,19 +349,6 @@ class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
             bulk_whitelist.delay(model.id)
 
 
-class SynchronizerAdmin(admin.ModelAdmin):
-
-    def adddd_view(self, request, form_url='', extra_context=None):
-        form = 'un form'
-        context = {}
-        if request.method == 'POST':
-            # Validar data?
-            # Crear los stages
-            # Crear el synchro
-            return super(SynchronizerAdmin, self).changelist_view(request, None)
-        return render(request, 'scheduler.html', context)
-
-
 admin.site.register(Catalog, CatalogAdmin)
 admin.site.register(Dataset, DatasetAdmin)
 admin.site.register(Distribution, DistributionAdmin)
