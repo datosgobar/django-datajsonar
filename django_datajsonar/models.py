@@ -86,7 +86,7 @@ def filepath(instance, _):
     """Método para asignar el nombre al archivo fuente del FileField
     del modelo Distribution
     """
-    return u'distribution_raw/{}.csv'.format(instance.identifier)
+    return u'distribution_raw/{}/{}.csv'.format(instance.dataset.catalog.identifier, instance.identifier)
 
 
 def get_distribution_storage():
