@@ -36,6 +36,8 @@ class Catalog(models.Model):
 
     enhanced_meta = GenericRelation(Metadata, null=True)
 
+    error_msg = models.TextField(default='')
+
     def __unicode__(self):
         return u'%s (%s)' % (self.title, self.identifier)
 
@@ -70,6 +72,8 @@ class Dataset(models.Model):
     themes = models.TextField(blank=True, null=True)
 
     enhanced_meta = GenericRelation(Metadata)
+
+    error_msg = models.TextField(default='')
 
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.catalog.identifier)
@@ -126,6 +130,8 @@ class Distribution(models.Model):
     enhanced_meta = GenericRelation(Metadata)
     new = models.BooleanField(default=False)
 
+    error_msg = models.TextField(default='')
+
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.dataset.catalog.identifier)
 
@@ -144,6 +150,8 @@ class Field(models.Model):
 
     enhanced_meta = GenericRelation(Metadata)
     new = models.BooleanField(default=False)
+
+    error_msg = models.TextField(default='')
 
     def __unicode__(self):
         return u'%s (%s)' %\

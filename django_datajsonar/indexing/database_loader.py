@@ -147,7 +147,7 @@ class DatabaseLoader(object):
 
         # En caso de que no descargue el archivo.
         if not distribution_model.download_url:
-            distribution_model.error = True
+            raise ValueError("DownloadURL no encontrado")
 
         update_model(created, trimmed_distribution, distribution_model,
                      updated_children=updated_fields, data_change=data_change)
@@ -186,7 +186,7 @@ class DatabaseLoader(object):
         else:
             user_agent = getattr(settings, 'DATAJSON_AR_USER_AGENT', 'aUserAgent')
             headers = {'User-Agent': user_agent}
-            request = requests.get(file_url, headers=headers, stream=True)
+            request = requests.get(file_url, headers=headers, stream=True, verify=False)
             request.raise_for_status()  # Excepción si es inválido
 
             lf = NamedTemporaryFile()

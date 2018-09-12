@@ -48,6 +48,7 @@ def index_catalog(node, task, read_local=False, whitelist=False):
     reset_fields = {'present': False,
                     'updated': False,
                     'error': False,
+                    'error_msg': '',
                     'new': False}
 
     Dataset.objects.filter(catalog__identifier=node.catalog_id).update(**reset_fields)
