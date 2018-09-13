@@ -1,14 +1,12 @@
 from django import forms
-
+from django.contrib.admin.widgets import AdminTimeWidget
 
 from scheduler.models import RepeatableJob
 
 
 class ScheduleJobForm(forms.ModelForm):
 
-    scheduled_time = forms.DateTimeField(widget=forms.widgets.DateTimeInput(attrs={'type': 'datetime-local'}),
-                                         input_formats=['%Y-%m-%dT%H:%M'],
-                                         help_text='Formato: yyyy-mm-ddTHH:MM')
+    scheduled_time = forms.DateTimeField(widget=AdminTimeWidget(attrs={'type': 'time'}))
 
     class Meta:
         model = RepeatableJob

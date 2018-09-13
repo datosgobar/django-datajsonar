@@ -1,15 +1,19 @@
 #!coding=utf8
 from __future__ import unicode_literals
 
+from datetime import timedelta
+
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 
-from django.utils import timezone
+from django.utils import timezone, dateparse
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.shortcuts import render, redirect
 
+from scheduler.models import RepeatableJob
+from scheduler.admin import RepeatableJobAdmin
 
 from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
@@ -317,6 +321,15 @@ class AbstractTaskAdmin(admin.ModelAdmin):
 
         if request.method == 'POST':
             form = ScheduleJobForm(request.POST)
+            # Convertir la hora a un datetime apropiado
+            form.data = form.data.copy()
+            datetime = timezone.localtime()
+            time = dateparse.parse_time(form.data['scheduled_time'])
+            datetime = datetime.replace(hour=time.hour, minute=time.minute, second=0, microsecond=0)
+            if datetime < timezone.now():
+                datetime = datetime + timedelta(days=1)
+            form.data['scheduled_time'] = datetime
+
             if form.is_valid():
                 form.save()
                 return redirect('admin:scheduler_repeatablejob_changelist')
@@ -351,6 +364,28 @@ class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
             bulk_whitelist.delay(model.id)
 
 
+class CustomRepeatableJobAdmin(RepeatableJobAdmin):
+
+    actions = ['delete_and_unschedule']
+
+    def delete_model(self, request, obj):
+        obj.unschedule()
+        return super(CustomRepeatableJobAdmin, self).delete_model(request, obj)
+
+    def delete_and_unschedule(self, _, queryset):
+        for job in queryset:
+            job.unschedule()
+        # Refresh queryset
+        queryset.all()
+        queryset.delete()
+    delete_and_unschedule.short_description = 'Action posta'
+
+    def get_actions(self, request):
+        actions = super(CustomRepeatableJobAdmin, self).get_actions(request)
+        del actions['delete_selected']
+        return actions
+
+
 admin.site.register(Catalog, CatalogAdmin)
 admin.site.register(Dataset, DatasetAdmin)
 admin.site.register(Distribution, DistributionAdmin)
@@ -360,3 +395,6 @@ admin.site.register(DatasetIndexingFile, DatasetIndexingFileAdmin)
 admin.site.register(NodeRegisterFile, NodeRegisterFileAdmin)
 admin.site.register(Node, NodeAdmin)
 admin.site.register(ReadDataJsonTask, DataJsonAdmin)
+
+admin.site.unregister(RepeatableJob)
+admin.site.register(RepeatableJob, CustomRepeatableJobAdmin)
