@@ -1,13 +1,11 @@
 #!coding=utf8
 from __future__ import unicode_literals
 
-from datetime import timedelta
-
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 
-from django.utils import timezone, dateparse
+from django.utils import timezone
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.shortcuts import render, redirect
@@ -321,15 +319,6 @@ class AbstractTaskAdmin(admin.ModelAdmin):
 
         if request.method == 'POST':
             form = ScheduleJobForm(request.POST)
-            # Convertir la hora a un datetime apropiado
-            form.data = form.data.copy()
-            datetime = timezone.localtime()
-            time = dateparse.parse_time(form.data['scheduled_time'])
-            datetime = datetime.replace(hour=time.hour, minute=time.minute, second=0, microsecond=0)
-            if datetime < timezone.now():
-                datetime = datetime + timedelta(days=1)
-            form.data['scheduled_time'] = datetime
-
             if form.is_valid():
                 form.save()
                 return redirect('admin:scheduler_repeatablejob_changelist')
@@ -378,7 +367,7 @@ class CustomRepeatableJobAdmin(RepeatableJobAdmin):
         # Refresh queryset
         queryset.all()
         queryset.delete()
-    delete_and_unschedule.short_description = 'Action posta'
+    delete_and_unschedule.short_description = 'Delete and unschedule job'
 
     def get_actions(self, request):
         actions = super(CustomRepeatableJobAdmin, self).get_actions(request)
