@@ -304,8 +304,8 @@ class Stage(models.Model):
             self.task.status = self.task.FINISHED
             self.task.save()
             return True
-        else:
-            return False
+
+        return False
 
     def __unicode__(self):
         return u'Stage' + str(self.pk)
