@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from django_rq import get_queue
+from .utils import pending_or_running_jobs
 
 
 class Metadata(models.Model):
@@ -300,14 +300,12 @@ class Stage(models.Model):
     task = GenericForeignKey()
 
     def close_task_if_finished(self):
-        if not get_queue(self.queue).jobs:
+        if not pending_or_running_jobs(self.queue):
             self.task.status = self.task.FINISHED
             self.task.save()
-            finished = True
+            return True
         else:
-            finished = False
-
-        return finished
+            return False
 
     def __unicode__(self):
         return u'Stage' + str(self.pk)
@@ -334,24 +332,24 @@ class Synchronizer(models.Model):
 
     def begin_stage(self, stage=None):
         stage = stage or self.start_stage
-        stage.status = Stage.ACTIVE
         task = self.run_callable(stage.callable_str)
         stage.task = task
         stage.object_id = task.pk
-        stage.save()
+        stage.status = Stage.ACTIVE
         self.actual_stage = stage
+        stage.save()
         self.save()
 
     def check_completion(self):
-        finished = False
         if self.actual_stage.close_task_if_finished():
             self.actual_stage.status = self.actual_stage.INACTIVE
             self.actual_stage.save()
             if self.actual_stage.next_stage is None:
-                finished = True
+                self.status = self.STAND_BY
+                self.actual_stage = None
+                self.save()
             else:
                 self.begin_stage(self.actual_stage.next_stage)
-        return finished
 
     def run_callable(self, callable_str):
         split = callable_str.split('.')
