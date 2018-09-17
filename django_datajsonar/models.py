@@ -1,5 +1,6 @@
 #! coding: utf-8
 from __future__ import unicode_literals
+
 from importlib import import_module
 
 from django.contrib.auth.models import User
@@ -11,7 +12,7 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from .utils import pending_or_running_jobs
+from .utils import pending_or_running_jobs, import_string
 
 
 class Metadata(models.Model):
@@ -293,18 +294,23 @@ class Stage(models.Model):
     callable_str = models.CharField(max_length=100)
     queue = models.CharField(max_length=50)
     next_stage = models.ForeignKey('self', null=True, blank=True)
+    task = models.CharField(max_length=200)
 
-    # Generic foreign key magics
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    object_id = models.PositiveIntegerField(null=True)
-    task = GenericForeignKey()
+    def get_running_task(self):
+        task_model = import_string(self.task)
+        try:
+            return task_model.objects.filter(status=task_model.RUNNING).latest()
+        except task_model:
+            return None
 
     def close_task_if_finished(self):
         if not pending_or_running_jobs(self.queue):
-            self.task.status = self.task.FINISHED
-            self.task.save()
+            task = self.get_running_task()
+            if task:
+                # Cierra la tarea si quedó abierta
+                task.status = task.FINISHED
+                task.save()
             return True
-
         return False
 
     def __unicode__(self):
@@ -332,7 +338,8 @@ class Synchronizer(models.Model):
 
     def begin_stage(self, stage=None):
         stage = stage or self.start_stage
-        task = self.run_callable(stage.callable_str)
+        self.run_callable(stage.callable_str)
+        task = False
         stage.task = task
         stage.object_id = task.pk
         stage.status = Stage.ACTIVE
@@ -352,9 +359,7 @@ class Synchronizer(models.Model):
                 self.begin_stage(self.actual_stage.next_stage)
 
     def run_callable(self, callable_str):
-        split = callable_str.split('.')
-        module = import_module('.'.join(split[:-1]))
-        method = getattr(module, split[-1], None)
+        method = import_string(callable_str)
         return method()
 
     def __unicode__(self):

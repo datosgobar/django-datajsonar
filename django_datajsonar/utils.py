@@ -1,8 +1,8 @@
 #!coding=utf8
 from __future__ import unicode_literals
 
+from importlib import import_module
 import csv
-
 
 from django.http import HttpResponse
 from django.utils.timezone import now
@@ -32,3 +32,10 @@ def pending_or_running_jobs(queue):
     registry = StartedJobRegistry(name=queue, connection=get_connection(queue))
     running = bool(len(registry))
     return pending or running
+
+
+def import_string(string):
+    split = string.split('.')
+    module = import_module('.'.join(split[:-1]))
+    attribute = getattr(module, split[-1], None)
+    return attribute
