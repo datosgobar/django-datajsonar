@@ -364,8 +364,6 @@ class CustomRepeatableJobAdmin(RepeatableJobAdmin):
     def delete_and_unschedule(self, _, queryset):
         for job in queryset:
             job.unschedule()
-        # Refresh queryset
-        queryset.all()
         queryset.delete()
     delete_and_unschedule.short_description = 'Delete and unschedule job'
 
