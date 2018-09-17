@@ -10,6 +10,8 @@ from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.shortcuts import render, redirect
 
+from scheduler.models import RepeatableJob
+from scheduler.admin import RepeatableJobAdmin
 
 from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
@@ -304,7 +306,9 @@ class AbstractTaskAdmin(admin.ModelAdmin):
         return extra_urls + urls
 
     def schedule_task(self, request, callable_str):
-        form = ScheduleJobForm(initial={'callable': callable_str, 'queue': 'indexing'})
+        form = ScheduleJobForm(initial={'callable': callable_str,
+                                        'queue': 'indexing',
+                                        'name': self.model._meta.verbose_name_plural})
 
         context = {
             'title': 'Schedule new task',
@@ -349,6 +353,26 @@ class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
             bulk_whitelist.delay(model.id)
 
 
+class CustomRepeatableJobAdmin(RepeatableJobAdmin):
+
+    actions = ['delete_and_unschedule']
+
+    def delete_model(self, request, obj):
+        obj.unschedule()
+        return super(CustomRepeatableJobAdmin, self).delete_model(request, obj)
+
+    def delete_and_unschedule(self, _, queryset):
+        for job in queryset:
+            job.unschedule()
+        queryset.delete()
+    delete_and_unschedule.short_description = 'Delete and unschedule job'
+
+    def get_actions(self, request):
+        actions = super(CustomRepeatableJobAdmin, self).get_actions(request)
+        del actions['delete_selected']
+        return actions
+
+
 admin.site.register(Catalog, CatalogAdmin)
 admin.site.register(Dataset, DatasetAdmin)
 admin.site.register(Distribution, DistributionAdmin)
@@ -358,3 +382,6 @@ admin.site.register(DatasetIndexingFile, DatasetIndexingFileAdmin)
 admin.site.register(NodeRegisterFile, NodeRegisterFileAdmin)
 admin.site.register(Node, NodeAdmin)
 admin.site.register(ReadDataJsonTask, DataJsonAdmin)
+
+admin.site.unregister(RepeatableJob)
+admin.site.register(RepeatableJob, CustomRepeatableJobAdmin)
