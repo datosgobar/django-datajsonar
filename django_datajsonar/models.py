@@ -299,8 +299,8 @@ class Stage(models.Model):
     def get_running_task(self):
         task_model = import_string(self.task)
         try:
-            return task_model.objects.filter(status=task_model.RUNNING).latest()
-        except task_model:
+            return task_model.objects.filter(status=task_model.RUNNING).latest('created')
+        except task_model.DoesNotExist:
             return None
 
     def close_task_if_finished(self):
@@ -339,9 +339,6 @@ class Synchronizer(models.Model):
     def begin_stage(self, stage=None):
         stage = stage or self.start_stage
         self.run_callable(stage.callable_str)
-        task = False
-        stage.task = task
-        stage.object_id = task.pk
         stage.status = Stage.ACTIVE
         self.actual_stage = stage
         stage.save()
