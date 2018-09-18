@@ -18,6 +18,7 @@ class SynchronizationTests(TestCase):
         previous_stage = None
         for x in range(0, 3):
             new_stage = Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
+                                             task='django_datajsonar.models.ReadDataJsonTask',
                                              queue='indexing', next_stage=previous_stage)
             previous_stage = new_stage
         Synchronizer.objects.create(start_stage=new_stage, name='test_synchro')
