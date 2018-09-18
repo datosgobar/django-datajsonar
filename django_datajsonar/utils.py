@@ -27,6 +27,10 @@ def generate_csv(datasets, output):
 
 
 def pending_or_running_jobs(queue):
+    """
+    Chequea si hay trabajos encolados o corriendo, en la cola
+    pasada por parámetro
+    """
     rq_queue = get_queue(queue)
     pending = bool(rq_queue.jobs)
     registry = StartedJobRegistry(name=queue, connection=get_connection(queue))

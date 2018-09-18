@@ -337,6 +337,8 @@ class Synchronizer(models.Model):
     actual_stage = models.ForeignKey(to=Stage, related_name='running_synchronizer', null=True, blank=True)
 
     def begin_stage(self, stage=None):
+        if self.status == self.RUNNING and stage is None:
+            raise Exception('El synchronizer ya está corriendo, pero no se pasó la siguiente etapa.')
         stage = stage or self.start_stage
         self.run_callable(stage.callable_str)
         stage.status = Stage.ACTIVE
@@ -345,6 +347,8 @@ class Synchronizer(models.Model):
         self.save()
 
     def check_completion(self):
+        if self.status != self.RUNNING:
+            raise Exception('El synchronizer no está corriendo')
         if self.actual_stage.close_task_if_finished():
             self.actual_stage.status = self.actual_stage.INACTIVE
             self.actual_stage.save()
