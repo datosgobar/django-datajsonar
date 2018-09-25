@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from importlib import import_module
 
 from django.contrib.auth.models import User
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.db import models, transaction
@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from .utils import pending_or_running_jobs, import_string
+from .utils import pending_or_running_jobs, import_string, run_callable
 
 
 class Metadata(models.Model):
@@ -294,10 +294,13 @@ class Stage(models.Model):
     callable_str = models.CharField(max_length=100)
     queue = models.CharField(max_length=50)
     next_stage = models.ForeignKey('self', null=True, blank=True)
-    task = models.CharField(max_length=200)
+    task = models.CharField(max_length=200, blank=True)
 
     def get_running_task(self):
-        task_model = import_string(self.task)
+        if self.task:
+            task_model = import_string(self.task)
+        else:
+            return None
         try:
             return task_model.objects.filter(status=task_model.RUNNING).latest('created')
         except task_model.DoesNotExist:
@@ -312,6 +315,35 @@ class Stage(models.Model):
                 task.save()
             return True
         return False
+
+    def clean(self):
+        errors = {}
+        try:
+            method = import_string(self.callable_str)
+            if not callable(method):
+                errors.update({'callable_str': ValidationError('callable_str must be callable')})
+        except (ImportError, ValueError):
+            errors.update({'callable_str': ValidationError('Unable to import callable_str')})
+
+        if self.task:
+            try:
+                task_model = import_string(self.task)
+                if not issubclass(task_model, AbstractTask):
+                    errors.update({'task': ValidationError('task must be an AbstractTask subclass')})
+            except ImportError:
+                errors.update({'task': ValidationError('If present, task must be importable')})
+
+        if self.next_stage and self.pk and self.next_stage.pk == self.pk:
+            errors.update({'next_stage': ValidationError('next_stage must point to a different_stage')})
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.full_clean()
+        super(Stage, self).save(force_insert=False, force_update=False, using=None,
+                                update_fields=None)
 
     def __unicode__(self):
         return u'Stage' + str(self.pk)
@@ -330,7 +362,7 @@ class Synchronizer(models.Model):
         (STAND_BY, "En espera"),
     )
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     status = models.BooleanField(default=False, choices=STATUS_CHOICES)
 
     start_stage = models.ForeignKey(to=Stage, related_name='synchronizer')
@@ -340,7 +372,7 @@ class Synchronizer(models.Model):
         if self.status == self.RUNNING and stage is None:
             raise Exception('El synchronizer ya está corriendo, pero no se pasó la siguiente etapa.')
         stage = stage or self.start_stage
-        self.run_callable(stage.callable_str)
+        run_callable(stage.callable_str)
         stage.status = Stage.ACTIVE
         self.actual_stage = stage
         stage.save()
@@ -358,10 +390,6 @@ class Synchronizer(models.Model):
                 self.save()
             else:
                 self.begin_stage(self.actual_stage.next_stage)
-
-    def run_callable(self, callable_str):
-        method = import_string(callable_str)
-        return method()
 
     def __unicode__(self):
         return self.name

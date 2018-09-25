@@ -38,6 +38,11 @@ def pending_or_running_jobs(queue):
     return pending or running
 
 
+def run_callable(callable_str):
+    method = import_string(callable_str)
+    return method()
+
+
 def import_string(string):
     split = string.split('.')
     module = import_module('.'.join(split[:-1]))

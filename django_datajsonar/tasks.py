@@ -6,7 +6,7 @@ import yaml
 from django.utils import timezone
 from django.conf import settings
 
-from django_rq import job, get_queue
+from django_rq import job
 
 from django_datajsonar.actions import DatasetIndexableToggler
 from django_datajsonar.indexing.tasks import close_read_datajson_task
