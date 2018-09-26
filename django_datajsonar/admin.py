@@ -19,6 +19,7 @@ from .utils import download_config_csv
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata, Synchronizer, Stage
 from .models import Catalog, Dataset, Distribution, Field
+from .models import Synchronizer, Stage
 from .forms import ScheduleJobForm
 
 
@@ -385,3 +386,6 @@ admin.site.register(ReadDataJsonTask, DataJsonAdmin)
 
 admin.site.unregister(RepeatableJob)
 admin.site.register(RepeatableJob, CustomRepeatableJobAdmin)
+
+admin.site.register(Synchronizer)
+admin.site.register(Stage)
