@@ -14,10 +14,10 @@ class Command(BaseCommand):
             next_stage = None
             for stage in process['stages'][::-1]:
                 next_stage, _ = Stage.objects.update_or_create(name=stage['name'],
-                                                            callable_str=stage['callable_str'],
-                                                            queue=stage['queue'],
-                                                            task=stage.get('task', ''),
-                                                            defaults={'next_stage': next_stage})
+                                                               callable_str=stage['callable_str'],
+                                                               queue=stage['queue'],
+                                                               task=stage.get('task', ''),
+                                                               defaults={'next_stage': next_stage})
 
             Synchronizer.objects.update_or_create(name=process['name'],
                                                   defaults={'start_stage': next_stage})
