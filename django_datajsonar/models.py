@@ -290,6 +290,7 @@ class Stage(models.Model):
         (INACTIVE, "Tarea inactiva"),
     )
 
+    name = models.CharField(max_length=100, unique=True)
     status = models.BooleanField(default=False, choices=STATUS_CHOICES)
     callable_str = models.CharField(max_length=100)
     queue = models.CharField(max_length=50)
