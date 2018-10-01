@@ -24,32 +24,31 @@ class SynchronizationTests(TestCase):
             previous_stage = new_stage
         Synchronizer.objects.create(start_stage=new_stage, name='test_synchro')
 
-    def test_create_invalid_stages(self):
+    def test_create_stage_with_no_name(self):
         with self.assertRaises(ValidationError):
-            # No name
             Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
                                  task='django_datajsonar.models.ReadDataJsonTask',
                                  queue='indexing')
 
+    def test_create_stage_with_no_callable(self):
         with self.assertRaises(ValidationError):
-            # No callable
             Stage.objects.create(task='django_datajsonar.models.ReadDataJsonTask',
                                  queue='indexing', name='stage fail')
 
+    def test_create_stage_with_uninportable_callable(self):
         with self.assertRaises(ValidationError):
-            # Uninmportable callable
             Stage.objects.create(callable_str='django_datajsonar.tasks',
                                  task='django_datajsonar.models.ReadDataJsonTask',
                                  queue='indexing', name='stage fail')
 
+    def test_create_stage_with_uninportable_task(self):
         with self.assertRaises(ValidationError):
-            # Uninportable task
             Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
                                  task='django_datajsonar.models',
                                  queue='indexing', name='stage fail')
 
+    def test_save_self_referential_stage(self):
         with self.assertRaises(ValidationError):
-            # Uninportable task
             stage = Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
                                          task='django_datajsonar.models.ReadDatajsonTask',
                                          queue='indexing', name='self referential')
