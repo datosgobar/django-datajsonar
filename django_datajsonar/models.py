@@ -331,7 +331,7 @@ class Stage(models.Model):
                 task_model = import_string(self.task)
                 if not issubclass(task_model, AbstractTask):
                     errors.update({'task': ValidationError('task must be an AbstractTask subclass')})
-            except ImportError:
+            except (ImportError, TypeError):
                 errors.update({'task': ValidationError('If present, task must be importable')})
 
         if self.next_stage and self.pk and self.next_stage.pk == self.pk:

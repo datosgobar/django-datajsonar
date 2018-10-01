@@ -6,6 +6,7 @@ except ImportError:
     from unittest.mock import patch
 
 from django.test import TestCase
+from django.core.exceptions import ValidationError
 
 from django_datajsonar.models import Synchronizer, Stage, ReadDataJsonTask
 from django_datajsonar.synchronizer_tasks import start_synchros, upkeep
@@ -22,6 +23,38 @@ class SynchronizationTests(TestCase):
                                              queue='indexing', next_stage=previous_stage, name='stage ' + str(x))
             previous_stage = new_stage
         Synchronizer.objects.create(start_stage=new_stage, name='test_synchro')
+
+    def test_create_invalid_stages(self):
+        with self.assertRaises(ValidationError):
+            # No name
+            Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
+                                 task='django_datajsonar.models.ReadDataJsonTask',
+                                 queue='indexing')
+
+        with self.assertRaises(ValidationError):
+            # No callable
+            Stage.objects.create(task='django_datajsonar.models.ReadDataJsonTask',
+                                 queue='indexing', name='stage fail')
+
+        with self.assertRaises(ValidationError):
+            # Uninmportable callable
+            Stage.objects.create(callable_str='django_datajsonar.tasks',
+                                 task='django_datajsonar.models.ReadDataJsonTask',
+                                 queue='indexing', name='stage fail')
+
+        with self.assertRaises(ValidationError):
+            # Uninportable task
+            Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
+                                 task='django_datajsonar.models',
+                                 queue='indexing', name='stage fail')
+
+        with self.assertRaises(ValidationError):
+            # Uninportable task
+            stage = Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
+                                         task='django_datajsonar.models.ReadDatajsonTask',
+                                         queue='indexing', name='self referential')
+            stage.next_stage = stage
+            stage.save()
 
     def test_synchronizator_starts_correctly(self):
         synchro = Synchronizer.objects.get(name='test_synchro')
