@@ -180,7 +180,7 @@ Los procesos son un grupo de tareas definidas para correr en un orden particular
 procesos default en los settings de la aplicación. En el archivo de settings definir la lista:
 
 ```
-DEFAULT_TASKS = [
+DEFAULT_PROCESSES = [
     ...
     {
         'name': '<process_name>',

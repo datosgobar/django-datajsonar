@@ -43,5 +43,12 @@ pendientes, `False` en caso contrario. Adicionalmente, si la tarea terminó y ti
 Devuelve la última tarea creada con estado `RUNNING` del modelo definido en `task`. Si el campo
 no está definido o, no hay una tarea corriendo, devuelve `None`
 
+## Uso
+
+Primero es necesario crear y guardar cada etapa armando con ellas la secuencia a seguir. Luego,
+crear el sincronizador apuntando a la etapa inicial. El proceso arranca cuando el sincronizador
+ejecuta `begin_stage()` y va avanzando mediante llamadas de `check_completion()`. Para lograr
+esto, es posible programar 2 repeatable jobs con los callables : `django_datajsonar.synchronizer_tasks.start_synchros`
+y `django_datajsonar.synchronizer_tasks.start_synchros` para hacer estas llamadas periódicas.
 
  
