@@ -307,15 +307,22 @@ class Stage(models.Model):
         except task_model.DoesNotExist:
             return None
 
-    def close_task_if_finished(self):
-        if not pending_or_running_jobs(self.queue):
-            task = self.get_running_task()
-            if task:
-                # Cierra la tarea si quedó abierta
-                task.status = task.FINISHED
-                task.save()
-            return True
-        return False
+    def open_stage(self):
+        run_callable(self.callable_str)
+        self.status = Stage.ACTIVE
+        self.save()
+
+    def close_stage(self):
+        task = self.get_running_task()
+        if task:
+            # Cierra la tarea si quedó abierta
+            task.status = task.FINISHED
+            task.save()
+        self.status = self.INACTIVE
+        self.save()
+
+    def check_completion(self):
+        return not pending_or_running_jobs(self.queue)
 
     def clean(self):
         errors = {}
@@ -373,18 +380,17 @@ class Synchronizer(models.Model):
         if self.status == self.RUNNING and stage is None:
             raise Exception('El synchronizer ya está corriendo, pero no se pasó la siguiente etapa.')
         stage = stage or self.start_stage
-        run_callable(stage.callable_str)
-        stage.status = Stage.ACTIVE
         self.actual_stage = stage
-        stage.save()
         self.save()
+        stage.open_stage()
 
     def check_completion(self):
         if self.status != self.RUNNING:
             raise Exception('El synchronizer no está corriendo')
-        if self.actual_stage.close_task_if_finished():
-            self.actual_stage.status = self.actual_stage.INACTIVE
-            self.actual_stage.save()
+        return self.actual_stage.check_completion()
+
+    def next_stage(self):
+            self.actual_stage.close_stage()
             if self.actual_stage.next_stage is None:
                 self.status = self.STAND_BY
                 self.actual_stage = None

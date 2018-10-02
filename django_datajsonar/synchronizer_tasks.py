@@ -11,7 +11,8 @@ def upkeep():
     """
     synchronizers = Synchronizer.objects.filter(status=Synchronizer.RUNNING)
     for synchro in synchronizers:
-        synchro.check_completion()
+        if synchro.check_completion():
+            synchro.next_stage()
 
 
 def start_synchros():
