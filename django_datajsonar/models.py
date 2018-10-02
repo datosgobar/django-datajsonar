@@ -390,13 +390,13 @@ class Synchronizer(models.Model):
         return self.actual_stage.check_completion()
 
     def next_stage(self):
-            self.actual_stage.close_stage()
-            if self.actual_stage.next_stage is None:
-                self.status = self.STAND_BY
-                self.actual_stage = None
-                self.save()
-            else:
-                self.begin_stage(self.actual_stage.next_stage)
+        self.actual_stage.close_stage()
+        if self.actual_stage.next_stage is None:
+            self.status = self.STAND_BY
+            self.actual_stage = None
+            self.save()
+        else:
+            self.begin_stage(self.actual_stage.next_stage)
 
     def __unicode__(self):
         return self.name
