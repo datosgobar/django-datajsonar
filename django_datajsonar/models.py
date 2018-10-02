@@ -381,6 +381,7 @@ class Synchronizer(models.Model):
         if self.status == self.RUNNING and stage is None:
             raise Exception('El synchronizer ya está corriendo, pero no se pasó la siguiente etapa.')
         stage = stage or self.start_stage
+        self.status = self.RUNNING
         self.actual_stage = stage
         self.save()
         stage.open_stage()
@@ -391,6 +392,8 @@ class Synchronizer(models.Model):
         return self.actual_stage.check_completion()
 
     def next_stage(self):
+        if self.status != self.RUNNING:
+            raise Exception('El synchronizer no está corriendo')
         self.actual_stage.close_stage()
         if self.actual_stage.next_stage is None:
             self.status = self.STAND_BY
