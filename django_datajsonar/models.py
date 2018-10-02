@@ -294,7 +294,7 @@ class Stage(models.Model):
     status = models.BooleanField(default=False, choices=STATUS_CHOICES)
     callable_str = models.CharField(max_length=100)
     queue = models.CharField(max_length=50)
-    next_stage = models.ForeignKey('self', null=True, blank=True)
+    next_stage = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
     task = models.CharField(max_length=200, blank=True)
 
     def get_running_task(self):
@@ -354,9 +354,7 @@ class Stage(models.Model):
                                 update_fields=None)
 
     def __unicode__(self):
-        method = self.callable_str or ''
-        method = method.split('.')[-1]
-        return u'Stage: {} ({})'.format(method, self.queue)
+        return '{} ({})'.format(self.name, self.queue)
 
     def __str__(self):
         return self.__unicode__()
@@ -375,8 +373,9 @@ class Synchronizer(models.Model):
     name = models.CharField(max_length=100, unique=True)
     status = models.BooleanField(default=False, choices=STATUS_CHOICES)
 
-    start_stage = models.ForeignKey(to=Stage, related_name='synchronizer')
-    actual_stage = models.ForeignKey(to=Stage, related_name='running_synchronizer', null=True, blank=True)
+    start_stage = models.ForeignKey(to=Stage, related_name='synchronizer', on_delete=models.PROTECT)
+    actual_stage = models.ForeignKey(to=Stage, related_name='running_synchronizer', null=True, blank=True,
+                                     on_delete=models.PROTECT)
 
     def begin_stage(self, stage=None):
         if self.status == self.RUNNING and stage is None:
