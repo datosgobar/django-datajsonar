@@ -354,7 +354,9 @@ class Stage(models.Model):
                                 update_fields=None)
 
     def __unicode__(self):
-        return u'Stage' + str(self.pk)
+        method = self.callable_str or ''
+        method = method.split('.')[-1]
+        return u'Stage: {} ({})'.format(method, self.queue)
 
     def __str__(self):
         return self.__unicode__()
