@@ -5,6 +5,7 @@ import yaml
 
 from django.utils import timezone
 from django.conf import settings
+
 from django_rq import job
 
 from django_datajsonar.actions import DatasetIndexableToggler
@@ -85,7 +86,7 @@ def schedule_new_read_datajson_task(mode=None):
     try:
         task = ReadDataJsonTask.objects.last()
         if task and task.status == ReadDataJsonTask.RUNNING:
-            return
+            return task
     except ReadDataJsonTask.DoesNotExist:
         pass
 
@@ -98,6 +99,8 @@ def schedule_new_read_datajson_task(mode=None):
         new_task = ReadDataJsonTask.objects.get(id=new_task.id)
         new_task.status = new_task.FINISHED
         new_task.save()
+
+    return new_task
 
 
 def schedule_full_read_task():

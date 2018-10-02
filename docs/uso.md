@@ -174,6 +174,39 @@ tener una tarea con un nombre ya definido en los defaults, llamar el comando act
 con los valores definidos en `DEFAULT_TASKS`)
 
 
+### Definición de procesos default
+
+Los procesos son un grupo de tareas definidas para correr en un orden particular.Es posible definir
+procesos default en los settings de la aplicación. En el archivo de settings definir la lista:
+
+```
+DEFAULT_PROCESSES = [
+    ...
+    {
+        'name': '<process_name>',
+        'tasks': 
+        [
+            ...
+            {
+                'name': '<stage_name>',
+                'callable_str': '<callable_str>',
+                'queue': '<queue name>',
+                'task': (optional) '<task_fully_qualified_name>',
+            },
+            ...
+        ]
+    },
+    ...
+}
+``` 
+
+Cada diccionario define una proceso a ser programado. Dentro del proceso, el campo `task` define
+las etapas a ejecutarse en orden. Llamar al comando `python manage.py schedule_default_processes`
+crea los procesos ahí definidos. (Nota: en caso de tener una tarea con un nombre ya definido en
+los defaults, llamar el comando actualizará este procesos con los valores definidos en
+`DEFAULT_PROCESSES`)
+
+
 ### Definir un storage para las distribuciones 
 
 En los settings se puede definir una clase que herede de `Storage` de django para guardar los archivos de distribuciones: `DATAJSON_AR_DISTRIBUTION_STORAGE`
