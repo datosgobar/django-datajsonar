@@ -49,6 +49,24 @@ Primero es necesario crear y guardar cada etapa armando con ellas la secuencia a
 crear el sincronizador apuntando a la etapa inicial. El proceso arranca cuando el sincronizador
 ejecuta `begin_stage()` y va avanzando mediante llamadas de `check_completion()`. Para lograr
 esto, es posible programar 2 repeatable jobs con los callables : `django_datajsonar.synchronizer_tasks.start_synchros`
-y `django_datajsonar.synchronizer_tasks.start_synchros` para hacer estas llamadas periódicas.
+y `django_datajsonar.synchronizer_tasks.upkeep` para hacer estas llamadas periódicas.
 
- 
+Por ejemplo:
+
+```python
+from django_datajsonar.models import Synchronizer, Stage
+
+stage_1 = Stage.objects.create(callable_str='a_callable', task='a_task', queue='other_queue', name='stage 1')
+stage_2 = Stage.objects.create(callable_str='other_callable', task='other_task', queue='other_queue',
+                               next_stage=stage_1, name='stage 2')
+stage_3 = Stage.objects.create(callable_str='another_callable', queue='another_queue',
+                               next_stage=stage_2, name='stage 2')
+
+
+Synchronizer.objects.create(name='process', start_stage=stage_3)
+```
+
+De esta manera se define un proceso de 3 etapas (3-> 2-> 1). Arranca por stage_3 y termina en
+stage_1. Tanto stage_1 y stage_2 cierran la tarea abierta por sus respectivos callables. El
+proceso comienza cuando el synchronizer ejecuta `begin_stage()` y avanza a medida que corre
+`check_completion()`.
