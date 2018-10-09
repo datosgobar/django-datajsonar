@@ -4,7 +4,7 @@ import datetime
 from django.test import TestCase
 from django.conf import settings
 from django.core.management import call_command
-from django.utils.timezone import localtime
+from django.utils.timezone import now
 
 from scheduler.models import RepeatableJob
 
@@ -45,7 +45,7 @@ class ReadDataJsonTest(TestCase):
             args = [profile['command'] + '_name']
             opts = {'time': ['12', '45']}
             call_command(profile['command'], *args, **opts)
-            start_time = localtime() + datetime.timedelta(days=1)
+            start_time = now() + datetime.timedelta(days=1)
             start_time = start_time.replace(hour=12, minute=45, second=0, microsecond=0)
             self.assertTrue(RepeatableJob.objects.filter(name=profile['command'] + '_name',
                                                          callable=profile['default_callable'],
@@ -147,7 +147,7 @@ class DefaultTaskSchedulingTest(TestCase):
                          RepeatableJob.objects.get(name='Close Indexing Task').callable)
 
     def test_start_times(self):
-        start_time = localtime() + datetime.timedelta(days=1)
+        start_time = now() + datetime.timedelta(days=1)
         start_time = start_time.replace(hour=3, minute=0, second=0, microsecond=0)
         self.assertEqual(start_time,
                          RepeatableJob.objects.get(name='Read Datajson Task').scheduled_time)

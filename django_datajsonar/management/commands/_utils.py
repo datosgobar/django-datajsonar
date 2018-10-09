@@ -1,7 +1,7 @@
 #! coding: utf-8
 import datetime
 
-from django.utils.timezone import localtime
+from django.utils.timezone import now
 from scheduler.models import RepeatableJob
 
 
@@ -33,7 +33,7 @@ def handle_command(options, logger):
         raise e
 
     name = options['name']
-    start_time = localtime() + datetime.timedelta(days=1)
+    start_time = now() + datetime.timedelta(days=1)
     time = [int(component) for component in options['time']]
     start_time = start_time.replace(hour=time[0],
                                     minute=time[1],

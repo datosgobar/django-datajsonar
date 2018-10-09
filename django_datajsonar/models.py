@@ -182,7 +182,7 @@ class BaseRegisterFile(models.Model):
     )
 
     created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(null=True)
+    modified = models.DateTimeField(auto_now=True, null=True)
     indexing_file = models.FileField(upload_to='register_files/')
     uploader = models.ForeignKey(User)
     state = models.CharField(max_length=20, choices=STATE_CHOICES)
