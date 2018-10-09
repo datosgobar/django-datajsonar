@@ -202,7 +202,7 @@ class DatabaseLoader(object):
         changed = distribution_model.data_hash != data_hash
         if changed:
             distribution_model.data_hash = data_hash
-            distribution_model.last_updated = timezone.now()
+            distribution_model.last_updated = timezone.localtime()
             distribution_model.field_set.update(updated=True)
 
         return changed

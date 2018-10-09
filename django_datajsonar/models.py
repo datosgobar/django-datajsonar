@@ -181,7 +181,7 @@ class BaseRegisterFile(models.Model):
         (FAILED, "Error"),
     )
 
-    created = models.DateTimeField()
+    created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(null=True)
     indexing_file = models.FileField(upload_to='register_files/')
     uploader = models.ForeignKey(User)
@@ -191,7 +191,6 @@ class BaseRegisterFile(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if not self.pk:  # first time only
-            self.created = timezone.now()
             self.state = self.UPLOADED
 
         super(BaseRegisterFile, self).save(force_insert, force_update, using, update_fields)
@@ -240,14 +239,13 @@ class AbstractTask(models.Model):
     )
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    created = models.DateTimeField()
+    created = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(null=True)
     logs = models.TextField()
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if not self.pk:  # first time only
-            self.created = timezone.now()
             self.status = self.RUNNING
 
         super(AbstractTask, self).save(force_insert, force_update, using, update_fields)

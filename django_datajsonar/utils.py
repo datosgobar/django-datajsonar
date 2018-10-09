@@ -5,7 +5,7 @@ from importlib import import_module
 import csv
 
 from django.http import HttpResponse
-from django.utils.timezone import now
+from django.utils.timezone import localtime
 
 from rq.registry import StartedJobRegistry
 from django_rq import get_queue, get_connection
@@ -13,7 +13,7 @@ from django_rq import get_queue, get_connection
 
 def download_config_csv(datasets):
     response = HttpResponse(content_type='text/csv')
-    filename = 'config_%s.csv' % now().date()
+    filename = 'config_%s.csv' % localtime().date()
     response['Content-Disposition'] = 'attachment; filename="%s"' % filename
     return generate_csv(datasets, response)
 

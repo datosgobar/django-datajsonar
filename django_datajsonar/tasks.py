@@ -54,7 +54,7 @@ def bulk_whitelist(indexing_file_id):
 
     indexing_file_model.state = state
     indexing_file_model.logs = logs
-    indexing_file_model.modified = timezone.now()
+    indexing_file_model.modified = timezone.localtime()
     indexing_file_model.save()
 
 

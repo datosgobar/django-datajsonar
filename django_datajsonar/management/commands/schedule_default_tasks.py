@@ -3,7 +3,7 @@ import datetime
 
 from django.core.management import BaseCommand
 from django.conf import settings
-from django.utils.timezone import now
+from django.utils.timezone import localtime
 
 from scheduler.models import RepeatableJob
 
@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         tasks = getattr(settings, 'DEFAULT_TASKS', [])
         for task in tasks:
-            start_time = now() + datetime.timedelta(days=1)
+            start_time = localtime() + datetime.timedelta(days=1)
             start_time = start_time.replace(hour=task['start_hour'],
                                             minute=task['start_minute'],
                                             second=0,
