@@ -1,0 +1,69 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static admin_urls %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}"/>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ app_label|capfirst|escape }}</a>
+        &rsaquo; {% if has_change_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">
+        {{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+        &rsaquo; {% trans 'Define new process' %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    {% if synchro_form %}
+    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_new_process' %}" method="post"
+          {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+        {% csrf_token %}
+        <div>
+            {% for fieldset in synchro_form %}
+                {% include "admin/includes/fieldset.html" %}
+            {% endfor %}
+        </div>
+        <div class="submit-row">
+            <input type="submit" name="synchro" value="Submit" class="default"/>
+        </div>
+    </form>
+    {% endif %}
+    {% if stages_form %}
+    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_new_process' %}" method="post"
+          {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+        {% csrf_token %}
+        <div>
+        {{ stages_form.management_form }}
+
+            <table>
+                <thead>
+                    {% for form in stages_form %}
+                        {% if forloop.first %}
+                            {% for field in form %}
+                                <th>{{ field.label_tag }}</th>
+                            {% endfor %}
+                        {% endif %}
+                </thead>
+                <tbody>
+                        <tr>
+                            {% for field in form %}
+                                <td>
+                                    {{ field.errors }}
+                                    {{ field }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="submit-row">
+            <input type="submit" name="stages" value="Submit" class="default"/>
+        </div>
+    </form>
+    {% endif %}
+
+{% endblock %}
