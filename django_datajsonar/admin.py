@@ -19,12 +19,7 @@ from .utils import download_config_csv, generate_stages
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata, Synchronizer, Stage
 from .models import Catalog, Dataset, Distribution, Field
-<<<<<<< HEAD
 from .forms import ScheduleJobForm, SynchroForm, StageFormset, StageForm
-=======
-from .models import Synchronizer, Stage
-from .forms import ScheduleJobForm
->>>>>>> master
 
 
 class EnhancedMetaAdmin(GenericTabularInline):
