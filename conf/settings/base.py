@@ -202,3 +202,26 @@ DEFAULT_TASKS = [
         'interval_unit': 'minutes'
     }
 ]
+
+DEFAULT_PROCESSES = [
+    {
+        'name': "Indexing x 2",
+        'stages': [
+            {
+                'callable_str': 'django_datajsonar.tasks.schedule_new_read_datajson_task',
+                'queue': 'indexing',
+                'task': 'django_datajsonar.models.ReadDataJsonTask'
+
+            },
+            {
+
+                'callable_str': 'django_datajsonar.tasks.schedule_new_read_datajson_task',
+                'queue': 'indexing'
+            },
+            {
+                'callable_str': 'django_datajsonar.indexing.tasks.close_read_datajson_task',
+                'queue': 'default'
+            }
+        ],
+    }
+]

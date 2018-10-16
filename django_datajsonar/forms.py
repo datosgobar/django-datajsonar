@@ -28,7 +28,7 @@ class ScheduleJobForm(forms.ModelForm):
         time = self.cleaned_data['scheduled_time']
         datetime = datetime.replace(hour=time.hour, minute=time.minute, second=0, microsecond=0)
         # Si la hora está en el pasado, lo programo para el día siguiente
-        if datetime < timezone.now():
+        if datetime < timezone.localtime():
             datetime = datetime + timedelta(days=1)
 
         return datetime

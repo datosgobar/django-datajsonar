@@ -7,9 +7,15 @@ except ImportError:
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
+from django.conf import settings
 
 from django_datajsonar.models import Synchronizer, Stage, ReadDataJsonTask
 from django_datajsonar.synchronizer_tasks import start_synchros, upkeep
+
+
+def callable_method():
+    pass
 
 
 class SynchronizationTests(TestCase):
@@ -122,3 +128,71 @@ class SynchronizationTests(TestCase):
         for x in range(0, 3):
             upkeep()
         self.assertEqual(3, ReadDataJsonTask.objects.filter(status=ReadDataJsonTask.FINISHED).count())
+
+
+class DefaultTaskSchedulingTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        defaults = [
+            {
+                'name': 'synchro_1',
+                'stages':
+                    [
+                        {
+                            'name': 'stage_1',
+                            'callable_str': 'django_datajsonar.tests.synchro_tests.callable_method',
+                            'queue': 'default'
+                        },
+                        {
+                            'name': 'stage_2',
+                            'callable_str': 'django_datajsonar.tasks.schedule_new_read_datajson_task',
+                            'task': 'django_datajsonar.models.ReadDataJsonTask',
+                            'queue': 'indexing'
+                        },
+                    ]
+            },
+            {
+                'name': 'synchro_2',
+                'stages':
+                    [
+                        {
+                            'name': 'stage_3',
+                            'callable_str': 'django_datajsonar.tasks.schedule_new_read_datajson_task',
+                            'task': 'django_datajsonar.models.ReadDataJsonTask',
+                            'queue': 'indexing'
+                        },
+                        {
+                            'name': 'stage_4',
+                            'callable_str': 'django_datajsonar.tests.synchro_tests.callable_method',
+                            'queue': 'default'
+                        },
+                    ]
+            }
+        ]
+        setattr(settings, 'DEFAULT_PROCESSES', defaults)
+        call_command('schedule_default_processes')
+
+    def test_create_stages(self):
+        self.assertEqual(4, Stage.objects.all().count())
+        self.assertEqual(2, Stage.objects.
+                         filter(callable_str='django_datajsonar.tests.synchro_tests.callable_method').count())
+        self.assertEqual(2, Stage.objects.filter(task='django_datajsonar.models.ReadDataJsonTask').count())
+        self.assertEqual(2, Stage.objects.filter(queue='indexing').count())
+
+    def test_create_synchronizers(self):
+        self.assertEqual(2, Synchronizer.objects.all().count())
+        self.assertEqual(1, Synchronizer.objects.filter(name='synchro_1').count())
+        self.assertEqual(1, Synchronizer.objects.filter(name='synchro_2').count())
+
+    def test_processes_get_updated(self):
+        synchro_1 = Synchronizer.objects.get(name='synchro_1')
+        synchro_2 = Synchronizer.objects.get(name='synchro_2')
+        synchro_1.start_stage = synchro_2.start_stage
+        synchro_1.save()
+        call_command('schedule_default_processes')
+        self.assertEqual(2, Synchronizer.objects.all().count())
+        self.assertEqual(4, Stage.objects.all().count())
+        synchro_1.refresh_from_db()
+        synchro_2.refresh_from_db()
+        self.assertNotEqual(synchro_1.start_stage, synchro_2.start_stage)
