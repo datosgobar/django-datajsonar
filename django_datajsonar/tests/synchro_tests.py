@@ -61,6 +61,12 @@ class SynchronizationTests(TestCase):
             stage.next_stage = stage
             stage.save()
 
+    def test_save_with_bad_queue(self):
+        with self.assertRaises(ValidationError):
+            Stage.objects.create(callable_str='django_datajsonar.tasks.schedule_new_read_datajson_task',
+                                 task='django_datajsonar.models.ReadDatajsonTask',
+                                 queue='bad_queue', name='stage fail')
+
     def test_synchronizator_starts_correctly(self):
         synchro = Synchronizer.objects.get(name='test_synchro')
         self.assertEqual(Synchronizer.STAND_BY, synchro.status)

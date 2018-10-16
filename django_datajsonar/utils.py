@@ -48,3 +48,18 @@ def import_string(string):
     module = import_module('.'.join(split[:-1]))
     attribute = getattr(module, split[-1], None)
     return attribute
+
+
+def generate_stages(stages_formset):
+    next_stage = None
+    for stage_form in stages_formset.forms[::-1]:
+        if stage_form.has_changed():
+            stage_form.instance.next_stage = next_stage
+            stage_form.instance.save()
+            next_stage = stage_form.instance
+
+    return [form.instance for form in stages_formset if form.instance]
+
+
+def get_qualified_name(target_class):
+    return target_class.__module__ + '.' + target_class.__name__

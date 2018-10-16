@@ -3,10 +3,14 @@
 from datetime import timedelta
 
 from django import forms
+from django.conf import settings
 from django.utils import timezone
 from django.contrib.admin.widgets import AdminTimeWidget
 
 from scheduler.models import RepeatableJob
+
+from django_datajsonar.models import Synchronizer, Stage, AbstractTask
+from django_datajsonar.utils import get_qualified_name
 
 
 class ScheduleJobForm(forms.ModelForm):
@@ -28,3 +32,30 @@ class ScheduleJobForm(forms.ModelForm):
             datetime = datetime + timedelta(days=1)
 
         return datetime
+
+
+class SynchroForm(forms.ModelForm):
+    name = forms.CharField(max_length=50)
+    stages_amount = forms.IntegerField(min_value=1)
+
+    class Meta:
+        model = Synchronizer
+        exclude = ['start_stage', 'actual_stage', 'status']
+
+
+class StageForm(forms.ModelForm):
+
+    queue = forms.ChoiceField(choices=[(queue, queue) for queue in settings.RQ_QUEUES])
+    task = forms.ChoiceField(choices=[(get_qualified_name(subclass), subclass.__name__)
+                                      for subclass in AbstractTask.__subclasses__()] + [(None, "")],
+                             required=False, )
+
+    class Meta:
+        model = Stage
+        exclude = ('next_stage', 'status')
+
+
+class StageFormset(forms.BaseFormSet):
+    def __init__(self, *args, **kwargs):
+        super(StageFormset, self).__init__(*args, **kwargs)
+        self.queryset = Stage.objects.none()
