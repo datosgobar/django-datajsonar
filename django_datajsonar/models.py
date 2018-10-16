@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from .utils import pending_or_running_jobs, import_string, run_callable
+from django_datajsonar.utils import pending_or_running_jobs, import_string, run_callable
 
 
 class Metadata(models.Model):
@@ -333,12 +333,15 @@ class Stage(models.Model):
         except (ImportError, ValueError):
             errors.update({'callable_str': ValidationError('Unable to import callable_str')})
 
+        if self.queue not in settings.RQ_QUEUES:
+            errors.update({'queue': ValidationError('Must be a settings defined queue')})
+
         if self.task:
             try:
                 task_model = import_string(self.task)
                 if not issubclass(task_model, AbstractTask):
                     errors.update({'task': ValidationError('task must be an AbstractTask subclass')})
-            except (ImportError, TypeError):
+            except (ImportError, TypeError, ValueError):
                 errors.update({'task': ValidationError('If present, task must be importable')})
 
         if self.next_stage and self.pk and self.next_stage.pk == self.pk:
