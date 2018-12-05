@@ -2,9 +2,10 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.forms.models import modelformset_factory
 from django.contrib import admin, messages
-from django.contrib.admin import helpers
+from django.contrib.admin import helpers, SimpleListFilter
 from django.utils import timezone
 from django.conf.urls import url
 from django.contrib.contenttypes.admin import GenericTabularInline
@@ -422,6 +423,31 @@ class SynchronizerAdmin(admin.ModelAdmin):
                                                     self.get_prepopulated_fields(request))
         context['stages_form'] = stages_form
         return render(request, 'synchronizer.html', context)
+
+
+class EnhancedMetaFilter(SimpleListFilter):
+    def lookups(self, request, model_admin):
+        return (
+            ('catalog', 'Catálogo'),
+            ('dataset', 'Dataset'),
+            ('distribution', 'Distribución'),
+            ('field', 'Campo'),
+        )
+
+    title = 'Instancia'
+    parameter_name = 'content_object'
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        return queryset.filter(content_type=ContentType.objects.get(app_label='django_datajsonar',
+                                                                    model=self.value()))
+
+
+@admin.register(Metadata)
+class MetadataAdmin(admin.ModelAdmin):
+    list_filter = (EnhancedMetaFilter, 'key')
+    list_display = ('content_type', 'key', 'value')
 
 
 admin.site.register(Catalog, CatalogAdmin)
