@@ -447,7 +447,22 @@ class EnhancedMetaFilter(SimpleListFilter):
 @admin.register(Metadata)
 class MetadataAdmin(admin.ModelAdmin):
     list_filter = (EnhancedMetaFilter, 'key')
-    list_display = ('content_type', 'key', 'value')
+    list_display = ('get_entity_content_type', 'get_entity_identifier', 'get_entity_title', 'key', 'value')
+
+    def get_entity_content_type(self, metadata):
+        result = str(metadata.content_type).capitalize()
+        return result
+    get_entity_content_type.short_description = 'Tipo Entidad'
+
+    def get_entity_title(self, metadata):
+        result = metadata.content_object.title
+        return result
+    get_entity_title.short_description = 'Título'
+
+    def get_entity_identifier(self, metadata):
+        result = metadata.content_object.identifier or ''
+        return result
+    get_entity_identifier.short_description = 'ID'
 
 
 admin.site.register(Catalog, CatalogAdmin)
