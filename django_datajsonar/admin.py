@@ -18,7 +18,7 @@ from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
 from .utils import download_config_csv, generate_stages
 from .tasks import bulk_whitelist, read_datajson
-from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata, Synchronizer, Stage
+from .models import DatasetIndexingFile, NodeRegisterFile, Node, NodeMetadata, ReadDataJsonTask, Metadata, Synchronizer, Stage
 from .models import Catalog, Dataset, Distribution, Field, Jurisdiction
 from .forms import ScheduleJobForm, SynchroForm, StageFormset, StageForm
 
@@ -239,9 +239,14 @@ class NodeRegisterFileAdmin(BaseRegisterFileAdmin):
             process_node_register_file_action(model)
 
 
+class InlineNodeMetadata(admin.StackedInline):
+    model = NodeMetadata
+
+
 class NodeAdmin(admin.ModelAdmin):
     list_display = ('catalog_id', 'indexable')
     exclude = ('catalog',)
+    inlines = (InlineNodeMetadata,)
     actions = ('delete_model', 'run_indexing', 'make_indexable', 'make_unindexable')
 
     def get_actions(self, request):
