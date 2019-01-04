@@ -224,6 +224,32 @@ class Jurisdiction(models.Model):
 
 
 class Node(models.Model):
+
+    catalog_id = models.CharField(max_length=100, unique=True)
+    catalog_url = models.URLField()
+    indexable = models.BooleanField()
+    catalog = models.TextField(default='{}')
+    admins = models.ManyToManyField(User, blank=True)
+    register_date = models.DateField(default=timezone.now)
+    release_date = models.DateField(null=True, blank=True)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if self.release_date is None and self.indexable is True:
+            self.release_date = timezone.now().date()
+        super(Node, self).save(force_insert, force_update, using, update_fields)
+
+    def __unicode__(self):
+        return self.catalog_id
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+class NodeMetadata(models.Model):
+    class Meta:
+        verbose_name = verbose_name_plural = "Node Metadata"
+
     CKAN = "ckan"
     XLSX = "xlsx"
     JSON = "json"
@@ -249,12 +275,6 @@ class Node(models.Model):
         (CKAN, "CKAN"),
         (OTHER, "Otros")
     )
-
-    catalog_id = models.CharField(max_length=100, unique=True)
-    catalog_url = models.URLField()
-    indexable = models.BooleanField()
-    catalog = models.TextField(default='{}')
-    admins = models.ManyToManyField(User, blank=True)
     catalog_format = models.CharField(max_length=20, choices=FORMATS,
                                       null=True, blank=True)
     argentinagobar_id = models.CharField(max_length=50, null=True, blank=True)
@@ -263,27 +283,13 @@ class Node(models.Model):
                                 null=True, blank=True)
     types = models.CharField(max_length=20, choices=TYPES,
                              null=True, blank=True)
-    jurisdiction = models.ForeignKey(to=Jurisdiction,
-                                     related_name='jurisdiction', null=True,
+    jurisdiction = models.ForeignKey(to=Jurisdiction, null=True,
                                      blank=True, on_delete=models.SET_NULL)
     json_url = models.URLField(null=True, blank=True)
     xlsx_url = models.URLField(null=True, blank=True)
     datosgobar_url = models.URLField(null=True, blank=True)
     homepage_url = models.URLField(null=True, blank=True)
-    register_date = models.DateField(default=timezone.now)
-    release_date = models.DateField(null=True, blank=True)
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        if self.release_date is None and self.indexable is True:
-            self.release_date = timezone.now()
-        super(Node, self).save(force_insert, force_update, using, update_fields)
-
-    def __unicode__(self):
-        return self.catalog_id
-
-    def __str__(self):
-        return self.__unicode__()
+    node = models.OneToOneField(Node, on_delete=models.CASCADE)
 
 
 class AbstractTask(models.Model):
