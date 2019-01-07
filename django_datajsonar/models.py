@@ -212,6 +212,17 @@ class DatasetIndexingFile(BaseRegisterFile):
         return self.__unicode__()
 
 
+class Jurisdiction(models.Model):
+    jurisdiction_title = models.CharField(max_length=100, unique=True)
+    jurisdiction_id = models.CharField(max_length=100, unique=True)
+
+    def __unicode__(self):
+        return "%s" % self.jurisdiction_title
+
+    def __str__(self):
+        return self.__unicode__()
+
+
 class Node(models.Model):
 
     catalog_id = models.CharField(max_length=100, unique=True)
@@ -219,12 +230,67 @@ class Node(models.Model):
     indexable = models.BooleanField()
     catalog = models.TextField(default='{}')
     admins = models.ManyToManyField(User, blank=True)
+    register_date = models.DateField(default=timezone.now)
+    release_date = models.DateField(null=True, blank=True)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if self.release_date is None and self.indexable is True:
+            self.release_date = timezone.now().date()
+        super(Node, self).save(force_insert, force_update, using, update_fields)
 
     def __unicode__(self):
         return self.catalog_id
 
     def __str__(self):
         return self.__unicode__()
+
+
+class NodeMetadata(models.Model):
+    class Meta:
+        verbose_name = verbose_name_plural = "Node Metadata"
+
+    CKAN = "ckan"
+    XLSX = "xlsx"
+    JSON = "json"
+    FORMATS = (
+        (CKAN, "Portal CKAN"),
+        (XLSX, "Catálogo XLSX"),
+        (JSON, "Catálogo JSON"),
+    )
+
+    CENTRAL = "central"
+    NO_CENTRAL = "no-central"
+    CATEGORIES = (
+        (CENTRAL, "Catálogo central"),
+        (NO_CENTRAL, "Catálogo no central")
+    )
+
+    ANDINO = "andino"
+    EXCEL = "excel"
+    OTHER = "other"
+    TYPES = (
+        (ANDINO, "Andino"),
+        (EXCEL, "Excel"),
+        (CKAN, "CKAN"),
+        (OTHER, "Otros")
+    )
+    catalog_format = models.CharField(max_length=20, choices=FORMATS,
+                                      null=True, blank=True)
+    argentinagobar_id = models.CharField(max_length=50, null=True, blank=True)
+    catalog_label = models.CharField(max_length=100, null=True, blank=True)
+    category = models.CharField(max_length=20, choices=CATEGORIES,
+                                null=True, blank=True)
+    types = models.CharField(max_length=20, choices=TYPES,
+                             null=True, blank=True)
+    jurisdiction = models.ForeignKey(to=Jurisdiction, null=True,
+                                     blank=True, on_delete=models.SET_NULL)
+    json_url = models.URLField(null=True, blank=True)
+    xlsx_url = models.URLField(null=True, blank=True)
+    datosgobar_url = models.URLField(null=True, blank=True)
+    homepage_url = models.URLField(null=True, blank=True)
+    node = models.OneToOneField(Node, on_delete=models.CASCADE,
+                                primary_key=True)
 
 
 class AbstractTask(models.Model):
@@ -248,7 +314,8 @@ class AbstractTask(models.Model):
         if not self.pk:  # first time only
             self.status = self.RUNNING
 
-        super(AbstractTask, self).save(force_insert, force_update, using, update_fields)
+        super(AbstractTask, self).save(force_insert, force_update,
+                                       using, update_fields)
 
     def __unicode__(self):
         return "Task at %s" % self._format_date(self.created)

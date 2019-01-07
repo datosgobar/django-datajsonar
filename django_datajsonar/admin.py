@@ -18,8 +18,8 @@ from .views import config_csv
 from .actions import process_node_register_file_action, confirm_delete
 from .utils import download_config_csv, generate_stages
 from .tasks import bulk_whitelist, read_datajson
-from .models import DatasetIndexingFile, NodeRegisterFile, Node, ReadDataJsonTask, Metadata, Synchronizer, Stage
-from .models import Catalog, Dataset, Distribution, Field
+from .models import DatasetIndexingFile, NodeRegisterFile, Node, NodeMetadata, ReadDataJsonTask, Metadata, Synchronizer, Stage
+from .models import Catalog, Dataset, Distribution, Field, Jurisdiction
 from .forms import ScheduleJobForm, SynchroForm, StageFormset, StageForm
 
 
@@ -239,10 +239,14 @@ class NodeRegisterFileAdmin(BaseRegisterFileAdmin):
             process_node_register_file_action(model)
 
 
-class NodeAdmin(admin.ModelAdmin):
+class InlineNodeMetadata(admin.StackedInline):
+    model = NodeMetadata
 
+
+class NodeAdmin(admin.ModelAdmin):
     list_display = ('catalog_id', 'indexable')
     exclude = ('catalog',)
+    inlines = (InlineNodeMetadata,)
     actions = ('delete_model', 'run_indexing', 'make_indexable', 'make_unindexable')
 
     def get_actions(self, request):
@@ -276,8 +280,8 @@ class AbstractTaskAdmin(admin.ModelAdmin):
     # Clase del modelo asociado
     model = None
 
-    # Task (callable) a correr asincrónicamente. Por default recible solo una instancia
-    # del AbstractTask asociado a este admin, overridear save_model
+    # Task (callable) a correr asincrónicamente. Por default recible solo una
+    # instancia del AbstractTask asociado a este admin, overridear save_model
     # si se quiere otro comportamiento
     task = None
 
@@ -469,6 +473,7 @@ admin.site.register(Catalog, CatalogAdmin)
 admin.site.register(Dataset, DatasetAdmin)
 admin.site.register(Distribution, DistributionAdmin)
 admin.site.register(Field, FieldAdmin)
+admin.site.register(Jurisdiction)
 
 admin.site.register(DatasetIndexingFile, DatasetIndexingFileAdmin)
 admin.site.register(NodeRegisterFile, NodeRegisterFileAdmin)
