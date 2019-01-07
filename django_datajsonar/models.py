@@ -213,8 +213,8 @@ class DatasetIndexingFile(BaseRegisterFile):
 
 
 class Jurisdiction(models.Model):
-    jurisdiction_title = models.CharField(max_length=100)
-    jurisdiction_id = models.CharField(max_length=100)
+    jurisdiction_title = models.CharField(max_length=100, unique=True)
+    jurisdiction_id = models.CharField(max_length=100, unique=True)
 
     def __unicode__(self):
         return "%s" % self.jurisdiction_title
@@ -289,7 +289,8 @@ class NodeMetadata(models.Model):
     xlsx_url = models.URLField(null=True, blank=True)
     datosgobar_url = models.URLField(null=True, blank=True)
     homepage_url = models.URLField(null=True, blank=True)
-    node = models.OneToOneField(Node, on_delete=models.CASCADE)
+    node = models.OneToOneField(Node, on_delete=models.CASCADE,
+                                primary_key=True)
 
 
 class AbstractTask(models.Model):
