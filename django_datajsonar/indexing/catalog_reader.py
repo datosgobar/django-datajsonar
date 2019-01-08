@@ -5,9 +5,10 @@ import json
 from django.conf import settings
 from django_rq import job
 from pydatajson import DataJson
+from pydatajson.custom_exceptions import NonParseableCatalog
 
 from django_datajsonar.models import Dataset, Catalog, Distribution, Field
-from django_datajsonar.models import ReadDataJsonTask
+from django_datajsonar.models import ReadDataJsonTask, NodeMetadata
 from .database_loader import DatabaseLoader
 from .strings import READ_ERROR
 from .utils import log_exception
@@ -33,11 +34,16 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         catalog_model[0].save()
 
     try:
-        catalog = DataJson(node.catalog_url)
+        try:
+            metadata = NodeMetadata.objects.get(node=node)
+            dj_format = metadata.catalog_format
+        except NodeMetadata.DoesNotExist:
+            dj_format = None
+        catalog = DataJson(node.catalog_url, dj_format=dj_format)
         catalog.generate_distribution_ids()
         node.catalog = json.dumps(catalog)
         node.save()
-    except Exception as e:
+    except NonParseableCatalog as e:
         if catalog_model:
             catalog_model[0].present = False
             catalog_model[0].error = True
