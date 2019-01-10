@@ -34,12 +34,7 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         catalog_model[0].save()
 
     try:
-        try:
-            metadata = NodeMetadata.objects.get(node=node)
-            dj_format = metadata.catalog_format
-        except NodeMetadata.DoesNotExist:
-            dj_format = None
-        catalog = DataJson(node.catalog_url, dj_format=dj_format)
+        catalog = DataJson(node.catalog_url, catalog_format=node.catalog_format)
         catalog.generate_distribution_ids()
         node.catalog = json.dumps(catalog)
         node.save()

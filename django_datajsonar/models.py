@@ -224,12 +224,22 @@ class Jurisdiction(models.Model):
 
 
 class Node(models.Model):
+    CKAN = "ckan"
+    XLSX = "xlsx"
+    JSON = "json"
+    FORMATS = (
+        (CKAN, "Portal CKAN"),
+        (XLSX, "Catálogo XLSX"),
+        (JSON, "Catálogo JSON"),
+    )
 
     catalog_id = models.CharField(max_length=100, unique=True)
     catalog_url = models.URLField()
     indexable = models.BooleanField()
     catalog = models.TextField(default='{}')
     admins = models.ManyToManyField(User, blank=True)
+    catalog_format = models.CharField(max_length=20, choices=FORMATS,
+                                      null=True, blank=True)
     register_date = models.DateField(default=timezone.now)
     release_date = models.DateField(null=True, blank=True)
 
@@ -250,15 +260,6 @@ class NodeMetadata(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "Node Metadata"
 
-    CKAN = "ckan"
-    XLSX = "xlsx"
-    JSON = "json"
-    FORMATS = (
-        (CKAN, "Portal CKAN"),
-        (XLSX, "Catálogo XLSX"),
-        (JSON, "Catálogo JSON"),
-    )
-
     CENTRAL = "central"
     NO_CENTRAL = "no-central"
     CATEGORIES = (
@@ -269,14 +270,13 @@ class NodeMetadata(models.Model):
     ANDINO = "andino"
     EXCEL = "excel"
     OTHER = "other"
+    CKAN = "ckan"
     TYPES = (
         (ANDINO, "Andino"),
         (EXCEL, "Excel"),
         (CKAN, "CKAN"),
         (OTHER, "Otros")
     )
-    catalog_format = models.CharField(max_length=20, choices=FORMATS,
-                                      null=True, blank=True)
     argentinagobar_id = models.CharField(max_length=50, null=True, blank=True)
     catalog_label = models.CharField(max_length=100, null=True, blank=True)
     category = models.CharField(max_length=20, choices=CATEGORIES,
