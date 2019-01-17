@@ -247,7 +247,7 @@ class NodeAdmin(admin.ModelAdmin):
     list_display = ('catalog_id', 'indexable')
     exclude = ('catalog',)
     inlines = (InlineNodeMetadata,)
-    actions = ('run_indexing', 'make_indexable', 'make_unindexable')
+    actions = ('make_indexable', 'make_unindexable')
 
     def make_unindexable(self, _, queryset):
         queryset.update(indexable=False)
