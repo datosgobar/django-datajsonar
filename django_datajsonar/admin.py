@@ -247,14 +247,7 @@ class NodeAdmin(admin.ModelAdmin):
     list_display = ('catalog_id', 'indexable')
     exclude = ('catalog',)
     inlines = (InlineNodeMetadata,)
-    actions = ('delete_model', 'run_indexing', 'make_indexable', 'make_unindexable')
-
-    def get_actions(self, request):
-        # Borro la acción de borrado default
-        actions = super(NodeAdmin, self).get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']
-        return actions
+    actions = ('run_indexing', 'make_indexable', 'make_unindexable')
 
     def make_unindexable(self, _, queryset):
         queryset.update(indexable=False)
@@ -263,12 +256,6 @@ class NodeAdmin(admin.ModelAdmin):
     def make_indexable(self, _, queryset):
         queryset.update(indexable=True)
     make_indexable.short_description = 'Marcar como indexable'
-
-    def delete_model(self, _, queryset):
-        register_files = NodeRegisterFile.objects.all()
-        for node in queryset:
-            if node.indexable:
-                confirm_delete(node, register_files)
 
 
 class AbstractTaskAdmin(admin.ModelAdmin):
