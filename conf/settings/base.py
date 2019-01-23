@@ -228,12 +228,12 @@ DEFAULT_PROCESSES = [
 
 DATAJSONAR_STAGES = {
     'Read Datajson (complete)': {
-        'callable_str': 'django_datajsonar.tasks.schedule_new_read_datajson_task',
+        'callable_str': 'django_datajsonar.tasks.schedule_full_read_task',
         'queue': 'indexing',
         'task': 'django_datajsonar.models.ReadDataJsonTask',
     },
     'Read Datajson (metadata only)': {
-        'callable_str': 'django_datajsonar.tasks.schedule_new_read_datajson_task',
+        'callable_str': 'django_datajsonar.tasks.schedule_metadata_read_task',
         'queue': 'indexing',
         'task': 'django_datajsonar.models.ReadDataJsonTask',
     },

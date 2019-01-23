@@ -206,6 +206,32 @@ crea los procesos ahí definidos. (Nota: en caso de tener una tarea con un nombr
 los defaults, llamar el comando actualizará este procesos con los valores definidos en
 `DEFAULT_PROCESSES`)
 
+### Creación de nuevos procesos
+
+La creación de procesos nuevos a ser corrido con sincronizadores se puede hacer de manera sencilla a través
+de la acción "New Process" en la vista del modelo Synchronizer en el panel de administración.
+Para ello, es necesario que la aplicación defina en sus `settings.py` un diccionario de tareas disponibles para
+ser utilizadas en las colas. El formato es muy parecido al anterior `DEFAULT_PROCESSES`. A continuación un ejemplo
+
+```python
+DATAJSONAR_STAGES = {
+    'Read Datajson (complete)': {
+        'callable_str': 'django_datajsonar.tasks.schedule_full_read_task',
+        'queue': 'indexing',
+        'task': 'django_datajsonar.models.ReadDataJsonTask',
+    },
+    'Read Datajson (metadata only)': {
+        'callable_str': 'django_datajsonar.tasks.schedule_metadata_read_task',
+        'queue': 'indexing',
+        'task': 'django_datajsonar.models.ReadDataJsonTask',
+    },
+}
+```
+
+Las funciones callable deben poder aceptar ningún argumento, y las colas corresponden a colas con workers
+habilitados de `django-rq`. Los modelos `task` deben heredar de `django_datajsonar.models.AbstractTask`.
+Por último, los nombres de las claves se utilizarán para identificar las tareas en la interfaz del administrador.
+
 
 ### Definir un storage para las distribuciones 
 
