@@ -34,25 +34,30 @@ class ScheduleJobForm(forms.ModelForm):
         return datetime
 
 
-class SynchroForm(forms.ModelForm):
+class SynchroForm(forms.Form):
     name = forms.CharField(max_length=50)
-    stages_amount = forms.IntegerField(min_value=1)
 
     class Meta:
         model = Synchronizer
         exclude = ['start_stage', 'actual_stage', 'status']
 
+    def create_synchronizer(self, start_stage):
+        return Synchronizer.objects.create(name=self.cleaned_data['name'], start_stage=start_stage)
 
-class StageForm(forms.ModelForm):
 
-    queue = forms.ChoiceField(choices=[(queue, queue) for queue in settings.RQ_QUEUES])
-    task = forms.ChoiceField(choices=[(get_qualified_name(subclass), subclass.__name__)
-                                      for subclass in AbstractTask.__subclasses__()] + [(None, "")],
+class StageForm(forms.Form):
+    task = forms.ChoiceField(choices=[(x, x) for x in settings.DATAJSONAR_STAGES.keys()],
                              required=False, )
 
     class Meta:
         model = Stage
-        exclude = ('next_stage', 'status')
+        exclude = ('next_stage', 'status', 'name', 'callable_str', 'queue')
+
+    def get_stage(self, name):
+        task = self.cleaned_data['task']
+
+        data = settings.DATAJSONAR_STAGES[task]
+        return Stage.objects.update_or_create(name=name, defaults=data)[0]
 
 
 class StageFormset(forms.BaseFormSet):
