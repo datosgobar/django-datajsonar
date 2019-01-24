@@ -3,7 +3,7 @@ django-environ==0.4.1
 requests>=2.18.2,<3
 python-dateutil==2.6.1
 iso8601==0.1.12
-pydatajson>=0.3.21
+pydatajson>=0.4.33
 django-rq==1.0.1
 pyyaml
 django-rq-scheduler==1.1.1

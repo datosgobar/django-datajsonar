@@ -50,15 +50,27 @@ def import_string(string):
     return attribute
 
 
-def generate_stages(stages_formset):
+def generate_stages(forms, name_prefix):
     next_stage = None
-    for stage_form in stages_formset.forms[::-1]:
-        if stage_form.has_changed():
-            stage_form.instance.next_stage = next_stage
-            stage_form.instance.save()
-            next_stage = stage_form.instance
+    stages = []
+    repeated_names = {}
+    for stage_form in forms:
+        task = stage_form.cleaned_data['task']
+        base_name = '{}: {}'.format(name_prefix, task)
+        name = base_name
+        if base_name in repeated_names.keys():
+            name += ' ({})'.format(repeated_names.get(name))
 
-    return [form.instance for form in stages_formset if form.instance]
+        repeated_names[base_name] = repeated_names.setdefault(base_name, 1) + 1
+        stage = stage_form.get_stage(name)
+        stages.append(stage)
+
+    for stage in stages[::-1]:
+        stage.next_stage = next_stage
+        stage.save()
+        next_stage = stage
+
+    return stages
 
 
 def get_qualified_name(target_class):

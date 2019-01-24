@@ -17,24 +17,14 @@
 {% endblock %}
 
 {% block content %}
-    {% if synchro_form %}
     <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_new_process' %}" method="post"
-          {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
+        {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} id="synchroForm">
         {% csrf_token %}
         <div>
             {% for fieldset in synchro_form %}
                 {% include "admin/includes/fieldset.html" %}
             {% endfor %}
         </div>
-        <div class="submit-row">
-            <input type="submit" name="synchro" value="Submit" class="default"/>
-        </div>
-    </form>
-    {% endif %}
-    {% if stages_form %}
-    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_new_process' %}" method="post"
-          {% if form.is_multipart %}enctype="multipart/form-data"{% endif %}>
-        {% csrf_token %}
         <div>
         {{ stages_form.management_form }}
 
@@ -64,6 +54,12 @@
             <input type="submit" name="stages" value="Submit" class="default"/>
         </div>
     </form>
-    {% endif %}
+<script src="{% static 'django_datajsonar/js/jquery-3.3.1.min.js' %}"></script>
+<script src="{% static 'django_datajsonar/js/jquery.formset.js' %}"></script>
+<script type="text/javascript">
+    $(function() {
+        $('#synchroForm tbody tr').formset();
+    })
+</script>
 
 {% endblock %}
