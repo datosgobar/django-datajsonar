@@ -102,9 +102,11 @@ def schedule_new_read_datajson_task(mode=None):
     return new_task
 
 
+@job("indexing")
 def schedule_full_read_task():
     return schedule_new_read_datajson_task(mode=ReadDataJsonTask.COMPLETE_RUN)
 
 
+@job("indexing")
 def schedule_metadata_read_task():
     return schedule_new_read_datajson_task(mode=ReadDataJsonTask.METADATA_ONLY)
