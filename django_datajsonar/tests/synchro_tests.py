@@ -17,7 +17,7 @@ from django_datajsonar.synchronizer_tasks import start_synchros, upkeep
 
 @job("default")
 def callable_method():
-    pass
+    ReadDataJsonTask.objects.create()
 
 
 class SynchronizationTests(TestCase):
@@ -123,6 +123,14 @@ class SynchronizationTests(TestCase):
         synchro.refresh_from_db()
         self.assertEqual(Synchronizer.STAND_BY, synchro.status)
         self.assertIsNone(synchro.actual_stage)
+
+    @patch('django_datajsonar.models.pending_or_running_jobs')
+    def test_stage_closes_task_when_finished(self, mock_queue):
+        mock_queue.return_value = False
+        start_synchros()
+        for x in range(0, 3):
+            upkeep()
+        self.assertEqual(3, ReadDataJsonTask.objects.filter(status=ReadDataJsonTask.FINISHED).count())
 
 
 class DefaultTaskSchedulingTest(TestCase):
