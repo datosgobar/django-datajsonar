@@ -224,12 +224,22 @@ class Jurisdiction(models.Model):
 
 
 class Node(models.Model):
+    CKAN = "ckan"
+    XLSX = "xlsx"
+    JSON = "json"
+    FORMATS = (
+        (CKAN, "Portal CKAN"),
+        (XLSX, "Catálogo XLSX"),
+        (JSON, "Catálogo JSON"),
+    )
 
     catalog_id = models.CharField(max_length=100, unique=True)
     catalog_url = models.URLField()
     indexable = models.BooleanField()
     catalog = models.TextField(default='{}')
     admins = models.ManyToManyField(User, blank=True)
+    catalog_format = models.CharField(max_length=20, choices=FORMATS,
+                                      null=True, blank=True)
     register_date = models.DateField(default=timezone.now)
     release_date = models.DateField(null=True, blank=True)
 
@@ -250,15 +260,6 @@ class NodeMetadata(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "Node Metadata"
 
-    CKAN = "ckan"
-    XLSX = "xlsx"
-    JSON = "json"
-    FORMATS = (
-        (CKAN, "Portal CKAN"),
-        (XLSX, "Catálogo XLSX"),
-        (JSON, "Catálogo JSON"),
-    )
-
     CENTRAL = "central"
     NO_CENTRAL = "no-central"
     CATEGORIES = (
@@ -269,14 +270,13 @@ class NodeMetadata(models.Model):
     ANDINO = "andino"
     EXCEL = "excel"
     OTHER = "other"
+    CKAN = "ckan"
     TYPES = (
         (ANDINO, "Andino"),
         (EXCEL, "Excel"),
         (CKAN, "CKAN"),
         (OTHER, "Otros")
     )
-    catalog_format = models.CharField(max_length=20, choices=FORMATS,
-                                      null=True, blank=True)
     argentinagobar_id = models.CharField(max_length=50, null=True, blank=True)
     catalog_label = models.CharField(max_length=100, null=True, blank=True)
     category = models.CharField(max_length=20, choices=CATEGORIES,
@@ -373,7 +373,8 @@ class Stage(models.Model):
             return None
 
     def open_stage(self):
-        run_callable(self.callable_str)
+        job = import_string(self.callable_str)
+        job.delay()
         self.status = Stage.ACTIVE
         self.save()
 
@@ -394,23 +395,33 @@ class Stage(models.Model):
         try:
             method = import_string(self.callable_str)
             if not callable(method):
-                errors.update({'callable_str': ValidationError('callable_str must be callable')})
+                msg = 'callable_str must be callable: {}'.format(self.callable_str)
+                errors.update({'callable_str': ValidationError(msg)})
+
+            if not hasattr(method, 'delay'):
+                msg = 'method referenced is not an rq job (has no "delay" attribute: {}'.format(self.callable_str)
+                errors.update({'callable_str': msg})
+
         except (ImportError, ValueError):
-            errors.update({'callable_str': ValidationError('Unable to import callable_str')})
+            msg = 'Unable to import callable_str: {}'.format(self.callable_str)
+            errors.update({'callable_str': ValidationError(msg)})
 
         if self.queue not in settings.RQ_QUEUES:
-            errors.update({'queue': ValidationError('Must be a settings defined queue')})
+            msg = 'Queue is not defined in settings: {}'.format(self.queue)
+            errors.update({'queue': ValidationError(msg)})
 
         if self.task:
             try:
                 task_model = import_string(self.task)
                 if not issubclass(task_model, AbstractTask):
-                    errors.update({'task': ValidationError('task must be an AbstractTask subclass')})
+                    msg = 'task must be an AbstractTask subclass: {}'.format(self.task)
+                    errors.update({'task': ValidationError(msg)})
             except (ImportError, TypeError, ValueError):
                 errors.update({'task': ValidationError('If present, task must be importable')})
 
         if self.next_stage and self.pk and self.next_stage.pk == self.pk:
-            errors.update({'next_stage': ValidationError('next_stage must point to a different_stage')})
+            msg = 'next_stage must point to a different_stage: {}'.format(self)
+            errors.update({'next_stage': ValidationError(msg)})
 
         if errors:
             raise ValidationError(errors)

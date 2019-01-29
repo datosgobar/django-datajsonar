@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
-from django.forms.models import modelformset_factory
+from django.forms.models import formset_factory
 from django.contrib import admin, messages
 from django.contrib.admin import helpers, SimpleListFilter
 from django.utils import timezone
@@ -247,14 +247,7 @@ class NodeAdmin(admin.ModelAdmin):
     list_display = ('catalog_id', 'indexable')
     exclude = ('catalog',)
     inlines = (InlineNodeMetadata,)
-    actions = ('delete_model', 'run_indexing', 'make_indexable', 'make_unindexable')
-
-    def get_actions(self, request):
-        # Borro la acción de borrado default
-        actions = super(NodeAdmin, self).get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']
-        return actions
+    actions = ('make_indexable', 'make_unindexable')
 
     def make_unindexable(self, _, queryset):
         queryset.update(indexable=False)
@@ -263,12 +256,6 @@ class NodeAdmin(admin.ModelAdmin):
     def make_indexable(self, _, queryset):
         queryset.update(indexable=True)
     make_indexable.short_description = 'Marcar como indexable'
-
-    def delete_model(self, _, queryset):
-        register_files = NodeRegisterFile.objects.all()
-        for node in queryset:
-            if node.indexable:
-                confirm_delete(node, register_files)
 
 
 class AbstractTaskAdmin(admin.ModelAdmin):
@@ -392,7 +379,6 @@ class SynchronizerAdmin(admin.ModelAdmin):
 
     def new_process(self, request):
         synchro_form = SynchroForm()
-        stages_form = None
 
         context = {
             'title': 'Define new process',
@@ -402,30 +388,21 @@ class SynchronizerAdmin(admin.ModelAdmin):
         }
 
         if request.method == 'POST':
-            if 'synchro' in request.POST:
-                synchro_form = SynchroForm(request.POST)
-                if synchro_form.is_valid():
-                    request.session['synchro_name'] = synchro_form.cleaned_data['name']
-                    request.session['stages_amount'] = synchro_form.cleaned_data['stages_amount']
-                    stages_form = modelformset_factory(Stage, form=StageForm,
-                                                       extra=request.session.get('stages_amount', 1),
-                                                       formset=StageFormset)()
+            synchro_form = SynchroForm(request.POST)
+            stages_formset = formset_factory(form=StageForm,
+                                             formset=StageFormset)(request.POST)
 
-            elif 'stages' in request.POST:
-                synchro_form = SynchroForm({'name': request.session['synchro_name'],
-                                            'stages_amount': request.session['stages_amount']})
-                stages_form = modelformset_factory(Stage, form=StageForm,
-                                                   extra=request.session.get('stages_amount', 1),
-                                                   formset=StageFormset)(request.POST)
-                if stages_form.is_valid() and synchro_form.is_valid():
-                    stages = generate_stages(stages_form)
-                    synchro_form.instance.start_stage = stages[0]
-                    synchro_form.save()
-                    return redirect('admin:django_datajsonar_synchronizer_changelist')
+            if stages_formset.is_valid() and synchro_form.is_valid():
+                synchro_name = synchro_form.cleaned_data['name']
+                stages = generate_stages(stages_formset.forms, synchro_name)
+                synchro_form.create_synchronizer(start_stage=stages[0])
+                return redirect('admin:django_datajsonar_synchronizer_changelist')
 
         context['synchro_form'] = helpers.AdminForm(synchro_form, list([(None, {'fields': synchro_form.base_fields})]),
                                                     self.get_prepopulated_fields(request))
-        context['stages_form'] = stages_form
+        stages_formset = formset_factory(form=StageForm,
+                                         formset=StageFormset)()
+        context['stages_form'] = stages_formset
         return render(request, 'synchronizer.html', context)
 
 
