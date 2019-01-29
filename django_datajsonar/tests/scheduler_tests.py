@@ -8,6 +8,8 @@ from django.utils.timezone import now
 
 from scheduler.models import RepeatableJob
 
+from django_datajsonar.forms import ScheduleJobForm
+
 
 def callable_method():
     pass
@@ -172,3 +174,43 @@ class DefaultTaskSchedulingTest(TestCase):
         self.assertEqual(2, RepeatableJob.objects.all().count())
         self.assertEqual('django_datajsonar.tests.scheduler_tests.callable_method',
                          RepeatableJob.objects.get(name='Read Datajson Task').callable)
+
+
+class ScheduleFormTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.default_data = {
+            'name': 'Test Job',
+            'callable': 'django_datajsonar.tests.scheduler_tests.callable_method',
+            'scheduled_time': datetime.time(4, 0, 0, 0),
+            'interval': 30,
+            'interval_unit': 'minutes',
+            'queue': 'default'
+        }
+
+    def form_creates_valid_job(self):
+        form = ScheduleJobForm(self.default_data)
+        form.save()
+        self.assertEqual(
+            1,
+            RepeatableJob.objects.filter(name='Test Job').count()
+        )
+
+    def error_on_starting_date_if_left_blank(self):
+        data = self.default_data.copy()
+        data.update({'interval_unit': 'weeks'})
+        form = ScheduleJobForm(data)
+        form.is_valid()
+        self.assertEqual(1, len(form.errors))
+        self.assertEqual('This is a required field',
+                         form.errors['starting_date'][0])
+
+    def error_on_starting_date_in_the_past(self):
+        data = self.default_data.copy()
+        data.update({'interval_unit': 'weeks',
+                     'starting_date': datetime.date(2000, 1, 1)})
+        form = ScheduleJobForm(data)
+        form.is_valid()
+        self.assertEqual(1, len(form.errors))
+        self.assertEqual('Date cannot be in the past',
+                         form.errors['starting_date'][0])
