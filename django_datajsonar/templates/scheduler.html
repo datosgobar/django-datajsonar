@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load i18n admin_static admin_urls %}
+{% load i18n admin_static admin_urls staticfiles %}
 
 {% block extrastyle %}
     {{ block.super }}
@@ -29,4 +29,5 @@
             <input type="submit" value="Submit" class="default"/>
         </div>
     </form>
+    <script src="{% static 'django_datajsonar/js/scheduler.js' %}"></script>
 {% endblock %}
