@@ -367,17 +367,7 @@ class CustomRepeatableJobAdmin(RepeatableJobAdmin):
 
 class SynchronizerAdmin(admin.ModelAdmin):
 
-    change_list_template = 'synchro_change_list.html'
-
-    def get_urls(self):
-        urls = super(SynchronizerAdmin, self).get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        extra_urls = [url(r'^new_process$',
-                          self.admin_site.admin_view(self.new_process),
-                          name='%s_%s_new_process' % info), ]
-        return extra_urls + urls
-
-    def new_process(self, request):
+    def add_view(self, request, form_url='', extra_context=None):
         synchro_form = SynchroForm()
 
         context = {
