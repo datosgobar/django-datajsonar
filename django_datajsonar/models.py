@@ -1,8 +1,10 @@
 #! coding: utf-8
 from __future__ import unicode_literals
 
+from datetime import datetime
 from importlib import import_module
 
+from croniter import croniter
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.conf import settings
@@ -456,12 +458,16 @@ class Synchronizer(models.Model):
     actual_stage = models.ForeignKey(to=Stage, related_name='running_synchronizer', null=True, blank=True,
                                      on_delete=models.PROTECT)
 
+    cron_string = models.CharField(max_length=64)
+    last_time_ran = models.DateTimeField(auto_now_add=True)
+
     def begin_stage(self, stage=None):
         if self.status == self.RUNNING and stage is None:
             raise Exception('El synchronizer ya está corriendo, pero no se pasó la siguiente etapa.')
         stage = stage or self.start_stage
         self.status = self.RUNNING
         self.actual_stage = stage
+        self.last_time_ran = timezone.now()
         self.save()
         stage.open_stage()
 
@@ -480,6 +486,9 @@ class Synchronizer(models.Model):
             self.save()
         else:
             self.begin_stage(self.actual_stage.next_stage)
+
+    def next_start_date(self):
+        return croniter(self.cron_string, start_time=self.last_time_ran).get_next(datetime)
 
     def __unicode__(self):
         return self.name
