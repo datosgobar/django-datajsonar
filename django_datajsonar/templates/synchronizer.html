@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_new_process' %}" method="post"
+    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_add' %}" method="post"
         {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} id="synchroForm">
         {% csrf_token %}
         <div>
