@@ -27,6 +27,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('django_datajsonar', '0020_auto_20190131_1213'),
+        ('scheduler', '0003_remove_queue_choices')
     ]
 
     operations = [
