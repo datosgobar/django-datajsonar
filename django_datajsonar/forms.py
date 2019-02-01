@@ -59,14 +59,34 @@ class ScheduleJobForm(forms.ModelForm):
 
 
 class SynchroForm(forms.Form):
-    name = forms.CharField(max_length=50)
-
     class Meta:
         model = Synchronizer
         exclude = ['start_stage', 'actual_stage', 'status']
 
+    name = forms.CharField(max_length=50)
+    WEEK_DAYS = 'week days'
+    DAILY = 'every day'
+    FREQUENCY_CHOICES = (
+        (DAILY, DAILY),
+        (WEEK_DAYS, WEEK_DAYS),
+    )
+
+    frequency = forms.ChoiceField(choices=FREQUENCY_CHOICES)
+
+    scheduled_time = forms.TimeField(
+        widget=AdminTimeWidget(attrs={'type': 'time'}))
+
+    def clean(self):
+        cleaned_data = super(SynchroForm, self).clean()
+        if cleaned_data['frequency'] == self.WEEK_DAYS:
+            self.add_error('frequency', 'week days not yet implemented')
+
     def create_synchronizer(self, start_stage):
-        return Synchronizer.objects.create(name=self.cleaned_data['name'], start_stage=start_stage)
+        scheduled_time = self.cleaned_data['scheduled_time']
+        cron_string = "{} {} * * *".format(scheduled_time.minute, scheduled_time.hour)
+        return Synchronizer.objects.create(name=self.cleaned_data['name'],
+                                           start_stage=start_stage,
+                                           cron_string=cron_string)
 
 
 class StageForm(forms.Form):

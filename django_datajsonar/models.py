@@ -1,8 +1,10 @@
 #! coding: utf-8
 from __future__ import unicode_literals
 
+from datetime import datetime
 from importlib import import_module
 
+from croniter import croniter, CroniterBadCronError
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.conf import settings
@@ -12,7 +14,7 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from django_datajsonar.utils import pending_or_running_jobs, import_string, run_callable
+from django_datajsonar.utils import pending_or_running_jobs, import_string
 
 
 class Metadata(models.Model):
@@ -456,12 +458,22 @@ class Synchronizer(models.Model):
     actual_stage = models.ForeignKey(to=Stage, related_name='running_synchronizer', null=True, blank=True,
                                      on_delete=models.PROTECT)
 
+    cron_string = models.CharField(max_length=64)
+    last_time_ran = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        try:
+            self.next_start_date()
+        except CroniterBadCronError:
+            raise ValidationError({'cron_string': "Invalid cron string: {}".format(self.cron_string)})
+
     def begin_stage(self, stage=None):
         if self.status == self.RUNNING and stage is None:
             raise Exception('El synchronizer ya está corriendo, pero no se pasó la siguiente etapa.')
         stage = stage or self.start_stage
         self.status = self.RUNNING
         self.actual_stage = stage
+        self.last_time_ran = timezone.now()
         self.save()
         stage.open_stage()
 
@@ -480,6 +492,10 @@ class Synchronizer(models.Model):
             self.save()
         else:
             self.begin_stage(self.actual_stage.next_stage)
+
+    def next_start_date(self):
+        localtime = self.last_time_ran.astimezone(timezone.get_current_timezone())
+        return croniter(self.cron_string, start_time=localtime).get_next(datetime)
 
     def __unicode__(self):
         return self.name

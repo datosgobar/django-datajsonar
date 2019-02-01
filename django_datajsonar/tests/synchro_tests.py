@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django_rq import job
+from freezegun import freeze_time
 
 try:
     from mock import patch, MagicMock
@@ -20,9 +21,11 @@ def callable_method():
     ReadDataJsonTask.objects.create()
 
 
+@freeze_time("2019-01-02 00:01:00")
 class SynchronizationTests(TestCase):
 
     @classmethod
+    @freeze_time("2019-01-01 00:00:00")
     def setUpTestData(cls):
         previous_stage = None
         for x in range(0, 3):
@@ -30,7 +33,9 @@ class SynchronizationTests(TestCase):
                                              task='django_datajsonar.models.ReadDataJsonTask',
                                              queue='indexing', next_stage=previous_stage, name='stage ' + str(x))
             previous_stage = new_stage
-        Synchronizer.objects.create(start_stage=new_stage, name='test_synchro')
+        Synchronizer.objects.create(start_stage=new_stage,
+                                    name='test_synchro',
+                                    cron_string="0 0 * * *")
 
     def test_create_stage_with_no_name(self):
         with self.assertRaises(ValidationError):
@@ -131,6 +136,15 @@ class SynchronizationTests(TestCase):
         for x in range(0, 3):
             upkeep()
         self.assertEqual(3, ReadDataJsonTask.objects.filter(status=ReadDataJsonTask.FINISHED).count())
+
+    @freeze_time("2019-01-01 10:00:00")
+    def test_synchro_wont_run_if_started_too_early(self):
+        synchro = Synchronizer.objects.get(name='test_synchro')
+        start_synchros()
+
+        # Esperado: no comienza, al correrse todos los días 12 AM, now() < 12 AM de mañana
+
+        self.assertEqual(synchro.status, Synchronizer.STAND_BY)
 
 
 class DefaultTaskSchedulingTest(TestCase):

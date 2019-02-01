@@ -110,6 +110,7 @@ class DefaultTaskSchedulingTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        RepeatableJob.objects.all().delete()  # Borro default job de upkeep scheduleado
         defaults = [
             {
                 'name': 'Read Datajson Task',
