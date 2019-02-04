@@ -425,6 +425,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
                                  self.get_prepopulated_fields(request))
 
     def post_synchro_edit(self, request, object_id=None):
+        synchro = Synchronizer.objects.get(id=object_id) if object_id else None
         synchro_form = SynchroForm(request.POST)
         stages_formset = self.StageFormset(request.POST)
 
@@ -434,6 +435,10 @@ class SynchronizerAdmin(admin.ModelAdmin):
 
         synchro_name = synchro_form.cleaned_data['name']
         stages = generate_stages(stages_formset.forms, synchro_name)
+        if not stages:
+            messages.error(request, "No hay stages definidos")
+            return render(request, 'synchronizer.html', self.add_synchro_context(request, synchro_form, synchro))
+
         data = {
             'name': synchro_name,
             'frequency': synchro_form.cleaned_data['frequency'],
