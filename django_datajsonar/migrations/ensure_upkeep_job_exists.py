@@ -11,7 +11,7 @@ def create_upkeep_repeatable_job(apps, schema_editor):
     db_alias = schema_editor.connection.alias
 
     upkeep_jobs_count = RepeatableJob.objects.using(db_alias).\
-        filter(callable='django_datajsonar.synchronizer_tasks.upkeep').count()
+        filter(callable='django_datajsonar.synchronizer.upkeep').count()
 
     if not upkeep_jobs_count:
         RepeatableJob.objects.using(db_alias).create(name='upkeep',

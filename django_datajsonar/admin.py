@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.forms.models import formset_factory
 from django.contrib import admin, messages
 from django.contrib.admin import helpers, SimpleListFilter
@@ -14,13 +16,14 @@ from django.shortcuts import render, redirect
 from scheduler.models import RepeatableJob
 from scheduler.admin import RepeatableJobAdmin
 
+from django_datajsonar.synchronizer import create_or_update_synchro
 from .views import config_csv
-from .actions import process_node_register_file_action, confirm_delete
+from .actions import process_node_register_file_action
 from .utils import download_config_csv, generate_stages
 from .tasks import bulk_whitelist, read_datajson
 from .models import DatasetIndexingFile, NodeRegisterFile, Node, NodeMetadata, ReadDataJsonTask, Metadata, Synchronizer, Stage
 from .models import Catalog, Dataset, Distribution, Field, Jurisdiction
-from .forms import ScheduleJobForm, SynchroForm, StageFormset, StageForm
+from .forms import ScheduleJobForm, SynchroForm, StageForm
 
 
 class EnhancedMetaAdmin(GenericTabularInline):
@@ -346,7 +349,6 @@ class DatasetIndexingFileAdmin(BaseRegisterFileAdmin):
 
 
 class CustomRepeatableJobAdmin(RepeatableJobAdmin):
-
     actions = ['delete_and_unschedule']
 
     def delete_model(self, request, obj):
@@ -357,6 +359,7 @@ class CustomRepeatableJobAdmin(RepeatableJobAdmin):
         for job in queryset:
             job.unschedule()
         queryset.delete()
+
     delete_and_unschedule.short_description = 'Delete and unschedule job'
 
     def get_actions(self, request):
@@ -366,34 +369,79 @@ class CustomRepeatableJobAdmin(RepeatableJobAdmin):
 
 
 class SynchronizerAdmin(admin.ModelAdmin):
+    StageFormset = formset_factory(StageForm, extra=0)
 
     def add_view(self, request, form_url='', extra_context=None):
-        synchro_form = SynchroForm()
+        return self._synchro_view(request)
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        synchro = Synchronizer.objects.get(id=object_id)
+        return self._synchro_view(request, synchro)
+
+    def _synchro_view(self, request, synchro=None):
+        if request.method == 'POST':
+            return self.post_synchro_edit(request, synchro.id if synchro else None)
+
+        if synchro is not None:
+            synchro_form = SynchroForm({
+                'name': synchro.name,
+                'frequency': synchro.frequency,
+                'scheduled_time': synchro.scheduled_time
+            })
+        else:
+            synchro_form = SynchroForm()
 
         context = {
-            'title': 'Define new process',
-            'app_label': self.model._meta.app_label,
             'opts': self.model._meta,
-            'has_change_permission': self.has_change_permission(request)
+            'has_change_permission': self.has_change_permission(request),
+            'synchro_form': self.admin_synchro_form(request, synchro_form),
+            'stages_form': self.get_stages_formset(synchro),
+            'object': synchro,
         }
 
-        if request.method == 'POST':
-            synchro_form = SynchroForm(request.POST)
-            stages_formset = formset_factory(form=StageForm,
-                                             formset=StageFormset)(request.POST)
-
-            if stages_formset.is_valid() and synchro_form.is_valid():
-                synchro_name = synchro_form.cleaned_data['name']
-                stages = generate_stages(stages_formset.forms, synchro_name)
-                synchro_form.create_synchronizer(start_stage=stages[0])
-                return redirect('admin:django_datajsonar_synchronizer_changelist')
-
-        context['synchro_form'] = helpers.AdminForm(synchro_form, list([(None, {'fields': synchro_form.base_fields})]),
-                                                    self.get_prepopulated_fields(request))
-        stages_formset = formset_factory(form=StageForm,
-                                         formset=StageFormset)()
-        context['stages_form'] = stages_formset
         return render(request, 'synchronizer.html', context)
+
+    def get_stages_formset(self, model=None):
+        stages_data = []
+        next_stage = model.start_stage if model else None
+        while next_stage is not None:
+            stages_data.append({
+                'task': self.get_stage_choice(next_stage.name)
+            })
+            next_stage = next_stage.next_stage
+
+        if not stages_data:
+            stages_data.append({})
+
+        return self.StageFormset(initial=stages_data)
+
+    def admin_synchro_form(self, request, synchro_form):
+        return helpers.AdminForm(synchro_form,
+                                 list([(None, {'fields': synchro_form.base_fields})]),
+                                 self.get_prepopulated_fields(request))
+
+    def post_synchro_edit(self, request, object_id=None):
+        synchro_form = SynchroForm(request.POST)
+        stages_formset = self.StageFormset(request.POST)
+
+        if not stages_formset.is_valid() or not synchro_form.is_valid():
+            raise ValidationError
+
+        synchro_name = synchro_form.cleaned_data['name']
+        stages = generate_stages(stages_formset.forms, synchro_name)
+        data = {
+            'name': synchro_name,
+            'frequency': synchro_form.cleaned_data['frequency'],
+            'scheduled_time': synchro_form.cleaned_data['scheduled_time'],
+        }
+        create_or_update_synchro(object_id, stages, data)
+
+        return redirect('admin:django_datajsonar_synchronizer_changelist')
+
+    def get_stage_choice(self, stage_name):
+        for name in settings.DATAJSONAR_STAGES.keys():
+            if name in stage_name:
+                return name
 
 
 class EnhancedMetaFilter(SimpleListFilter):

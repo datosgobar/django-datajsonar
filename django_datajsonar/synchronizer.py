@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.utils import timezone
 
-from .models import Synchronizer
+from .models import Synchronizer, Stage
 
 
 def upkeep():
@@ -25,3 +25,25 @@ def start_synchros():
     for synchro in synchronizers:
         if now > synchro.next_start_date():
             synchro.begin_stage()
+
+
+def create_or_update_synchro(synchro_id, stages, data=None):
+    if data is None:
+        data = {}
+
+    if synchro_id is None:
+        return Synchronizer.objects.create(start_stage=stages[0], **data)
+
+    synchro_queryset = Synchronizer.objects.filter(id=synchro_id)
+    synchro_queryset.update(start_stage=stages[0], **data)
+
+    synchro = synchro_queryset.first()
+    old_stages = synchro.get_stages()
+
+    Stage.objects \
+        .filter(id__in=[stage.id for stage in old_stages]) \
+        .exclude(id__in=[stage.id for stage in stages]) \
+        .delete()
+
+    synchro.refresh_from_db()
+    return synchro
