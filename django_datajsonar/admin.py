@@ -391,6 +391,11 @@ class SynchronizerAdmin(admin.ModelAdmin):
         else:
             synchro_form = SynchroForm()
 
+        context = self.add_synchro_context(request, synchro_form, synchro)
+
+        return render(request, 'synchronizer.html', context)
+
+    def add_synchro_context(self, request, synchro_form, synchro=None):
         context = {
             'opts': self.model._meta,
             'has_change_permission': self.has_change_permission(request),
@@ -398,8 +403,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
             'stages_form': self.get_stages_formset(synchro),
             'object': synchro,
         }
-
-        return render(request, 'synchronizer.html', context)
+        return context
 
     def get_stages_formset(self, model=None):
         stages_data = []
@@ -425,7 +429,8 @@ class SynchronizerAdmin(admin.ModelAdmin):
         stages_formset = self.StageFormset(request.POST)
 
         if not stages_formset.is_valid() or not synchro_form.is_valid():
-            raise ValidationError
+            synchro = Synchronizer.objects.get(id=object_id) if object_id else None
+            return render(request, 'synchronizer.html', self.add_synchro_context(request, synchro_form, synchro))
 
         synchro_name = synchro_form.cleaned_data['name']
         stages = generate_stages(stages_formset.forms, synchro_name)
