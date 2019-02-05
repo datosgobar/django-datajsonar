@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+from django.utils import timezone
 from django_rq import job
 from freezegun import freeze_time
+
+from django_datajsonar.forms import SynchroForm
 
 try:
     from mock import patch, MagicMock
@@ -13,7 +16,7 @@ from django.core.management import call_command
 from django.conf import settings
 
 from django_datajsonar.models import Synchronizer, Stage, ReadDataJsonTask
-from django_datajsonar.synchronizer_tasks import start_synchros, upkeep
+from django_datajsonar.synchronizer import start_synchros, upkeep, create_or_update_synchro
 
 
 @job("default")
@@ -35,7 +38,8 @@ class SynchronizationTests(TestCase):
             previous_stage = new_stage
         Synchronizer.objects.create(start_stage=new_stage,
                                     name='test_synchro',
-                                    cron_string="0 0 * * *")
+                                    frequency=Synchronizer.DAILY,
+                                    scheduled_time=timezone.now())
 
     def test_create_stage_with_no_name(self):
         with self.assertRaises(ValidationError):
@@ -213,3 +217,68 @@ class DefaultTaskSchedulingTest(TestCase):
         synchro_1.refresh_from_db()
         synchro_2.refresh_from_db()
         self.assertNotEqual(synchro_1.start_stage, synchro_2.start_stage)
+
+
+class SynchronizerUtilsTests(TestCase):
+
+    def test_create_synchro(self):
+        self.create_synchro()
+        self.assertTrue(Synchronizer.objects.count())
+
+    def test_update_synchro(self):
+        synchro = self.create_synchro()
+        create_or_update_synchro(synchro.id,
+                                 [Stage.objects.first()],
+                                 {'name': 'new_name'})
+
+        self.assertEqual(Synchronizer.objects.first().name, 'new_name')
+
+    def test_add_new_stages(self):
+        synchro = self.create_synchro()
+
+        stages = synchro.get_stages()
+        new_stage = Stage.objects.create(name='new_stage',
+                                         queue='default',
+                                         callable_str='django_datajsonar.tests.synchro_tests.callable_method')
+        stages[0].next_stage = new_stage
+        stages[0].save()
+        stages.append(new_stage)
+        synchro = create_or_update_synchro(synchro.id, stages)
+
+        self.assertEqual(Synchronizer.objects.count(), 1)
+        self.assertEqual(len(synchro.get_stages()), 2)
+
+    def test_remove_stages(self):
+        stages = []
+        next_stage = None
+        for i in range(3):
+            stage = Stage.objects.create(
+                name='Stage {}'.format(i),
+                queue='default',
+                callable_str='django_datajsonar.tests.synchro_tests.callable_method')
+            stage.next_stage = next_stage
+            next_stage = stage
+            stage.save()
+            stages.append(stage)
+
+        stages.reverse()
+        synchro = self.create_synchro(stages=stages)
+
+        stages.pop()
+        stages[-1].next_stage = None
+        stages[-1].save()
+
+        synchro = create_or_update_synchro(synchro.id, stages)
+        self.assertEqual(len(synchro.get_stages()), 2)
+
+    @staticmethod
+    def create_synchro(stages=None):
+        if stages is None:
+            stages = [Stage.objects.create(name='a',
+                                           queue='default',
+                                           callable_str='django_datajsonar.tests.synchro_tests.callable_method')]
+        return create_or_update_synchro(None,
+                                        stages,
+                                        {'name': 'test_name',
+                                         'scheduled_time': timezone.now(),
+                                         'frequency': Synchronizer.DAILY})

@@ -1,10 +1,8 @@
 #! coding: utf-8
 from __future__ import unicode_literals
 
-from datetime import datetime
 from importlib import import_module
 
-from croniter import croniter, CroniterBadCronError
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.conf import settings
@@ -14,6 +12,8 @@ from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
+from django_datajsonar.frequency import get_next_run_date
+from django_datajsonar.strings import SYNCHRO_DAILY_FREQUENCY, SYNCHRO_WEEK_DAYS_FREQUENCY
 from django_datajsonar.utils import pending_or_running_jobs, import_string
 
 
@@ -458,14 +458,16 @@ class Synchronizer(models.Model):
     actual_stage = models.ForeignKey(to=Stage, related_name='running_synchronizer', null=True, blank=True,
                                      on_delete=models.PROTECT)
 
-    cron_string = models.CharField(max_length=64)
-    last_time_ran = models.DateTimeField(auto_now_add=True)
+    WEEK_DAYS = SYNCHRO_WEEK_DAYS_FREQUENCY
+    DAILY = SYNCHRO_DAILY_FREQUENCY
+    FREQUENCY_CHOICES = (
+        (DAILY, DAILY),
+        (WEEK_DAYS, WEEK_DAYS),
+    )
+    frequency = models.CharField(choices=FREQUENCY_CHOICES, max_length=16, default=DAILY)
+    scheduled_time = models.TimeField(auto_now_add=True)
 
-    def clean(self):
-        try:
-            self.next_start_date()
-        except CroniterBadCronError:
-            raise ValidationError({'cron_string': "Invalid cron string: {}".format(self.cron_string)})
+    last_time_ran = models.DateTimeField(auto_now_add=True)
 
     def begin_stage(self, stage=None):
         if self.status == self.RUNNING and stage is None:
@@ -495,10 +497,18 @@ class Synchronizer(models.Model):
 
     def next_start_date(self):
         localtime = self.last_time_ran.astimezone(timezone.get_current_timezone())
-        return croniter(self.cron_string, start_time=localtime).get_next(datetime)
+        return get_next_run_date(localtime, self.scheduled_time, self.frequency)
 
     def __unicode__(self):
         return self.name
 
     def __str__(self):
         return self.__unicode__()
+
+    def get_stages(self):
+        stages = []
+        current_stage = self.start_stage
+        while current_stage is not None:
+            stages.append(current_stage)
+            current_stage = current_stage.next_stage
+        return stages
