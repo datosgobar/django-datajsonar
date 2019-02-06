@@ -1,6 +1,7 @@
 #! coding: utf-8
 from __future__ import unicode_literals
 
+import json
 from importlib import import_module
 
 from django.contrib.auth.models import User
@@ -461,13 +462,15 @@ class Synchronizer(models.Model):
     WEEK_DAYS = SYNCHRO_WEEK_DAYS_FREQUENCY
     DAILY = SYNCHRO_DAILY_FREQUENCY
     FREQUENCY_CHOICES = (
-        (DAILY, DAILY),
-        (WEEK_DAYS, WEEK_DAYS),
+        (DAILY, 'Every day'),
+        (WEEK_DAYS, 'Week days'),
     )
     frequency = models.CharField(choices=FREQUENCY_CHOICES, max_length=16, default=DAILY)
-    scheduled_time = models.TimeField(auto_now_add=True)
+    scheduled_time = models.TimeField(default=timezone.now)
 
     last_time_ran = models.DateTimeField(auto_now_add=True)
+
+    week_days = models.TextField(blank=True)
 
     def begin_stage(self, stage=None):
         if self.status == self.RUNNING and stage is None:
@@ -496,8 +499,9 @@ class Synchronizer(models.Model):
             self.begin_stage(self.actual_stage.next_stage)
 
     def next_start_date(self):
-        localtime = self.last_time_ran.astimezone(timezone.get_current_timezone())
-        return get_next_run_date(localtime, self.scheduled_time, self.frequency)
+        start_time = self.last_time_ran.astimezone(timezone.get_current_timezone())
+        week_days = self.get_days_of_week()
+        return get_next_run_date(start_time, self.scheduled_time, week_days=week_days)
 
     def __unicode__(self):
         return self.name
@@ -512,3 +516,8 @@ class Synchronizer(models.Model):
             stages.append(current_stage)
             current_stage = current_stage.next_stage
         return stages
+
+    def get_days_of_week(self):
+        if self.frequency == self.WEEK_DAYS:
+            return json.loads(self.week_days)
+        return []
