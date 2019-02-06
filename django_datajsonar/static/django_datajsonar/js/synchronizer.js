@@ -7,7 +7,7 @@ window.onload = function() {
 function hideWeekDays() {
     const frequency = document.getElementById('id_frequency');
     const weekDays = document.getElementById('id_week_days');
-    const weekDaysDiv = weekDays.parentElement.parentElement;
+    const weekDaysDiv = weekDays.closest('.field-week_days');
     const option = frequency.options[frequency.selectedIndex].text;
 
     if (option === 'week days') {
