@@ -1,10 +1,11 @@
 #!coding=utf8
 from __future__ import unicode_literals
 
+import json
+
 from django import forms
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.forms.models import formset_factory
 from django.contrib import admin, messages
 from django.contrib.admin import helpers, SimpleListFilter
@@ -386,7 +387,8 @@ class SynchronizerAdmin(admin.ModelAdmin):
             synchro_form = SynchroForm({
                 'name': synchro.name,
                 'frequency': synchro.frequency,
-                'scheduled_time': synchro.scheduled_time
+                'scheduled_time': synchro.scheduled_time,
+                'week_days': synchro.get_days_of_week()
             })
         else:
             synchro_form = SynchroForm()
@@ -443,6 +445,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
             'name': synchro_name,
             'frequency': synchro_form.cleaned_data['frequency'],
             'scheduled_time': synchro_form.cleaned_data['scheduled_time'],
+            'week_days': json.dumps(synchro_form.cleaned_data['week_days']),
         }
         create_or_update_synchro(object_id, stages, data)
 

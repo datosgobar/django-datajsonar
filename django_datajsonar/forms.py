@@ -9,8 +9,8 @@ from django.contrib.admin.widgets import AdminTimeWidget, AdminDateWidget
 
 from scheduler.models import RepeatableJob
 
-from django_datajsonar.models import Synchronizer, Stage, AbstractTask
-from django_datajsonar.utils import get_qualified_name
+from django_datajsonar.models import Stage
+from . import strings
 
 
 class ScheduleJobForm(forms.ModelForm):
@@ -72,10 +72,32 @@ class SynchroForm(forms.Form):
     scheduled_time = forms.TimeField(
         widget=AdminTimeWidget(attrs={'type': 'time'}))
 
+    MON = strings.MON
+    TUE = strings.TUE
+    WED = strings.WED
+    THU = strings.THU
+    FRI = strings.FRI
+    SAT = strings.SAT
+    SUN = strings.SUN
+
+    WEEK_DAY_CHOICES = (
+        (MON, 'Monday'),
+        (TUE, 'Tuesday'),
+        (WED, 'Wednesday'),
+        (THU, 'Thursday'),
+        (FRI, 'Friday'),
+        (SAT, 'Saturday'),
+        (SUN, 'Sunday'),
+    )
+
+    week_days = forms.MultipleChoiceField(choices=WEEK_DAY_CHOICES, required=False)
+
     def clean(self):
         cleaned_data = super(SynchroForm, self).clean()
-        if cleaned_data['frequency'] == self.WEEK_DAYS:
-            self.add_error('frequency', 'week days not yet implemented')
+        days = cleaned_data['week_days']
+        frequency = cleaned_data['frequency']
+        if frequency == self.WEEK_DAYS and not days:
+            self.add_error('week_days', 'Days of week not selected')
 
 
 class StageForm(forms.Form):

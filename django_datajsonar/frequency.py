@@ -2,13 +2,17 @@ from datetime import datetime
 
 from croniter import croniter
 
-from django_datajsonar.strings import SYNCHRO_DAILY_FREQUENCY
 
+def get_next_run_date(start_time, scheduled_time, week_days=None):
+    if not week_days:
+        week_days_field = "*"
+    else:
+        week_days_field = ','.join(week_days)
 
-def get_next_run_date(start_time, scheduled_time, frequency):
-    if frequency != SYNCHRO_DAILY_FREQUENCY:
-        raise NotImplementedError
-
-    cron_string = "{} {} * * *".format(scheduled_time.minute, scheduled_time.hour)
+    cron_string = "{} {} * * {}".format(
+        scheduled_time.minute,
+        scheduled_time.hour,
+        week_days_field
+    )
 
     return croniter(cron_string, start_time=start_time).get_next(datetime)
