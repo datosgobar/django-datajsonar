@@ -219,6 +219,13 @@ class ScheduleFormTest(TestCase):
 
 class UpkeepCommand(TestCase):
 
+    @classmethod
+    def setUpTestData(cls):
+        # Borro el job creado por la migración
+        job = RepeatableJob.objects.get(name='upkeep')
+        job.unschedule()
+        job.delete()
+
     def test_upkeep_job_is_created(self):
         call_command('schedule_upkeep_job')
         self.assertEqual(1, RepeatableJob.objects.all().count())
@@ -250,6 +257,8 @@ class UpkeepCommand(TestCase):
             repeat=None
         )
         job.unschedule()
+        job.save()
         call_command('schedule_upkeep_job')
+        job.refresh_from_db()
         self.assertEqual(1, RepeatableJob.objects.all().count())
         self.assertTrue(job.is_scheduled())
