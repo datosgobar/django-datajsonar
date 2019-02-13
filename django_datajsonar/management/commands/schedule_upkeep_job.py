@@ -1,11 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals
-
 import logging
 
 from django.core.management.base import BaseCommand
-from scheduler.models import RepeatableJob
 from django.utils import timezone
+from scheduler.models import RepeatableJob
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +29,6 @@ class Command(BaseCommand):
         if not job.is_scheduled():
             job.schedule()
 
-        logger.info('created: ' + str(created))
-        logger.info('name: ' + job.name)
-        logger.info('scheduled' + str(job.is_scheduled()))
+        logger.info('created: %s', str(created))
+        logger.info('name: %s', job.name)
+        logger.info('scheduled: %s', str(job.is_scheduled()))
