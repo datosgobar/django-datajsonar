@@ -20,8 +20,6 @@ class BaseRegisterFileAdmin(admin.ModelAdmin):
         form.base_fields['uploader'].initial = request.user
         return form
 
-    def save_form(self, request, form, change):
-        return super(BaseRegisterFileAdmin, self).save_form(request, form, change)
 
 @admin.register(NodeRegisterFile)
 class NodeRegisterFileAdmin(BaseRegisterFileAdmin):

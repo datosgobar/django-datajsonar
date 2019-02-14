@@ -150,6 +150,7 @@ class DistributionAdmin(admin.ModelAdmin):
 
         return queryset.exclude(id__in=ids_to_remove), distinct
 
+
 @admin.register(Field)
 class FieldAdmin(admin.ModelAdmin):
     list_display = ('get_title', 'identifier', 'get_distribution_title', 'get_dataset_title', 'get_catalog_id')

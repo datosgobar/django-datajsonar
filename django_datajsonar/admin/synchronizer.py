@@ -101,6 +101,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
         for name in settings.DATAJSONAR_STAGES.keys():
             if name in stage_name:
                 return name
+        raise ValueError("Invalid stage name: {}".format(stage_name))
 
     def weekdays(self, obj):
         if obj.frequency == Synchronizer.WEEK_DAYS:

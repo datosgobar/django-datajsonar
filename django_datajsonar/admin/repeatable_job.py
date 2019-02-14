@@ -4,6 +4,7 @@ from scheduler.models import RepeatableJob
 
 admin.site.unregister(RepeatableJob)
 
+
 @admin.register(RepeatableJob)
 class CustomRepeatableJobAdmin(RepeatableJobAdmin):
     actions = ['delete_and_unschedule']
@@ -23,5 +24,3 @@ class CustomRepeatableJobAdmin(RepeatableJobAdmin):
         actions = super(CustomRepeatableJobAdmin, self).get_actions(request)
         del actions['delete_selected']
         return actions
-
-
