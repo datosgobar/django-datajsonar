@@ -1,10 +1,7 @@
+from django.contrib import admin
+
 from django_datajsonar.models import Jurisdiction, Stage
-from .synchronizer import *
-from .repeatable_job import *
-from .data_json import *
-from .metadata import *
-from .node import *
-from .tasks import *
+from . import synchronizer, data_json, metadata, node, repeatable_job, tasks
 
 admin.site.register(Jurisdiction)
 admin.site.register(Stage)
