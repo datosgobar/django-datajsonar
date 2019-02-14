@@ -370,6 +370,7 @@ class CustomRepeatableJobAdmin(RepeatableJobAdmin):
 
 
 class SynchronizerAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'frequency', 'scheduled_time')
     StageFormset = formset_factory(StageForm, extra=0)
 
     def add_view(self, request, form_url='', extra_context=None):
