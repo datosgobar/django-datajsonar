@@ -15,7 +15,7 @@ from django_datajsonar.utils import generate_stages
 @admin.register(Synchronizer)
 class SynchronizerAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'frequency', 'scheduled_time', 'weekdays')
-
+    actions = ('duplicate',)
     StageFormset = formset_factory(StageForm, extra=0)
 
     def add_view(self, request, form_url='', extra_context=None):
@@ -107,3 +107,11 @@ class SynchronizerAdmin(admin.ModelAdmin):
             return ', '.join(obj.get_days_of_week())
         return '-'
     weekdays.short_description = 'Week days'
+
+    def duplicate(self, _, queryset):
+        for synchronizer in queryset:
+            # Duplica el synchronizer
+            synchronizer.pk = None
+            synchronizer.name = "Copia de {}".format(synchronizer.name)
+            synchronizer.save()
+    duplicate.short_description = "Duplicar synchronizer"
