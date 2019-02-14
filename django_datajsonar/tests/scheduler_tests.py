@@ -215,3 +215,50 @@ class ScheduleFormTest(TestCase):
         self.assertEqual(1, len(form.errors))
         self.assertEqual('Date cannot be in the past',
                          form.errors['starting_date'][0])
+
+
+class UpkeepCommand(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        # Borro el job creado por la migración
+        job = RepeatableJob.objects.get(name='upkeep')
+        job.unschedule()
+        job.delete()
+
+    def test_upkeep_job_is_created(self):
+        call_command('schedule_upkeep_job')
+        self.assertEqual(1, RepeatableJob.objects.all().count())
+        job = RepeatableJob.objects.get(name='Synchronizer upkeep job')
+        self.assertEqual('django_datajsonar.synchronizer.upkeep',
+                         job.callable)
+
+    def test_upkeep_job_remains_if_already_exists(self):
+        RepeatableJob.objects.create(
+            callable='django_datajsonar.synchronizer.upkeep',
+            name='test job',
+            queue='default',
+            scheduled_time=now(),
+            interval_unit='hours',
+            interval=2,
+            repeat=None
+        )
+        call_command('schedule_upkeep_job')
+        self.assertEqual(1, RepeatableJob.objects.all().count())
+
+    def test_upkeep_job_gets_scheduled_if_not_scheduled(self):
+        job = RepeatableJob.objects.create(
+            callable='django_datajsonar.synchronizer.upkeep',
+            name='test job',
+            queue='default',
+            scheduled_time=now(),
+            interval_unit='hours',
+            interval=2,
+            repeat=None
+        )
+        job.unschedule()
+        job.save()
+        call_command('schedule_upkeep_job')
+        job.refresh_from_db()
+        self.assertEqual(1, RepeatableJob.objects.all().count())
+        self.assertTrue(job.is_scheduled())
