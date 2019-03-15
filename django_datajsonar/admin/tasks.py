@@ -1,13 +1,18 @@
 #! coding: utf-8
 from __future__ import unicode_literals
 
+from datetime import time
+
+from django.conf import settings
 from django.conf.urls import url
 from django.contrib import messages, admin
 from django.contrib.admin import helpers
+from django.forms import formset_factory
 from django.shortcuts import render, redirect
 
-from django_datajsonar.forms import ScheduleJobForm
-from django_datajsonar.models import ReadDataJsonTask
+from django_datajsonar.admin.synchronizer import SynchronizerAdmin
+from django_datajsonar.forms import ScheduleJobForm, StageForm, SynchroForm
+from django_datajsonar.models import ReadDataJsonTask, Synchronizer
 from django_datajsonar.tasks import read_datajson
 
 
@@ -45,10 +50,20 @@ class AbstractTaskAdmin(admin.ModelAdmin):
         urls = super(AbstractTaskAdmin, self).get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
         extra_urls = [url(r'^schedule_task$',
-                          self.admin_site.admin_view(self.schedule_task),
-                          {'callable_str': self.callable_str},
+                          self.admin_site.admin_view(SynchronizerAdmin(Synchronizer, self.admin_site).add_view),
+                          {'extra_context': self.synchronizer_form_defaultls()},
                           name='%s_%s_schedule_task' % info), ]
         return extra_urls + urls
+
+    def synchronizer_form_defaultls(self):
+        stage_name = get_stage_name_from_callable_string(self.callable_str)
+        formset = formset_factory(StageForm, extra=0)(initial=[{'task': stage_name}])
+        return {
+            'name': stage_name,
+            'frequency': SynchroForm.DAILY,
+            'scheduled_time': time(0, 0, 0),
+            'stages_formset': formset
+        }
 
     def schedule_task(self, request, callable_str):
         form = ScheduleJobForm(initial={'callable': callable_str,
@@ -81,10 +96,17 @@ class AbstractTaskAdmin(admin.ModelAdmin):
 class DataJsonAdmin(AbstractTaskAdmin):
     model = ReadDataJsonTask
     task = read_datajson
-    callable_str = 'django_datajsonar.tasks.schedule_new_read_datajson_task'
+    callable_str = 'django_datajsonar.tasks.schedule_metadata_read_task'
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return self.readonly_fields + ('indexing_mode',)
 
         return self.readonly_fields
+
+
+def get_stage_name_from_callable_string(callable_str):
+    for name, stage in settings.DATAJSONAR_STAGES.items():
+        if stage['callable_str'] == callable_str:
+            return name
+    raise ValueError("Stage not found for callable_str: {}".format(callable_str))
