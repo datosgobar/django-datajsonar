@@ -49,13 +49,17 @@ class AbstractTaskAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(AbstractTaskAdmin, self).get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
+        try:
+            extra_content = self.synchronizer_form_defaults()
+        except ValueError:
+            return urls
         extra_urls = [url(r'^schedule_task$',
                           self.admin_site.admin_view(SynchronizerAdmin(Synchronizer, self.admin_site).add_view),
-                          {'extra_context': self.synchronizer_form_defaultls()},
+                          {'extra_context': extra_content},
                           name='%s_%s_schedule_task' % info), ]
         return extra_urls + urls
 
-    def synchronizer_form_defaultls(self):
+    def synchronizer_form_defaults(self):
         stage_name = get_stage_name_from_callable_string(self.callable_str)
         formset = formset_factory(StageForm, extra=0)(initial=[{'task': stage_name}])
         return {
