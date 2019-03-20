@@ -11,7 +11,9 @@ from django.forms import formset_factory
 from django.shortcuts import render, redirect
 
 from django_datajsonar.admin.synchronizer import SynchronizerAdmin
-from django_datajsonar.forms import ScheduleJobForm, StageForm, SynchroForm
+from django_datajsonar.forms.schedule_job_form import ScheduleJobForm
+from django_datajsonar.forms.stage_form import StageForm
+from django_datajsonar.forms.synchro_form import SynchroForm
 from django_datajsonar.models import ReadDataJsonTask, Synchronizer
 from django_datajsonar.tasks import read_datajson
 

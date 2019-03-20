@@ -9,7 +9,8 @@ from django.contrib.admin import helpers
 from django.forms import formset_factory
 from django.shortcuts import render, redirect
 
-from django_datajsonar.forms import StageForm, SynchroForm
+from django_datajsonar.forms.stage_form import StageForm
+from django_datajsonar.forms.synchro_form import SynchroForm
 from django_datajsonar.models import Synchronizer
 from django_datajsonar.synchronizer import create_or_update_synchro
 from django_datajsonar.utils import generate_stages

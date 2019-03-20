@@ -3,7 +3,6 @@ from django.utils import timezone
 from django_rq import job
 from freezegun import freeze_time
 
-from django_datajsonar.forms import SynchroForm
 
 try:
     from mock import patch, MagicMock

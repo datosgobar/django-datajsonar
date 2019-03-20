@@ -8,7 +8,7 @@ from django.utils.timezone import now
 
 from scheduler.models import RepeatableJob
 
-from django_datajsonar.forms import ScheduleJobForm
+from django_datajsonar.forms.schedule_job_form import ScheduleJobForm
 
 
 def callable_method():
