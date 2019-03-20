@@ -1,3 +1,4 @@
+#!coding=utf8
 from datetime import timedelta
 
 from django import forms
