@@ -9,7 +9,7 @@ from django.contrib.admin.widgets import AdminTimeWidget, AdminDateWidget
 
 from scheduler.models import RepeatableJob
 
-from django_datajsonar.models import Stage
+from django_datajsonar.models import Stage, Synchronizer
 from . import strings
 
 
@@ -98,6 +98,9 @@ class SynchroForm(forms.Form):
         frequency = cleaned_data['frequency']
         if frequency == self.WEEK_DAYS and not days:
             self.add_error('week_days', 'Days of week not selected')
+
+        if Synchronizer.objects.get(name=cleaned_data['name']):
+            self.add_error('name', 'Synchronizer with this name already exists')
 
 
 class StageForm(forms.Form):
