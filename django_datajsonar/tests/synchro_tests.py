@@ -84,7 +84,7 @@ class SynchronizationTests(TestCase):
         synchro.refresh_from_db()
         self.assertEqual(Synchronizer.RUNNING, synchro.status)
 
-    @patch('django_datajsonar.models.synchronizer.pending_or_running_jobs')
+    @patch('django_datajsonar.models.stage.pending_or_running_jobs')
     def test_advance_stage_if_queue_is_empty(self, mock_queue):
         mock_queue.return_value = False
         synchro = Synchronizer.objects.get(name='test_synchro')
@@ -97,7 +97,7 @@ class SynchronizationTests(TestCase):
         self.assertEqual(synchro.actual_stage, synchro.start_stage.next_stage)
 
     @patch('django_datajsonar.tests.synchro_tests.callable_method')
-    @patch('django_datajsonar.models.synchronizer.pending_or_running_jobs')
+    @patch('django_datajsonar.models.stage.pending_or_running_jobs')
     def test_synchronizator_runs_task(self, mock_queue, mock_method):
         mock_queue.return_value = False
         self.assertEqual(0, mock_method.delay.call_count)
@@ -106,7 +106,7 @@ class SynchronizationTests(TestCase):
         upkeep()
         self.assertEqual(2, mock_method.delay.call_count)
 
-    @patch('django_datajsonar.models.synchronizer.pending_or_running_jobs')
+    @patch('django_datajsonar.models.stage.pending_or_running_jobs')
     def test_complete_stage_before_advancing(self, mock_queue):
         mock_queue.jobs.return_value = True
         synchro = Synchronizer.objects.get(name='test_synchro')
@@ -121,7 +121,7 @@ class SynchronizationTests(TestCase):
         synchro.refresh_from_db()
         self.assertEqual(synchro.actual_stage, synchro.start_stage)
 
-    @patch('django_datajsonar.models.synchronizer.pending_or_running_jobs')
+    @patch('django_datajsonar.models.stage.pending_or_running_jobs')
     def test_synchronizator_finishes_correctly(self, mock_queue):
         mock_queue.return_value = False
         synchro = Synchronizer.objects.get(name='test_synchro')
@@ -132,7 +132,7 @@ class SynchronizationTests(TestCase):
         self.assertEqual(Synchronizer.STAND_BY, synchro.status)
         self.assertIsNone(synchro.actual_stage)
 
-    @patch('django_datajsonar.models.synchronizer.pending_or_running_jobs')
+    @patch('django_datajsonar.models.stage.pending_or_running_jobs')
     def test_stage_closes_task_when_finished(self, mock_queue):
         mock_queue.return_value = False
         start_synchros()
