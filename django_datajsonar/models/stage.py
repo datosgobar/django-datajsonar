@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from django_datajsonar.models import AbstractTask
-from django_datajsonar.utils import import_string, pending_or_running_jobs
+from django_datajsonar.utils.utils import import_string, pending_or_running_jobs
 
 
 class Stage(models.Model):

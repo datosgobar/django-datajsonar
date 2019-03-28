@@ -1,5 +1,5 @@
 from django_datajsonar.models import AbstractTask
-from django_datajsonar.utils import pending_or_running_jobs
+from django_datajsonar.utils.utils import pending_or_running_jobs
 
 
 class TaskCloser(object):

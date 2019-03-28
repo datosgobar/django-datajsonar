@@ -8,7 +8,7 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 from django.utils import timezone
 
 from django_datajsonar.models import Dataset, Metadata, Catalog, Distribution, Field
-from django_datajsonar.utils import download_config_csv
+from django_datajsonar.utils.utils import download_config_csv
 from django_datajsonar.views import config_csv
 
 
