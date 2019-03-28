@@ -51,15 +51,15 @@ class InlineNodeMetadata(admin.StackedInline):
 
 @admin.register(Node)
 class NodeAdmin(admin.ModelAdmin):
-    list_display = ('catalog_id', 'indexable')
+    list_display = ('catalog_id', 'federable')
     exclude = ('catalog',)
     inlines = (InlineNodeMetadata,)
     actions = ('make_indexable', 'make_unindexable')
 
     def make_unindexable(self, _, queryset):
-        queryset.update(indexable=False)
-    make_unindexable.short_description = 'Marcar como no indexable'
+        queryset.update(federable=False)
+    make_unindexable.short_description = 'Marcar como no federable'
 
     def make_indexable(self, _, queryset):
-        queryset.update(indexable=True)
-    make_indexable.short_description = 'Marcar como indexable'
+        queryset.update(federable=True)
+    make_indexable.short_description = 'Marcar como federable'

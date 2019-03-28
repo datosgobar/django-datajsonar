@@ -64,13 +64,13 @@ class CatalogAdmin(admin.ModelAdmin):
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
-    search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
+    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'federable', 'reviewed', 'last_reviewed')
+    search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'federable')
     readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed')
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
                'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
 
-    list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
+    list_filter = ('catalog__identifier', 'present', 'federable', 'reviewed')
 
     def mark_as_reviewed(self, _, queryset):
         queryset.update(reviewed=Dataset.REVIEWED, last_reviewed=timezone.localdate())
@@ -89,16 +89,16 @@ class DatasetAdmin(admin.ModelAdmin):
     )
 
     def make_unindexable(self, _, queryset):
-        queryset.update(indexable=False)
-    make_unindexable.short_description = 'Marcar como no indexable'
+        queryset.update(federable=False)
+    make_unindexable.short_description = 'Marcar como no federable'
 
     def make_indexable(self, _, queryset):
-        queryset.update(indexable=True)
-    make_indexable.short_description = 'Marcar como indexable'
+        queryset.update(federable=True)
+    make_indexable.short_description = 'Marcar como federable'
 
     def generate_config_file(self, _, queryset):
-        indexables = queryset.filter(indexable=True)
-        return download_config_csv(indexables)
+        federables = queryset.filter(federable=True)
+        return download_config_csv(federables)
     generate_config_file.short_description = 'Generar csv de configuración'
 
     def get_urls(self):

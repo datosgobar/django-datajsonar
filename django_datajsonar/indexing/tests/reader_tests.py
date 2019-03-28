@@ -19,7 +19,7 @@ class ReaderTests(TestCase):
 
     def setUp(self):
         self.task = ReadDataJsonTask.objects.create()
-        self.node = Node(catalog_id=self.catalog_id, catalog_url=self.catalog, indexable=True)
+        self.node = Node(catalog_id=self.catalog_id, catalog_url=self.catalog, federable=True)
         self.node.save()
 
     def test_index_same_series_different_catalogs(self):

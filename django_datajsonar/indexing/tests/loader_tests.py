@@ -30,7 +30,7 @@ class DatabaseLoaderTests(TestCase):
         self.task.save()
         self.node = Node(catalog_id=self.catalog_id,
                          catalog_url=os.path.join(dir_path, 'full_ts_data.json'),
-                         indexable=True)
+                         federable=True)
         self.node.catalog = json.dumps(DataJson(self.node.catalog_url))
         self.node.save()
 
@@ -52,7 +52,7 @@ class DatabaseLoaderTests(TestCase):
             )
             if created:
                 dataset_model.metadata = '{}'
-                dataset_model.indexable = whitelist
+                dataset_model.federable = whitelist
                 dataset_model.save()
 
     def tearDown(self):
@@ -106,7 +106,7 @@ class DatabaseLoaderTests(TestCase):
         dataset = Catalog.objects.get(identifier=CATALOG_ID).dataset_set
 
         self.assertEqual(dataset.count(), 1)
-        self.assertFalse(dataset.first().indexable)
+        self.assertFalse(dataset.first().federable)
 
     def test_change_series_distribution(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))

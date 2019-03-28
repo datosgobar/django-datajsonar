@@ -90,7 +90,7 @@ class DatabaseLoader(object):
         updated_distributions = False
         distributions = dataset.get('distribution', [])
         if self.default_whitelist:
-            dataset_model.indexable = True
+            dataset_model.federable = True
         if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False):
             distributions = filter(distribution_has_time_index, distributions)
         for distribution in distributions:
@@ -142,7 +142,7 @@ class DatabaseLoader(object):
                 continue
 
         data_change = False
-        if self.task.indexing_mode and dataset_model.indexable:
+        if self.task.indexing_mode and dataset_model.federable:
             data_change = self._read_file(distribution_model)
 
         # En caso de que no descargue el archivo.
@@ -170,7 +170,7 @@ class DatabaseLoader(object):
     def _read_file(self, distribution_model):
         """Descarga y lee el archivo de la distribución. Por razones
         de performance, NO hace un save() a la base de datos.
-        Marca el modelo de distribución como 'indexable' si el archivo tiene datos
+        Marca el modelo de distribución como 'federable' si el archivo tiene datos
         distintos a los actuales. El chequeo de cambios se hace hasheando el archivo entero
         Args:
             distribution_model (Distribution)

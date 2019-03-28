@@ -24,7 +24,7 @@ def index_catalog(node, task, read_local=False, whitelist=False):
         task (ReadDataJsonTask): Task a loggear acciones
         read_local (bool): Lee las rutas a archivos fuente como archivo
         local o como URL. Default False
-        whitelist (bool): Marcar los datasets nuevos como indexables por defecto. Default False
+        whitelist (bool): Marcar los datasets nuevos como federables por defecto. Default False
     """
     catalog_model = Catalog.objects.filter(identifier=node.catalog_id)
     # Seteo inicial de variables a usar durante la indexación

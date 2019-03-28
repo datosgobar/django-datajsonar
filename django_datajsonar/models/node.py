@@ -80,7 +80,7 @@ class Node(models.Model):
 
     catalog_id = models.CharField(max_length=100, unique=True)
     catalog_url = models.URLField()
-    indexable = models.BooleanField()
+    federable = models.BooleanField()
     catalog = models.TextField(default='{}')
     admins = models.ManyToManyField(User, blank=True)
     catalog_format = models.CharField(max_length=20, choices=FORMATS,
@@ -90,7 +90,7 @@ class Node(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        if self.release_date is None and self.indexable is True:
+        if self.release_date is None and self.federable is True:
             self.release_date = timezone.now().date()
         super(Node, self).save(force_insert, force_update, using, update_fields)
 

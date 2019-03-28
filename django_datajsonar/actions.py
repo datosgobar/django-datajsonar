@@ -53,7 +53,7 @@ class DatasetIndexableToggler(object):
             for dataset in datasets:
                 try:
                     dataset_model = dataset_models.get(identifier=dataset)
-                    dataset_model.indexable = True
+                    dataset_model.federable = True
                     dataset_model.save()
                 except Dataset.DoesNotExist:
                     status = 'ERROR'

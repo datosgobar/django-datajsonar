@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 
 @job('indexing')
 def read_datajson(task, whitelist=False, read_local=False):
-    """Tarea raíz de indexación. Itera sobre todos los nodos indexables (federados) e
+    """Tarea raíz de indexación. Itera sobre todos los nodos federables (federados) e
     inicia la tarea de indexación sobre cada uno de ellos
     """
-    nodes = Node.objects.filter(indexable=True)
+    nodes = Node.objects.filter(federable=True)
     for node in nodes:
         try:
             index_catalog.delay(node, task, read_local, whitelist)
@@ -36,7 +36,7 @@ def read_datajson(task, whitelist=False, read_local=False):
 
 @job('indexing')
 def bulk_whitelist(indexing_file_id):
-    """Marca datasets como indexables en conjunto a partir de la lectura
+    """Marca datasets como federables en conjunto a partir de la lectura
     del archivo la instancia del DatasetIndexingFile pasado
     """
     indexing_file_model = DatasetIndexingFile.objects.get(id=indexing_file_id)

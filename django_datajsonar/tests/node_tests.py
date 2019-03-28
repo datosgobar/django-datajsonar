@@ -104,29 +104,29 @@ class NodeTests(TestCase):
 
     def test_node_release_date_sets_itself(self):
         test_node = Node.objects.create(
-            catalog_id='sspm', catalog_url='url', indexable=False)
+            catalog_id='sspm', catalog_url='url', federable=False)
         with patch('django_datajsonar.models.node.timezone') as mock_time:
             time = datetime.datetime(3000, 1, 1)
             mock_time.now.return_value = time
-            test_node.indexable = True
+            test_node.federable = True
             test_node.save()
         self.assertEqual(test_node.release_date, time.date())
 
     def test_node_release_date_sets_itself_only_the_first_time(self):
         test_node = Node.objects.create(
-            catalog_id='sspm', catalog_url='url', indexable=False)
+            catalog_id='sspm', catalog_url='url', federable=False)
         with patch('django_datajsonar.models.node.timezone') as mock_time:
             first_time = datetime.datetime(3000, 1, 1)
             mock_time.now.return_value = first_time
-            test_node.indexable = True
+            test_node.federable = True
             test_node.save()
         self.assertEqual(test_node.release_date, first_time.date())
-        test_node.indexable = False
+        test_node.federable = False
         test_node.save()
         with patch('django_datajsonar.models.node.timezone') as mock_time:
             second_time = datetime.datetime(3999, 12, 31)
             mock_time.now.return_value = second_time
-            test_node.indexable = True
+            test_node.federable = True
             test_node.save()
         self.assertEqual(test_node.release_date, first_time.date())
 

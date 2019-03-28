@@ -32,7 +32,7 @@ class ReadDataJsonTest(TestCase):
         identifier = 'test_id'
         Node(catalog_id=identifier,
              catalog_url=os.path.join(dir_path, 'sample_data.json'),
-             indexable=True).save()
+             federable=True).save()
         task = ReadDataJsonTask()
         task.save()
         read_datajson(task, whitelist=True)
@@ -42,7 +42,7 @@ class ReadDataJsonTest(TestCase):
         identifier = 'test_id'
         Node(catalog_id=identifier,
              catalog_url=os.path.join(dir_path, 'sample_data.json'),
-             indexable=True).save()
+             federable=True).save()
         # Esperado: mismo comportamiento que llamando la función read_datajson
         call_command('read_datajson', whitelist=True)
         self.assertTrue(Field.objects.filter(distribution__dataset__catalog__identifier=identifier))
@@ -51,7 +51,7 @@ class ReadDataJsonTest(TestCase):
         identifier = 'test_id'
         Node(catalog_id=identifier,
              catalog_url=os.path.join(dir_path, 'sample_data.json'),
-             indexable=True).save()
+             federable=True).save()
 
         ReadDataJsonTask(status=ReadDataJsonTask.RUNNING).save()
 

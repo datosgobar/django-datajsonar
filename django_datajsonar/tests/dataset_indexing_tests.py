@@ -43,7 +43,7 @@ class BulkIndexingTests(TestCase):
         filepath = os.path.join(dir_path, 'test_indexing_file.csv')
 
         dataset = Dataset.objects.get(catalog__identifier=self.test_catalog, identifier='1')
-        self.assertFalse(dataset.indexable)
+        self.assertFalse(dataset.federable)
 
         with open(filepath, 'rb') as f:
             idx_file = DatasetIndexingFile(indexing_file=SimpleUploadedFile(filepath, f.read()),
@@ -52,13 +52,13 @@ class BulkIndexingTests(TestCase):
 
             bulk_whitelist(idx_file.id)
         dataset = Dataset.objects.get(catalog__identifier=self.test_catalog, identifier='1')
-        self.assertTrue(dataset.indexable)
+        self.assertTrue(dataset.federable)
 
     def test_dataset_not_in_file_unaffected(self):
         filepath = os.path.join(dir_path, 'test_indexing_file.csv')
 
         dataset = Dataset.objects.get(catalog__identifier=self.test_catalog, identifier='0')
-        self.assertFalse(dataset.indexable)
+        self.assertFalse(dataset.federable)
         with open(filepath, 'rb') as f:
             idx_file = DatasetIndexingFile(indexing_file=SimpleUploadedFile(filepath, f.read()),
                                            uploader=self.user)
@@ -67,7 +67,7 @@ class BulkIndexingTests(TestCase):
             bulk_whitelist(idx_file.id)
 
         dataset = Dataset.objects.get(catalog__identifier=self.test_catalog, identifier='0')
-        self.assertFalse(dataset.indexable)
+        self.assertFalse(dataset.federable)
 
     def test_idx_file_model_changes_states(self):
         filepath = os.path.join(dir_path, 'test_indexing_file.csv')
@@ -105,7 +105,7 @@ class BulkIndexingTests(TestCase):
         idx_file = DatasetIndexingFile.objects.first()
         dataset = Dataset.objects.get(catalog__identifier=self.test_catalog, identifier='1')
         self.assertEqual(idx_file.state, idx_file.PROCESSED)
-        self.assertTrue(dataset.indexable)
+        self.assertTrue(dataset.federable)
 
     def test_config_csv_view(self):
         filepath = os.path.join(dir_path, 'test_indexing_file.csv')
@@ -120,7 +120,7 @@ class BulkIndexingTests(TestCase):
         content = response.content.decode('utf-8')
         config_csv = csv.reader(io.StringIO(content))
         csv_indexables = [row[1] for row in config_csv][1:]
-        model_indexables = list(Dataset.objects.filter(indexable=True).values_list("identifier", flat=True))
+        model_indexables = list(Dataset.objects.filter(federable=True).values_list("identifier", flat=True))
         self.assertListEqual(sorted(csv_indexables), sorted(model_indexables))
 
     def tearDown(self):
