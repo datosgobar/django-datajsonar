@@ -1,8 +1,11 @@
 #!coding=utf8
 from __future__ import unicode_literals
 
+from django.conf import settings
 from django.utils import timezone
 
+from django_datajsonar.task_closer import TaskCloser
+from django_datajsonar.utils.utils import import_string
 from .models import Synchronizer, Stage
 
 
@@ -17,6 +20,11 @@ def upkeep():
     for synchro in synchronizers:
         if synchro.check_completion():
             synchro.next_stage()
+
+    task_closer = TaskCloser()
+    for stage_settings in settings.DATAJSONAR_STAGES.values():
+        task = import_string(stage_settings['task'])
+        task_closer.close_all_opened(task)
 
 
 def start_synchros():
