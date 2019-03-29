@@ -9,7 +9,8 @@ from django.contrib.admin import helpers
 from django.forms import formset_factory
 from django.shortcuts import render, redirect
 
-from django_datajsonar.forms import StageForm, SynchroForm
+from django_datajsonar.forms.stage_form import StageForm
+from django_datajsonar.forms.synchro_form import SynchroForm
 from django_datajsonar.models import Synchronizer
 from django_datajsonar.synchronizer import create_or_update_synchro
 from django_datajsonar.utils import generate_stages
@@ -22,13 +23,14 @@ class SynchronizerAdmin(admin.ModelAdmin):
     StageFormset = formset_factory(StageForm, extra=0)
 
     def add_view(self, request, form_url='', extra_context=None):
-        return self._synchro_view(request)
+        return self._synchro_view(request, extra_context=extra_context)
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         synchro = Synchronizer.objects.get(id=object_id)
-        return self._synchro_view(request, synchro)
+        return self._synchro_view(request, synchro, extra_context=extra_context)
 
-    def _synchro_view(self, request, synchro=None):
+    def _synchro_view(self, request, synchro=None, extra_context=None):
+        extra_context = extra_context or {}
         if request.method == 'POST':
             return self.post_synchro_edit(request, synchro.id if synchro else None)
 
@@ -40,18 +42,19 @@ class SynchronizerAdmin(admin.ModelAdmin):
                 'week_days': synchro.get_days_of_week()
             })
         else:
-            synchro_form = SynchroForm()
+            synchro_form = SynchroForm(extra_context)
 
-        context = self.add_synchro_context(request, synchro_form, synchro)
+        stages_formset = extra_context.get('stages_formset')
+        context = self.add_synchro_context(request, synchro_form, synchro, stages_formset)
 
         return render(request, 'synchronizer.html', context)
 
-    def add_synchro_context(self, request, synchro_form, synchro=None):
+    def add_synchro_context(self, request, synchro_form, synchro=None, stages_formset=None):
         context = {
             'opts': self.model._meta,
             'has_change_permission': self.has_change_permission(request),
             'synchro_form': self.admin_synchro_form(request, synchro_form),
-            'stages_form': self.get_stages_formset(synchro),
+            'stages_form': stages_formset or self.get_stages_formset(synchro),
             'object': synchro,
         }
         return context
