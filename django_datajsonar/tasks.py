@@ -70,7 +70,7 @@ def process_node_register_file(register_file_id):
             if bool(values['federado']) is True and values['formato'] == 'json':
                 Node.objects.get_or_create(catalog_id=node,
                                            catalog_url=values['url'],
-                                           indexable=True)
+                                           federable=True)
             register_file.logs = register_file.logs + (
                 " - Guardado Node Indexing File %s" % (node, ))
         except Exception as e:

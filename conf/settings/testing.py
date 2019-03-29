@@ -42,6 +42,12 @@ RQ_QUEUES = {
         'DB': DEFAULT_REDIS_DB,
         'ASYNC': False,
     },
+    'scrapping': {
+        'HOST': DEFAULT_REDIS_HOST,
+        'PORT': DEFAULT_REDIS_PORT,
+        'DB': DEFAULT_REDIS_DB,
+        'ASYNC': False,
+    },
     'indexing': {
         'HOST': DEFAULT_REDIS_HOST,
         'PORT': DEFAULT_REDIS_PORT,
