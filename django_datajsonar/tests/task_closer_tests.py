@@ -1,4 +1,4 @@
-from unittest.mock import Mock, MagicMock
+from mock import Mock, MagicMock
 
 from django.test import TestCase
 

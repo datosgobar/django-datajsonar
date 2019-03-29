@@ -1,9 +1,9 @@
 #! coding: utf-8
 
 from __future__ import unicode_literals
+from mock import patch
 from django.conf import settings
 from django.test import TestCase
-from mock import patch
 
 from django_datajsonar.synchronizer import close_opened_tasks
 from django_datajsonar.utils.utils import import_string

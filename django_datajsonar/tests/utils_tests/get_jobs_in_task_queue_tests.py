@@ -2,9 +2,9 @@
 
 from __future__ import unicode_literals
 
+from mock import patch
 from django.conf import settings
 from django.test import TestCase
-from mock import patch
 
 from django_datajsonar.models import ReadDataJsonTask
 from django_datajsonar.utils.get_jobs_in_task_queue import get_jobs_in_task_queue
