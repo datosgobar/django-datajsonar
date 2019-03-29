@@ -21,6 +21,10 @@ def upkeep():
         if synchro.check_completion():
             synchro.next_stage()
 
+    close_opened_tasks()
+
+
+def close_opened_tasks():
     task_closer = TaskCloser()
     for stage_settings in settings.DATAJSONAR_STAGES.values():
         task = import_string(stage_settings['task'])
