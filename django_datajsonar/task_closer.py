@@ -1,13 +1,15 @@
 from django_datajsonar.models import AbstractTask
-from django_datajsonar.utils.utils import pending_or_running_jobs
+from django_datajsonar.utils.get_jobs_in_task_queue import get_jobs_in_task_queue
 
 
 class TaskCloser(object):
 
-    def __init__(self, task_model, does_queue_have_running_jobs=pending_or_running_jobs):
-        self.does_queue_have_running_jobs = does_queue_have_running_jobs
-        self.task_model = task_model
+    def __init__(self, task_jobs=get_jobs_in_task_queue):
+        self.task_jobs = task_jobs
 
-    def close_all_opened(self):
-        if not self.does_queue_have_running_jobs('a_queue'):
-            self.task_model.objects.update(status=AbstractTask.FINISHED)
+    def close_all_opened(self, task_model):
+        if not self.has_jobs_in_queue(task_model):
+            task_model.objects.update(status=AbstractTask.FINISHED)
+
+    def has_jobs_in_queue(self, task_model):
+        return bool(self.task_jobs(task_model))
