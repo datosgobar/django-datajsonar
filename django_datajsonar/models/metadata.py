@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 
 class Metadata(models.Model):
     class Meta:
-        verbose_name = verbose_name_plural = "Metadatos enriquecidos"
+        verbose_name = verbose_name_plural = "Additional metadata"
 
     key = models.CharField(max_length=64)
     value = models.TextField()

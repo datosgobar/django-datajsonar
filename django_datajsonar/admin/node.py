@@ -58,8 +58,8 @@ class NodeAdmin(admin.ModelAdmin):
 
     def make_unindexable(self, _, queryset):
         queryset.update(indexable=False)
-    make_unindexable.short_description = 'Marcar como no indexable'
+    make_unindexable.short_description = 'Marcar como no federable'
 
     def make_indexable(self, _, queryset):
         queryset.update(indexable=True)
-    make_indexable.short_description = 'Marcar como indexable'
+    make_indexable.short_description = 'Marcar como federable'

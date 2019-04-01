@@ -80,7 +80,7 @@ class Node(models.Model):
 
     catalog_id = models.CharField(max_length=100, unique=True)
     catalog_url = models.URLField()
-    indexable = models.BooleanField()
+    indexable = models.BooleanField(verbose_name='federable')
     catalog = models.TextField(default='{}')
     admins = models.ManyToManyField(User, blank=True)
     catalog_format = models.CharField(max_length=20, choices=FORMATS,
