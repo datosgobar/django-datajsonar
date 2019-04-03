@@ -27,8 +27,10 @@ def upkeep():
 def close_opened_tasks():
     task_closer = TaskCloser()
     for stage_settings in settings.DATAJSONAR_STAGES.values():
-        task = import_string(stage_settings['task'])
-        task_closer.close_all_opened(task)
+        task_name = stage_settings.get('task')
+        if task_name:
+            task = import_string(task_name)
+            task_closer.close_all_opened(task)
 
 
 def start_synchros():
