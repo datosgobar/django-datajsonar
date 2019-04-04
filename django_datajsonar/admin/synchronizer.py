@@ -8,8 +8,10 @@ from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.forms import formset_factory
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
+from django_datajsonar.forms.manual_synchronizer_form import ManualSynchronizerRunForm
 from django_datajsonar.forms.stage_form import StageForm
 from django_datajsonar.forms.synchro_form import SynchroForm
 from django_datajsonar.models import Synchronizer
@@ -133,10 +135,19 @@ class SynchronizerAdmin(admin.ModelAdmin):
     duplicate.short_description = "Duplicar synchronizer"
 
     def start_synchro(self, request, synchro_id):
-        try:
-            synchro = Synchronizer.objects.get(id=synchro_id)
-            synchro.begin_stage()
-            messages.success(request, "Corriendo tarea!")
-        except Exception:
-            messages.error(request, "El synchronizer selccionado ya está corriendo")
-        return redirect('admin:django_datajsonar_synchronizer_changelist')
+        synchro = Synchronizer.objects.get(id=synchro_id)
+        if request.method == 'POST':
+            try:
+                synchro.begin_stage()
+                messages.success(request, "Corriendo tarea!")
+            except Exception:
+                messages.error(request, "El synchronizer selccionado ya está corriendo")
+            return redirect('admin:django_datajsonar_synchronizer_changelist')
+
+        context = {
+            'opts': self.model._meta,
+            'has_change_permission': self.has_change_permission(request),
+            'form': ManualSynchronizerRunForm(),
+            'object': synchro,
+        }
+        return render(request, 'synchronizer_manual_run.html', context=context)
