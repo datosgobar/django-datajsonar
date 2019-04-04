@@ -46,7 +46,7 @@ class Synchronizer(models.Model):
 
     week_days = models.TextField(blank=True)
 
-    def begin_stage(self, stage=None):
+    def begin_stage(self, stage=None, node=None):
         if self.status == self.RUNNING and stage is None:
             raise Exception('El synchronizer ya está corriendo,'
                             'pero no se pasó la siguiente etapa.')
@@ -55,7 +55,7 @@ class Synchronizer(models.Model):
         self.actual_stage = stage
         self.last_time_ran = timezone.now()
         self.save()
-        stage.open_stage()
+        stage.open_stage(node)
 
     def check_completion(self):
         if self.status != self.RUNNING:
