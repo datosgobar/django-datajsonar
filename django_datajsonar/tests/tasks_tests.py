@@ -61,7 +61,7 @@ class ReadDataJsonTest(TestCase):
         call_command('read_datajson')
         self.assertEqual(ReadDataJsonTask.objects.all().count(), 1)
 
-    @patch('django_datajsonar.tasks.index_catalog.delay')
+    @patch('django_datajsonar.tasks.index_catalog')
     def test_read_datajson_several_nodes_call_index_catalog_once_per_node(self, index_catalog):
         Node(catalog_id='one_catalog',
              catalog_url='http://one_url.com',
@@ -72,9 +72,9 @@ class ReadDataJsonTest(TestCase):
 
         task = ReadDataJsonTask.objects.create()
         read_datajson(task)
-        self.assertEqual(index_catalog.call_count, 2)
+        self.assertEqual(index_catalog.delay.call_count, 2)
 
-    @patch('django_datajsonar.tasks.index_catalog.delay')
+    @patch('django_datajsonar.tasks.index_catalog')
     def test_read_datajson_one_node_only_calls_task_for_that_node(self, index_catalog):
         Node(catalog_id='one_catalog',
              catalog_url='http://one_url.com',
@@ -85,7 +85,7 @@ class ReadDataJsonTest(TestCase):
 
         task = ReadDataJsonTask.objects.create(node=node)
         read_datajson(task)
-        self.assertEqual(index_catalog.call_count, 1)
+        self.assertEqual(index_catalog.delay.call_count, 1)
 
 
 class SchedulingMethodsTest(TestCase):
