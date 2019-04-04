@@ -20,7 +20,7 @@
     {% if object %}
 
     <ul class="object-tools">
-        <li><a href="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'start_synchro' object.id %}" class='btn btn-high btn-success' style="margin-top: 50px">Correr ahora</a></li>
+        <li><a href="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'start_synchro' object.id %}" class='btn btn-high btn-success' style="margin-top: 50px">Run now</a></li>
     </ul>
         <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'change' object.id %}"
               method="post"{% else %}
