@@ -7,6 +7,8 @@ from django.core.management import call_command
 from django.test import TestCase
 from unittest import skipIf
 
+from mock import patch
+
 from django_datajsonar.models import Field
 from django_datajsonar.tasks import read_datajson, schedule_new_read_datajson_task,\
     schedule_full_read_task, schedule_metadata_read_task
@@ -58,6 +60,32 @@ class ReadDataJsonTest(TestCase):
         # Esperado: no se crea una segunda tarea
         call_command('read_datajson')
         self.assertEqual(ReadDataJsonTask.objects.all().count(), 1)
+
+    @patch('django_datajsonar.tasks.index_catalog.delay')
+    def test_read_datajson_several_nodes_call_index_catalog_once_per_node(self, index_catalog):
+        Node(catalog_id='one_catalog',
+             catalog_url='http://one_url.com',
+             indexable=True).save()
+        Node(catalog_id='other_catalog',
+             catalog_url='http://other_url.com',
+             indexable=True).save()
+
+        task = ReadDataJsonTask.objects.create()
+        read_datajson(task)
+        self.assertEqual(index_catalog.call_count, 2)
+
+    @patch('django_datajsonar.tasks.index_catalog.delay')
+    def test_read_datajson_one_node_only_calls_task_for_that_node(self, index_catalog):
+        Node(catalog_id='one_catalog',
+             catalog_url='http://one_url.com',
+             indexable=True).save()
+        node = Node.objects.create(catalog_id='other_catalog',
+                                   catalog_url='http://other_url.com',
+                                   indexable=True)
+
+        task = ReadDataJsonTask.objects.create(node=node)
+        read_datajson(task)
+        self.assertEqual(index_catalog.call_count, 1)
 
 
 class SchedulingMethodsTest(TestCase):
