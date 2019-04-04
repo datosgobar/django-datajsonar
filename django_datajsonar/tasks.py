@@ -23,15 +23,20 @@ def read_datajson(task, whitelist=False, read_local=False):
     """Tarea raíz de indexación. Itera sobre todos los nodos indexables (federados) e
     inicia la tarea de indexación sobre cada uno de ellos
     """
-    nodes = Node.objects.filter(indexable=True)
+    nodes = [task.node] if task.node else Node.objects.filter(indexable=True)
+
     for node in nodes:
-        try:
-            index_catalog.delay(node, task, read_local, whitelist)
-        except Exception as e:
-            logger.error(u"Excepción leyendo nodo %s: %s", node.id, e)
+        index_one_catalog(task, node, read_local, whitelist)
 
     if not settings.RQ_QUEUES['indexing'].get('ASYNC'):
         close_read_datajson_task()
+
+
+def index_one_catalog(task, node, read_local, whitelist):
+    try:
+        index_catalog.delay(node, task, read_local, whitelist)
+    except Exception as e:
+        logger.error(u"Excepción leyendo nodo %s: %s", node.id, e)
 
 
 @job('indexing')

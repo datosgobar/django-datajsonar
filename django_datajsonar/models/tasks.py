@@ -5,6 +5,8 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 
+from django_datajsonar.models.node import Node
+
 
 class AbstractTask(models.Model):
 
@@ -21,6 +23,8 @@ class AbstractTask(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(null=True)
     logs = models.TextField()
+
+    node = models.ForeignKey(to=Node, default=None, null=True)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
