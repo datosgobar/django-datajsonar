@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import json
 
 from django.conf import settings
+from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.forms import formset_factory
@@ -24,6 +25,14 @@ class SynchronizerAdmin(admin.ModelAdmin):
 
     def add_view(self, request, form_url='', extra_context=None):
         return self._synchro_view(request, extra_context=extra_context)
+
+    def get_urls(self):
+        urls = super(SynchronizerAdmin, self).get_urls()
+        info = self.model._meta.app_label, self.model._meta.model_name
+        extra_urls = [url(r'^start_synchro/(?P<synchro_id>[0-9])$',
+                          self.admin_site.admin_view(self.start_synchro),
+                          name='%s_%s_start_synchro' % info), ]
+        return extra_urls + urls
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         synchro = Synchronizer.objects.get(id=object_id)
@@ -122,3 +131,12 @@ class SynchronizerAdmin(admin.ModelAdmin):
             synchronizer.name = "Copia de {}".format(synchronizer.name)
             synchronizer.save()
     duplicate.short_description = "Duplicar synchronizer"
+
+    def start_synchro(self, request, synchro_id):
+        try:
+            synchro = Synchronizer.objects.get(id=synchro_id)
+            synchro.begin_stage()
+            messages.success(request, "Corriendo tarea!")
+        except Exception:
+            messages.error(request, "El synchronizer selccionado ya está corriendo")
+        return redirect('admin:django_datajsonar_synchronizer_changelist')
