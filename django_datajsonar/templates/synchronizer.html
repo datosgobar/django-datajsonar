@@ -1,4 +1,4 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/change_form.html" %}
 {% load i18n admin_static admin_urls %}
 
 {% block extrastyle %}
@@ -18,43 +18,49 @@
 
 {% block content %}
     {% if object %}
-    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'change' object.id%}" method="post"{% else %}
-    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'add' %}" method="post"{% endif %}
-        {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} id="synchroForm">
-        {% csrf_token %}
-        <div>
-            {% for fieldset in synchro_form %}
-                {% include "admin/includes/fieldset.html" %}
-            {% endfor %}
-        </div>
-        <div>
+
+    <ul class="object-tools">
+        <li><a href="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'start_synchro' object.id %}" class='btn btn-high btn-success' style="margin-top: 50px">Correr ahora</a></li>
+    </ul>
+        <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'change' object.id %}"
+              method="post"{% else %}
+        <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_'|add:'add' %}"
+              method="post"{% endif %}
+              {% if form.is_multipart %}enctype="multipart/form-data"{% endif %} id="synchroForm">
+    {% csrf_token %}
+    <div>
+        {% for fieldset in synchro_form %}
+            {% include "admin/includes/fieldset.html" %}
+        {% endfor %}
+    </div>
+    <div>
         {{ stages_form.management_form }}
 
-            <table>
-                <thead>
-                <th>TASK</th>
-                </thead>
-                <tbody>{% for form in stages_form %}
-                    <tr>{% for field in form %}
-                        <td>
-                            {{ field.errors }}
-                            {{ field }}
-                        </td>
-                    {% endfor %}</tr>
-                {% endfor %}</tbody>
-            </table>
-        </div>
-        <div class="submit-row">
-            <input type="submit" name="stages" value="Submit" class="default"/>
-        </div>
-    </form>
-<script src="{% static 'django_datajsonar/js/jquery-3.3.1.min.js' %}"></script>
-<script src="{% static 'django_datajsonar/js/jquery.formset.js' %}"></script>
-<script src="{% static 'django_datajsonar/js/synchronizer.js' %}"></script>
-<script type="text/javascript">
-    $(function() {
-        $('#synchroForm tbody tr').formset();
-    })
-</script>
+        <table>
+            <thead>
+            <th>TASK</th>
+            </thead>
+            <tbody>{% for form in stages_form %}
+                <tr>{% for field in form %}
+                    <td>
+                        {{ field.errors }}
+                        {{ field }}
+                    </td>
+                {% endfor %}</tr>
+            {% endfor %}</tbody>
+        </table>
+    </div>
+    <div class="submit-row">
+        <input type="submit" name="stages" value="Submit" class="default"/>
+    </div>
+</form>
+    <script src="{% static 'django_datajsonar/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'django_datajsonar/js/jquery.formset.js' %}"></script>
+    <script src="{% static 'django_datajsonar/js/synchronizer.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#synchroForm tbody tr').formset();
+        })
+    </script>
 
 {% endblock %}
