@@ -142,7 +142,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
                 synchro.begin_stage(node=node)
                 messages.success(request, "Corriendo tarea!")
             except Exception:
-                messages.error(request, "El synchronizer selccionado ya está corriendo")
+                messages.error(request, "El synchronizer seleccionado ya está corriendo")
             return redirect('admin:django_datajsonar_synchronizer_changelist')
 
         context = {
