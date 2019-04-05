@@ -86,7 +86,7 @@ def process_node_register_file(register_file_id):
     register_file.save()
 
 
-def schedule_new_read_datajson_task(mode=None):
+def schedule_new_read_datajson_task(mode=None, node=None):
     try:
         task = ReadDataJsonTask.objects.last()
         if task and task.status == ReadDataJsonTask.RUNNING:
@@ -96,7 +96,7 @@ def schedule_new_read_datajson_task(mode=None):
 
     if mode is None:
         mode = getattr(settings, 'DATAJSON_AR_DOWNLOAD_RESOURCES', True)
-    new_task = ReadDataJsonTask.objects.create(indexing_mode=mode)
+    new_task = ReadDataJsonTask.objects.create(indexing_mode=mode, node=node)
     read_datajson.delay(new_task)
 
     if not settings.RQ_QUEUES['indexing'].get('ASYNC'):
@@ -108,10 +108,10 @@ def schedule_new_read_datajson_task(mode=None):
 
 
 @job("indexing")
-def schedule_full_read_task(*_):
-    return schedule_new_read_datajson_task(mode=ReadDataJsonTask.COMPLETE_RUN)
+def schedule_full_read_task(node=None):
+    return schedule_new_read_datajson_task(mode=ReadDataJsonTask.COMPLETE_RUN, node=node)
 
 
 @job("indexing")
-def schedule_metadata_read_task(*_):
-    return schedule_new_read_datajson_task(mode=ReadDataJsonTask.METADATA_ONLY)
+def schedule_metadata_read_task(node=None):
+    return schedule_new_read_datajson_task(mode=ReadDataJsonTask.METADATA_ONLY, node=node)

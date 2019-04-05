@@ -14,7 +14,7 @@ from django.shortcuts import render, redirect
 from django_datajsonar.forms.manual_synchronizer_form import ManualSynchronizerRunForm
 from django_datajsonar.forms.stage_form import StageForm
 from django_datajsonar.forms.synchro_form import SynchroForm
-from django_datajsonar.models import Synchronizer
+from django_datajsonar.models import Synchronizer, Node
 from django_datajsonar.synchronizer import create_or_update_synchro
 from django_datajsonar.utils.utils import generate_stages
 
@@ -138,9 +138,10 @@ class SynchronizerAdmin(admin.ModelAdmin):
         synchro = Synchronizer.objects.get(id=synchro_id)
         if request.method == 'POST':
             try:
-                synchro.begin_stage()
+                node = Node.objects.get(id=request.POST['node'])
+                synchro.begin_stage(node=node)
                 messages.success(request, "Corriendo tarea!")
-            except Exception:
+            except IOError:
                 messages.error(request, "El synchronizer selccionado ya está corriendo")
             return redirect('admin:django_datajsonar_synchronizer_changelist')
 
