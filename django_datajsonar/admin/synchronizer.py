@@ -138,10 +138,10 @@ class SynchronizerAdmin(admin.ModelAdmin):
         synchro = Synchronizer.objects.get(id=synchro_id)
         if request.method == 'POST':
             try:
-                node = Node.objects.get(id=request.POST['node'])
+                node = Node.objects.get(id=request.POST.get('node'))
                 synchro.begin_stage(node=node)
                 messages.success(request, "Corriendo tarea!")
-            except IOError:
+            except Exception:
                 messages.error(request, "El synchronizer selccionado ya está corriendo")
             return redirect('admin:django_datajsonar_synchronizer_changelist')
 

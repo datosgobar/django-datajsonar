@@ -18,11 +18,6 @@ class SynchronizerAdminTests(TestCase):
         # admin auth
         self.client.force_login(User.objects.create(username='test_user', is_staff=True))
 
-    def test_start_syncrhonizer_manually(self, mock_synchro):
-        mock_synchro.objects.get.return_value = mock_synchro
-        self.client.post(reverse('admin:django_datajsonar_synchronizer_start_synchro', args=(self.synchro.id,)))
-        mock_synchro.begin_stage.assert_called_once()
-
     def test_start_manually_if_already_started_fails(self, mock_synchro):
         self.synchro.status = Synchronizer.RUNNING
         self.synchro.save()
