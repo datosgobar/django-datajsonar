@@ -38,9 +38,9 @@ class Stage(models.Model):
         except task_model.DoesNotExist:
             return None
 
-    def open_stage(self, _=None):
+    def open_stage(self, node=None):
         job = import_string(self.callable_str)
-        job.delay()
+        job.delay(node)
         self.status = Stage.ACTIVE
         self.save()
 
