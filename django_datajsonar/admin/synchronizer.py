@@ -138,8 +138,8 @@ class SynchronizerAdmin(admin.ModelAdmin):
         synchro = Synchronizer.objects.get(id=synchro_id)
         if request.method == 'POST':
             try:
-                node = Node.objects.get(id=request.POST.get('node'))
-                synchro.begin_stage(node=node)
+                synchro.node = Node.objects.get(id=request.POST.get('node'))
+                synchro.begin_stage()
                 messages.success(request, "Corriendo tarea!")
             except Exception:
                 messages.error(request, "El synchronizer seleccionado ya está corriendo")

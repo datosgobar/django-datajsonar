@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 
 from django_datajsonar.frequency import get_next_run_date
+from django_datajsonar.models.node import Node
 from django_datajsonar.strings import SYNCHRO_DAILY_FREQUENCY,\
     SYNCHRO_WEEK_DAYS_FREQUENCY
 from .stage import Stage
@@ -32,6 +33,8 @@ class Synchronizer(models.Model):
                                      null=True, blank=True,
                                      on_delete=models.PROTECT)
 
+    node = models.ForeignKey(to=Node, blank=True, null=True)
+
     WEEK_DAYS = SYNCHRO_WEEK_DAYS_FREQUENCY
     DAILY = SYNCHRO_DAILY_FREQUENCY
     FREQUENCY_CHOICES = (
@@ -46,7 +49,7 @@ class Synchronizer(models.Model):
 
     week_days = models.TextField(blank=True)
 
-    def begin_stage(self, stage=None, node=None):
+    def begin_stage(self, stage=None):
         if self.status == self.RUNNING and stage is None:
             raise Exception('El synchronizer ya está corriendo,'
                             'pero no se pasó la siguiente etapa.')
@@ -55,7 +58,7 @@ class Synchronizer(models.Model):
         self.actual_stage = stage
         self.last_time_ran = timezone.now()
         self.save()
-        stage.open_stage(node)
+        stage.open_stage(self.node)
 
     def check_completion(self):
         if self.status != self.RUNNING:
@@ -69,6 +72,7 @@ class Synchronizer(models.Model):
         if self.actual_stage.next_stage is None:
             self.status = self.STAND_BY
             self.actual_stage = None
+            self.node = None
             self.save()
         else:
             self.begin_stage(self.actual_stage.next_stage)

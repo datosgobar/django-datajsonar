@@ -23,5 +23,16 @@ class SynchronizerTests(TestCase):
         stage = Stage()
         stage.open_stage = Mock()
         node = Node.objects.create(catalog_id='test_catalog', catalog_url='http://catalog_url.com', indexable=True)
-        Synchronizer(start_stage=stage).begin_stage(node=node)
+        Synchronizer(start_stage=stage, node=node).begin_stage()
         stage.open_stage.assert_called_with(node)
+
+    def test_after_synchro_is_finished_node_is_none(self, *_):
+        stage = Stage()
+        stage.open_stage = Mock()
+        stage.save = Mock()
+        node = Node.objects.create(catalog_id='test_catalog', catalog_url='http://catalog_url.com', indexable=True)
+        synchro = Synchronizer(start_stage=stage, node=node)
+        synchro.begin_stage()
+        synchro.next_stage()
+
+        self.assertIsNone(synchro.node)
