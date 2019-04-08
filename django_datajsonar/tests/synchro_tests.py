@@ -19,7 +19,7 @@ from django_datajsonar.synchronizer import start_synchros, upkeep, create_or_upd
 
 
 @job("default")
-def callable_method():
+def callable_method(*_):
     ReadDataJsonTask.objects.create()
 
 

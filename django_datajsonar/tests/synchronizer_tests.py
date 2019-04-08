@@ -1,7 +1,7 @@
 from django.test import TestCase
 from mock import Mock, patch
 
-from django_datajsonar.models import Synchronizer, Stage
+from django_datajsonar.models import Synchronizer, Stage, Node
 
 
 @patch('django_datajsonar.models.synchronizer.Synchronizer.save')
@@ -18,3 +18,10 @@ class SynchronizerTests(TestCase):
             stage = Stage()
             stage.open_stage = Mock()
             Synchronizer(status=Synchronizer.RUNNING, start_stage=stage).begin_stage()
+
+    def test_start_stage_for_node(self, *_):
+        stage = Stage()
+        stage.open_stage = Mock()
+        node = Node.objects.create(catalog_id='test_catalog', catalog_url='http://catalog_url.com', indexable=True)
+        Synchronizer(start_stage=stage).begin_stage(node=node)
+        stage.open_stage.assert_called_with(node)
