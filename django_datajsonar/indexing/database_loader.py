@@ -179,8 +179,8 @@ class DatabaseLoader(object):
         if not file_url:
             return False
         if self.read_local:  # Usado en debug y testing
-            with open(file_url) as f:
-                data_hash = hashlib.sha512(f.read().encode('utf-8')).hexdigest()
+            with open(file_url, 'rb') as f:
+                data_hash = hashlib.sha512(f.read()).hexdigest()
             distribution_model.data_file = File(open(file_url, 'rb'))
 
         else:
