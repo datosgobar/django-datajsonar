@@ -63,7 +63,7 @@ class NodeRegisterFileTests(TestCase):
                 label='metadata_' + i_str,
                 category='no-central',
                 type='andino',
-                jurisdiction=jurs[i//2],
+                jurisdiction=jurs[i // 2],
                 url_datosgobar='http://test.url',
                 url_homepage='http://test.url',
                 url_json='http://test.url',

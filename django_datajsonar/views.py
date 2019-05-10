@@ -16,5 +16,3 @@ def nodes_metadata_json(_):
     response = {'meta': project_metadata(),
                 'jurisdictions': jurisdiction_list_metadata()}
     return JsonResponse(response)
-
-
