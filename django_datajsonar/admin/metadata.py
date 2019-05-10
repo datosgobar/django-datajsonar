@@ -5,7 +5,10 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.contenttypes.models import ContentType
 
-from django_datajsonar.models import Metadata
+from solo.admin import SingletonModelAdmin
+
+from django_datajsonar.models import Metadata, ProjectMetadata,\
+    Language, Publisher, Spatial
 
 
 class EnhancedMetaFilter(SimpleListFilter):
@@ -46,3 +49,24 @@ class MetadataAdmin(admin.ModelAdmin):
         result = metadata.content_object.identifier or ''
         return result
     get_entity_identifier.short_description = 'ID'
+
+
+class LanguageAdmin(admin.TabularInline):
+    model = Language
+
+
+class PublisherAdmin(admin.TabularInline):
+    model = Publisher
+
+
+class SpatialAdmin(admin.TabularInline):
+    model = Spatial
+
+
+@admin.register(ProjectMetadata)
+class ProjectMetadataAdmin(SingletonModelAdmin):
+    inlines = [
+        LanguageAdmin,
+        PublisherAdmin,
+        SpatialAdmin,
+    ]
