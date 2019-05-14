@@ -60,6 +60,8 @@ class DatasetIndexingFile(BaseRegisterFile):
 class Jurisdiction(models.Model):
     jurisdiction_title = models.CharField(max_length=100, unique=True)
     jurisdiction_id = models.CharField(max_length=100, unique=True)
+    argentinagobar_id = models.CharField(max_length=50, null=True, blank=True)
+    modified_date = models.DateField(auto_now=True)
 
     def __unicode__(self):
         return "%s" % self.jurisdiction_title
@@ -122,17 +124,17 @@ class NodeMetadata(models.Model):
         (CKAN, "CKAN"),
         (OTHER, "Otros")
     )
-    argentinagobar_id = models.CharField(max_length=50, null=True, blank=True)
-    catalog_label = models.CharField(max_length=100, null=True, blank=True)
+    label = models.CharField(max_length=100, null=True, blank=True)
     category = models.CharField(max_length=20, choices=CATEGORIES,
                                 null=True, blank=True)
-    types = models.CharField(max_length=20, choices=TYPES,
-                             null=True, blank=True)
+    type = models.CharField(max_length=20, choices=TYPES,
+                            null=True, blank=True)
     jurisdiction = models.ForeignKey(to=Jurisdiction, null=True,
                                      blank=True, on_delete=models.SET_NULL)
-    json_url = models.URLField(null=True, blank=True)
-    xlsx_url = models.URLField(null=True, blank=True)
-    datosgobar_url = models.URLField(null=True, blank=True)
-    homepage_url = models.URLField(null=True, blank=True)
+    url_json = models.URLField(null=True, blank=True)
+    url_xlsx = models.URLField(null=True, blank=True)
+    url_datosgobar = models.URLField(null=True, blank=True)
+    url_homepage = models.URLField(null=True, blank=True)
     node = models.OneToOneField(Node, on_delete=models.CASCADE,
                                 primary_key=True)
+    modified_date = models.DateField(auto_now=True)
