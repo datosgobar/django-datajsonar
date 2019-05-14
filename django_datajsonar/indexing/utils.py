@@ -27,4 +27,3 @@ def update_model(created, trimmed_dict, model, updated_children=False, data_chan
     model.new = created
     model.present = True
     model.save()
-    return

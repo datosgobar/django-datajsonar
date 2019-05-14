@@ -2,7 +2,7 @@ from django_datajsonar.models import AbstractTask
 from django_datajsonar.utils.get_jobs_in_task_queue import pending_or_running_jobs_in_task_queue
 
 
-class TaskCloser(object):
+class TaskCloser:
 
     def __init__(self, task_jobs=pending_or_running_jobs_in_task_queue):
         self.task_jobs = task_jobs

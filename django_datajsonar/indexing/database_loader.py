@@ -17,7 +17,7 @@ from . import constants
 from .utils import log_exception, update_model
 
 
-class DatabaseLoader(object):
+class DatabaseLoader:
     """Carga la base de datos. No hace validaciones"""
 
     def __init__(self, task, read_local=False, default_whitelist=False):
