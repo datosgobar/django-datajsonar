@@ -34,11 +34,9 @@ class MetadataGeneratorTests(TestCase):
         project_metadata.version = 'v.test'
         project_metadata.save()
 
-        publisher = Publisher.get_solo()
-        publisher.name = 'pub_name'
-        publisher.mbox = 'pub_mbox'
-        publisher.save()
-
+        Publisher.objects.create(name='pub_name',
+                                 mbox='pub_mbox',
+                                 project_metadata=project_metadata)
         Language.objects.create(language='spa',
                                 project_metadata=project_metadata)
         Language.objects.create(language='swa',

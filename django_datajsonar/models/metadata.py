@@ -37,7 +37,8 @@ class Publisher(SingletonModel):
     mbox = models.CharField(max_length=128, null=True)
     modified_date = models.DateField(auto_now=True)
     project_metadata = models.OneToOneField(ProjectMetadata,
-                                            on_delete=models.CASCADE)
+                                            on_delete=models.CASCADE,
+                                            null=True)
 
 
 class Language(models.Model):
