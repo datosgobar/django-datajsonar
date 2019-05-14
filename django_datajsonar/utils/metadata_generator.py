@@ -1,4 +1,5 @@
 #!coding=utf8
+from __future__ import unicode_literals
 from django.forms.models import model_to_dict
 from django.db.models import Max
 
@@ -7,7 +8,7 @@ from django_datajsonar.models.metadata import ProjectMetadata, Language,\
 from django_datajsonar.models.node import Jurisdiction, NodeMetadata
 
 
-def project_metadata():
+def get_project_metadata():
     metadata = ProjectMetadata.get_solo()
     result = model_to_dict(metadata, fields=[
         'title', 'description', 'version', 'homepage', 'issued'
@@ -41,7 +42,7 @@ def last_modified_date():
     return result
 
 
-def jurisdiction_list_metadata():
+def get_jurisdiction_list_metadata():
     jurisdictions = []
     jurisdictions_models = Jurisdiction.objects.all()
     for jurisdiction_model in jurisdictions_models:
