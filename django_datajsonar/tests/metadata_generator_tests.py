@@ -183,3 +183,21 @@ class MetadataGeneratorTests(TestCase):
         self.assertEqual('central', result['category'])
         self.assertTrue('type' in result)
         self.assertIsNone(result['type'])
+
+    def test_unnaffiliated_jurisdiction(self):
+        Jurisdiction.objects.create(jurisdiction_id='id_3',
+                                    jurisdiction_title='unaffiliated_title',
+                                    argentinagobar_id='00000')
+        result = get_jurisdiction_list_metadata()
+        self.assertEqual(3, len(result))
+        self.assertEqual(0, len(result[2]['catalogs']))
+
+    def test_unnaffiliated_metadata(self):
+        unaffiliated_node = Node.objects.create(catalog_id='unaffiliated_id',
+                                                indexable=True)
+        NodeMetadata.objects.create(node=unaffiliated_node)
+        project = get_project_metadata()
+        jurisdictions = get_jurisdiction_list_metadata()
+        self.assertEqual(3, project['catalog_count'])
+        self.assertEqual(2, len(jurisdictions[0]['catalogs']))
+        self.assertEqual(1, len(jurisdictions[1]['catalogs']))
