@@ -22,4 +22,3 @@ SPANISH_FIELDS = OrderedDict({
     "url_datosgobar": "catalogo_url_datosgobar",
     "url_homepage": "catalogo_url_portal",
 })
-

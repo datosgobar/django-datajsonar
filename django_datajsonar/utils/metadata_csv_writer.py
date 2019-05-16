@@ -23,6 +23,7 @@ def flatten_jurisdiction_list_metadata(jurisdictions):
         catalogs = jurisdiction.pop('catalogs')
         for catalog in catalogs:
             catalog.update(jurisdiction)
+            result.append(catalog)
     return result
 
 
