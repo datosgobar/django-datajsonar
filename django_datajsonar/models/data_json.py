@@ -44,6 +44,7 @@ class Dataset(models.Model):
     identifier = models.CharField(max_length=200)
     metadata = models.TextField()
     catalog = models.ForeignKey(to=Catalog, on_delete=models.CASCADE)
+    landing_page = models.URLField(blank=True, null=True)
     indexable = models.BooleanField(default=False, verbose_name='federable')
     present = models.BooleanField(default=True)
     updated = models.BooleanField(default=True)
