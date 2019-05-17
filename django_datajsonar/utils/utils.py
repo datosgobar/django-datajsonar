@@ -12,10 +12,15 @@ from django_rq import get_queue, get_connection
 
 
 def download_config_csv(datasets):
-    response = HttpResponse(content_type='text/csv')
     filename = 'config_%s.csv' % localtime().date()
-    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    response = generate_csv_download_response(filename)
     return generate_csv(datasets, response)
+
+
+def generate_csv_download_response(filename):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response
 
 
 def generate_csv(datasets, output):

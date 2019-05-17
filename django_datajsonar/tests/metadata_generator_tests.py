@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+from collections import OrderedDict
 from datetime import date, datetime, timedelta
 
 from django.test import TestCase
@@ -18,7 +19,8 @@ from django_datajsonar.models.metadata import ProjectMetadata, Publisher, \
 from django_datajsonar.models.node import Jurisdiction, NodeMetadata, Node
 from django_datajsonar.utils.metadata_generator import get_project_metadata, \
     get_jurisdiction_list_metadata, last_modified_date
-
+from django_datajsonar.utils.metadata_csv_writer import \
+    flatten_jurisdiction_list_metadata, translate_fields
 dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples')
 
 
@@ -201,3 +203,71 @@ class MetadataGeneratorTests(TestCase):
         self.assertEqual(3, project['catalog_count'])
         self.assertEqual(2, len(jurisdictions[0]['catalogs']))
         self.assertEqual(1, len(jurisdictions[1]['catalogs']))
+
+    def test_jurisdiction_metadata_flatten(self):
+        expected = [
+            {'id': 'catalog_id_0',
+             'label': 'metadata_0',
+             'category': 'no-central',
+             'type': 'andino',
+             'published': True,
+             'url_datosgobar': 'http://test.url.datos.0',
+             'url_homepage': 'http://test.url.home.0',
+             'url_json': 'http://test.url.json.0',
+             'url_xlsx': 'http://test.url.xlsx.0',
+             'title': 'jurisdiction_0',
+             'argentinagobar_id': 'gobar_0',
+             },
+            {'id': 'catalog_id_1',
+             'label': 'metadata_1',
+             'category': 'no-central',
+             'type': 'andino',
+             'published': True,
+             'url_datosgobar': 'http://test.url.datos.1',
+             'url_homepage': 'http://test.url.home.1',
+             'url_json': 'http://test.url.json.1',
+             'url_xlsx': 'http://test.url.xlsx.1',
+             'title': 'jurisdiction_0',
+             'argentinagobar_id': 'gobar_0',
+             },
+            {'id': 'catalog_id_2',
+             'label': 'metadata_2',
+             'category': 'no-central',
+             'type': 'andino',
+             'published': True,
+             'url_datosgobar': 'http://test.url.datos.2',
+             'url_homepage': 'http://test.url.home.2',
+             'url_json': 'http://test.url.json.2',
+             'url_xlsx': 'http://test.url.xlsx.2',
+             'title': 'jurisdiction_1',
+             'argentinagobar_id': 'gobar_1',
+             }
+        ]
+
+        result = flatten_jurisdiction_list_metadata(
+            get_jurisdiction_list_metadata())
+        self.assertDictEqual.__self__.maxDiff = None
+        self.assertListEqual(expected, result)
+
+    def test_metadata_translation(self):
+        test_trasnslation = OrderedDict({
+            "id": "translation_1",
+            "label": "translation_2",
+            "url_json": "translation_3",
+            "url_xlsx": "translation_4",
+            "url_datosgobar": "translation_5",
+            "url_homepage": "translation_6",
+        })
+        expected = {
+            "translation_1": 'catalog_id_0',
+            "translation_2": 'metadata_0',
+            "translation_3": 'http://test.url.json.0',
+            "translation_4": 'http://test.url.xlsx.0',
+            "translation_5": 'http://test.url.datos.0',
+            "translation_6": 'http://test.url.home.0',
+        }
+        result = translate_fields(
+            get_jurisdiction_list_metadata()[0]['catalogs'],
+            test_trasnslation)
+        result = result[0]
+        self.assertDictEqual(expected, result)
