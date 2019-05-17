@@ -3,7 +3,6 @@
 import logging
 import yaml
 
-from django.utils import timezone
 from django.conf import settings
 
 from django_rq import job
