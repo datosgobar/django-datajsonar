@@ -261,3 +261,20 @@ class DatabaseLoaderTests(TestCase):
         self.loader.run(catalog, self.catalog_id)
 
         self.assertTrue(Dataset.objects.first().error_msg)
+
+    def test_dataset_landing_page(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+
+        landing_page = Dataset.objects.first().landing_page
+        self.assertEqual(
+            "http://datos.gob.ar/dataset/sistema-de-contrataciones"
+            "-electronicas-argentina-compra", landing_page)
+
+    def test_dataset_without_landing_page(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        del catalog.datasets[0]['landingPage']
+        self.loader.run(catalog, self.catalog_id)
+
+        landing_page = Dataset.objects.first().landing_page
+        self.assertIsNone(landing_page)
