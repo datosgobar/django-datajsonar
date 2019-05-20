@@ -24,7 +24,7 @@ class AbstractTask(models.Model):
     finished = models.DateTimeField(null=True)
     logs = models.TextField()
 
-    node = models.ForeignKey(to=Node, default=None, null=True)
+    node = models.ForeignKey(to=Node, default=None, null=True, blank=True)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

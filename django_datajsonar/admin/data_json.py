@@ -6,6 +6,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.utils import timezone
+from django.utils.html import format_html
 
 from django_datajsonar.models import Dataset, Metadata, Catalog, Distribution, Field
 from django_datajsonar.utils.utils import download_config_csv
@@ -64,13 +65,19 @@ class CatalogAdmin(admin.ModelAdmin):
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'identifier', 'catalog', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
+    list_display = ('title', 'identifier', 'catalog', 'landing_page_links', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
     readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed')
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
                'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
 
     list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
+
+    def landing_page_links(self, obj):
+        landing_page = obj.landing_page
+        if landing_page:
+            return format_html("<a href='{url}'>{url}</a>", url=landing_page)
+        return '-'
 
     def mark_as_reviewed(self, _, queryset):
         queryset.update(reviewed=Dataset.REVIEWED, last_reviewed=timezone.localdate())

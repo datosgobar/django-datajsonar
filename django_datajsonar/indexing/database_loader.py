@@ -84,7 +84,9 @@ class DatabaseLoader:
         dataset_model, created = Dataset.objects.update_or_create(
             catalog=catalog_model,
             identifier=identifier,
-            defaults={'title': trimmed_dataset.get('title', 'No Title')}
+            defaults={'title': trimmed_dataset.get('title', 'No Title'),
+                      'landing_page':
+                          trimmed_dataset.get('landingPage')}
         )
         self.assign_theme_fields(dataset, dataset_model)
         updated_distributions = False
