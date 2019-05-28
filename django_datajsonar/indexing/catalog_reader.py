@@ -9,6 +9,7 @@ from pydatajson.custom_exceptions import NonParseableCatalog
 
 from django_datajsonar.models import Dataset, Catalog, Distribution, Field
 from django_datajsonar.models import ReadDataJsonTask
+from django_datajsonar.models.config import IndexingConfig
 from .database_loader import DatabaseLoader
 from .strings import READ_ERROR
 from .utils import log_exception
@@ -16,9 +17,12 @@ from .utils import log_exception
 
 class CatalogReader:
 
-    def __init__(self, read_local=False, whitelist=False):
+    def __init__(self, read_local=False, whitelist=False, indexing_config=None):
         self.read_local = read_local
         self.whitelist = whitelist
+        if indexing_config is None:
+            indexing_config = IndexingConfig.get_solo()
+        self.indexing_config = indexing_config
 
     def index(self, node, task):
         self._reset_catalog_if_exists(node)
@@ -38,8 +42,11 @@ class CatalogReader:
         self._index_catalog(catalog, node, task)
 
     def _index_catalog(self, catalog, node, task):
+        verify_ssl = self.indexing_config.verify_ssl
         try:
-            loader = DatabaseLoader(task, read_local=self.read_local, default_whitelist=self.whitelist)
+            loader = DatabaseLoader(task, read_local=self.read_local,
+                                    default_whitelist=self.whitelist,
+                                    verify_ssl=verify_ssl)
             ReadDataJsonTask.info(task, u"Corriendo loader para catalogo {}".format(node.catalog_id))
             loader.run(catalog, node.catalog_id)
         except Exception as e:
@@ -48,10 +55,10 @@ class CatalogReader:
 
     def reset_fields(self, node):
         fields = {'present': False,
-                        'updated': False,
-                        'error': False,
-                        'error_msg': '',
-                        'new': False}
+                  'updated': False,
+                  'error': False,
+                  'error_msg': '',
+                  'new': False}
         Dataset.objects.filter(catalog__identifier=node.catalog_id).update(**fields)
         Distribution.objects.filter(dataset__catalog__identifier=node.catalog_id).update(**fields)
         Field.objects.filter(distribution__dataset__catalog__identifier=node.catalog_id).update(**fields)

@@ -20,11 +20,11 @@ from .utils import log_exception, update_model
 class DatabaseLoader:
     """Carga la base de datos. No hace validaciones"""
 
-    def __init__(self, task, read_local=False, default_whitelist=False):
+    def __init__(self, task, read_local=False, default_whitelist=False, verify_ssl=False):
         self.task = task
         self.read_local = read_local
         self.default_whitelist = default_whitelist
-
+        self.verify_ssl = verify_ssl
         self.theme_taxonomy = {}
 
     def run(self, catalog, catalog_id):
@@ -188,7 +188,7 @@ class DatabaseLoader:
         else:
             user_agent = getattr(settings, 'DATAJSON_AR_USER_AGENT', 'aUserAgent')
             headers = {'User-Agent': user_agent}
-            request = requests.get(file_url, headers=headers, stream=True, verify=False)
+            request = requests.get(file_url, headers=headers, stream=True, verify=self.verify_ssl)
             request.raise_for_status()  # Excepción si es inválido
 
             lf = NamedTemporaryFile()
