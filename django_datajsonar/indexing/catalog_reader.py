@@ -28,7 +28,9 @@ class CatalogReader:
         self._reset_catalog_if_exists(node)
 
         try:
-            catalog = DataJson(node.catalog_url, catalog_format=node.catalog_format)
+            catalog = DataJson(node.catalog_url,
+                               catalog_format=node.catalog_format,
+                               verify_ssl=self.indexing_config.verify_ssl)
             catalog.generate_distribution_ids()
             node.catalog = json.dumps(catalog)
             node.save()
