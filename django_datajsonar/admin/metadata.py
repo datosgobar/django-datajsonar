@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from solo.admin import SingletonModelAdmin
 
+from django_datajsonar.admin.singleton_admin import SingletonAdmin
 from django_datajsonar.models import Metadata, ProjectMetadata,\
     Language, Publisher, Spatial
 
@@ -64,7 +65,7 @@ class SpatialAdmin(admin.TabularInline):
 
 
 @admin.register(ProjectMetadata)
-class ProjectMetadataAdmin(SingletonModelAdmin):
+class ProjectMetadataAdmin(SingletonAdmin):
     inlines = [
         LanguageAdmin,
         PublisherAdmin,
