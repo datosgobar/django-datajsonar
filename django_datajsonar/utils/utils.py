@@ -23,6 +23,14 @@ def generate_csv_download_response(filename):
     return response
 
 
+def generate_xlsx_download_response(filename):
+    response = HttpResponse(content_type='application/'
+                                         'vnd.openxmlformats-officedocument.'
+                                         'spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    return response
+
+
 def generate_csv(datasets, output):
     writer = csv.writer(output)
     writer.writerow(['catalog_id', 'dataset_identifier'])
