@@ -1,11 +1,20 @@
 #!coding=utf8
 from django_datajsonar.utils.metadata_generator import \
-    get_jurisdiction_list_metadata
+    get_jurisdiction_list_metadata, get_distributions_metadata
 
 
 def write_node_metadata(output, fields, writer):
     metadata_list = flatten_jurisdiction_list_metadata(
         get_jurisdiction_list_metadata())
+    metadata_list = translate_fields(metadata_list, fields)
+    headers = fields.values()
+    metadata_writer = writer(output, headers)
+    metadata_writer.write_metadata(metadata_list)
+    return output
+
+
+def write_distributions_metadata(output, fields, writer):
+    metadata_list = get_distributions_metadata()
     metadata_list = translate_fields(metadata_list, fields)
     headers = fields.values()
     metadata_writer = writer(output, headers)
@@ -26,3 +35,4 @@ def flatten_jurisdiction_list_metadata(jurisdictions):
 def translate_fields(metadata_list, fields_translation):
     return [{fields_translation[key]: catalog[key]for key in fields_translation}
             for catalog in metadata_list]
+
