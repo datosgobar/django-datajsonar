@@ -19,7 +19,7 @@ from django_datajsonar.models.metadata import ProjectMetadata, Publisher, \
 from django_datajsonar.models.node import Jurisdiction, NodeMetadata, Node
 from django_datajsonar.utils.metadata_generator import get_project_metadata, \
     get_jurisdiction_list_metadata, last_modified_date
-from django_datajsonar.utils.metadata_csv_writer import \
+from django_datajsonar.utils.download_response_writer import \
     flatten_jurisdiction_list_metadata, translate_fields
 dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples')
 
