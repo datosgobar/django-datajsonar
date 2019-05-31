@@ -10,3 +10,4 @@ django-rq-scheduler>=1.1.3
 rq-scheduler>=0.9
 croniter
 django-solo
+XlsxWriter
