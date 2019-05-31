@@ -1,19 +1,15 @@
 #!coding=utf8
-import csv
-
 from django_datajsonar.utils.metadata_generator import \
     get_jurisdiction_list_metadata
 
 
-def write_node_metadata_csv(output, fields):
+def write_node_metadata(output, fields, writer):
     metadata_list = flatten_jurisdiction_list_metadata(
         get_jurisdiction_list_metadata())
     metadata_list = translate_fields(metadata_list, fields)
     headers = fields.values()
-    writer = csv.DictWriter(output, headers, extrasaction='ignore')
-    writer.writeheader()
-    for catalog in metadata_list:
-        writer.writerow(catalog)
+    metadata_writer = writer(output, headers)
+    metadata_writer.write_metadata(metadata_list)
     return output
 
 
