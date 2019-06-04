@@ -15,12 +15,13 @@ class DistributionMetadataGenerator(TestCase):
     catalog = os.path.join(SAMPLES_DIR, 'sample_data.json')
     catalog_id = 'catalog_id'
 
-    def setUp(self):
-        self.task = ReadDataJsonTask.objects.create()
-        self.node = Node(catalog_id=self.catalog_id, catalog_url=self.catalog,
-                         indexable=True)
-        self.node.save()
-        index_catalog(self.node, self.task, read_local=True, whitelist=True)
+    @classmethod
+    def setUpTestData(cls):
+        cls.task = ReadDataJsonTask.objects.create()
+        cls.node = Node(catalog_id=cls.catalog_id, catalog_url=cls.catalog,
+                        indexable=True)
+        cls.node.save()
+        index_catalog(cls.node, cls.task, read_local=True, whitelist=True)
 
     def test_catalog_model_values(self):
         result = get_distributions_metadata()
