@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.forms.models import model_to_dict
 from django.db.models import Max
 
+from django_datajsonar.models import Distribution
 from django_datajsonar.models.metadata import ProjectMetadata, Language,\
     Spatial, Publisher
 from django_datajsonar.models.node import Jurisdiction, NodeMetadata
@@ -73,3 +74,15 @@ def jurisdiction_metadata(jurisdiction):
         'catalogs': nodes_metadata,
     }
     return result
+
+
+def get_distributions_metadata():
+    return list(Distribution.objects.all().select_related('dataset__catalog').values(
+        'identifier',
+        'title',
+        'download_url',
+        'dataset__identifier',
+        'dataset__title',
+        'dataset__catalog__title',
+        'dataset__catalog__identifier'
+    ))
