@@ -1,5 +1,8 @@
 #!coding=utf8
 from __future__ import unicode_literals
+
+import json
+
 from django.forms.models import model_to_dict
 from django.db.models import Max
 
@@ -77,12 +80,47 @@ def jurisdiction_metadata(jurisdiction):
 
 
 def get_distributions_metadata():
-    return list(Distribution.objects.all().select_related('dataset__catalog').values(
+    metadata_list = list(Distribution.objects.all().select_related('dataset__catalog').values(
         'identifier',
         'title',
         'download_url',
+        'metadata',
         'dataset__identifier',
         'dataset__title',
+        'dataset__metadata',
         'dataset__catalog__title',
-        'dataset__catalog__identifier'
+        'dataset__catalog__identifier',
+        'dataset__catalog__metadata'
     ))
+
+    for distribution in metadata_list:
+        distribution_metadata = json.loads(distribution.pop('metadata')) \
+            if distribution.get('metadata') else {}
+        distribution['accessURL'] = distribution_metadata.get('accessURL')
+        distribution['type'] = distribution_metadata.get('type')
+        distribution['format'] = distribution_metadata.get('format')
+
+        dataset_metadata = json.loads(distribution.pop('dataset__metadata')) \
+            if distribution.get('dataset__metadata') else {}
+        distribution['dataset_description'] = \
+            dataset_metadata.get('description')
+        distribution['dataset_publisher'] = \
+            dataset_metadata.get('publisher', {}).get('name')
+        distribution['dataset_publisher_mail'] = \
+            dataset_metadata.get('publisher', {}).get('mbox')
+        distribution['dataset_source'] = \
+            dataset_metadata.get('source')
+        distribution['dataset_theme'] = \
+            ','.join(dataset_metadata.get('theme', []))
+        distribution['dataset_superTheme'] = \
+            ','.join(dataset_metadata.get('superTheme', []))
+        distribution['dataset_license'] = \
+            dataset_metadata.get('license')
+
+        catalog_metadata = \
+            json.loads(distribution.pop('dataset__catalog__metadata')) \
+            if distribution.get('dataset__catalog__metadata') else {}
+        distribution['catalog_publisher'] = \
+            catalog_metadata.get('publisher', {}).get('name')
+
+    return metadata_list
