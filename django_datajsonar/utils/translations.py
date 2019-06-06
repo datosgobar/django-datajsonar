@@ -41,7 +41,7 @@ DISTRIBUTIONS_SPANISH_FIELDS = OrderedDict({
     'identifier': 'distribucion_id',
     'title': 'distribucion_titulo',
     'download_url': 'distribucion_url_descarga',
-    'accessURL': 'distribucion_url_acceseo',
+    'accessURL': 'distribucion_url_acceso',
     'type': 'distribucion_tipo',
     'format': 'distribucion_formato',
 
