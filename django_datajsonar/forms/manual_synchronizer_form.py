@@ -4,4 +4,4 @@ from django_datajsonar.models import Node
 
 
 class ManualSynchronizerRunForm(forms.Form):
-    node = forms.ModelChoiceField(queryset=Node.objects.filter(indexable=True))
+    node = forms.ModelChoiceField(queryset=Node.objects.filter(indexable=True), required=False)

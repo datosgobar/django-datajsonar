@@ -32,7 +32,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
         urls = super(SynchronizerAdmin, self).get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
         extra_urls = [url(r'^start_synchro/(?P<synchro_id>[0-9])$',
-                          self.admin_site.admin_view(self.start_synchro),
+                          self.admin_site.admin_view(self.manual_run),
                           name='%s_%s_start_synchro' % info), ]
         return extra_urls + urls
 
@@ -134,7 +134,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
             synchronizer.save()
     duplicate.short_description = "Duplicar synchronizer"
 
-    def start_synchro(self, request, synchro_id):
+    def manual_run(self, request, synchro_id):
         synchro = Synchronizer.objects.get(id=synchro_id)
         if request.method == 'POST':
             try:
