@@ -1,4 +1,6 @@
 #!coding=utf8
+from collections import OrderedDict
+
 from django_datajsonar.utils.metadata_generator import \
     get_jurisdiction_list_metadata, get_distributions_metadata
 
@@ -33,5 +35,6 @@ def flatten_jurisdiction_list_metadata(jurisdictions):
 
 
 def translate_fields(metadata_list, fields_translation):
-    return [{fields_translation[key]: catalog[key]for key in fields_translation}
-            for catalog in metadata_list]
+    return [OrderedDict(
+        {fields_translation[key]: catalog[key]for key in fields_translation})
+        for catalog in metadata_list]

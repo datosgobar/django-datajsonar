@@ -24,11 +24,26 @@ NODES_SPANISH_FIELDS = OrderedDict({
 })
 
 DISTRIBUTIONS_SPANISH_FIELDS = OrderedDict({
+    'dataset__catalog__identifier': 'catalogo_id',
+    'dataset__catalog__title': 'catalogo_titulo',
+    'catalog_publisher': 'catalogo_responsable',
+
+    'dataset__identifier': 'dataset_id',
+    'dataset__title': 'dataset_titulo',
+    'dataset_description': 'dataset_descripcion',
+    'dataset_publisher': 'dataset_responsable',
+    'dataset_publisher_mail': 'dataset_responsable_correo',
+    'dataset_source': 'dataset_fuente',
+    'dataset_theme': 'dataset_tema_especifico',
+    'dataset_superTheme': 'dataset_tema_global',
+    'dataset_license': 'dataset_licencia',
+
     'identifier': 'distribucion_id',
     'title': 'distribucion_titulo',
     'download_url': 'distribucion_url_descarga',
-    'dataset__identifier': 'dataset_id',
-    'dataset__title': 'dataset_titulo',
-    'dataset__catalog__title': 'catalogo_titulo',
-    'dataset__catalog__identifier': 'catalogo_id',
+    'accessURL': 'distribucion_url_acceso',
+    'type': 'distribucion_tipo',
+    'format': 'distribucion_formato',
+
+
 })

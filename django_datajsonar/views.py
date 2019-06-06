@@ -27,25 +27,35 @@ def nodes_metadata_json(_):
 
 def nodes_english_metadata_csv(_):
     response = generate_csv_download_response('nodes.csv')
-    return write_node_metadata(response, NODES_ENGLISH_FIELDS, CSVMetadataWriter)
+    return write_node_metadata(response, NODES_ENGLISH_FIELDS,
+                               CSVMetadataWriter)
 
 
 def nodes_spanish_metadata_csv(_):
     response = generate_csv_download_response('nodos.csv')
-    return write_node_metadata(response, NODES_SPANISH_FIELDS, CSVMetadataWriter)
+    return write_node_metadata(response, NODES_SPANISH_FIELDS,
+                               CSVMetadataWriter)
 
 
 def nodes_english_metadata_xlsx(_):
     response = generate_xlsx_download_response('nodes.xlsx')
-    return write_node_metadata(response, NODES_ENGLISH_FIELDS, XLSXMetadataWriter)
+    return write_node_metadata(response, NODES_ENGLISH_FIELDS,
+                               XLSXMetadataWriter)
 
 
 def nodes_spanish_metadata_xlsx(_):
     response = generate_xlsx_download_response('nodos.xlsx')
-    return write_node_metadata(response, NODES_SPANISH_FIELDS, XLSXMetadataWriter)
+    return write_node_metadata(response, NODES_SPANISH_FIELDS,
+                               XLSXMetadataWriter)
 
 
 def distributions_spanish_metadata_csv(_):
     response = generate_csv_download_response('distribuciones.csv')
     return write_distributions_metadata(response, DISTRIBUTIONS_SPANISH_FIELDS,
                                         CSVMetadataWriter)
+
+
+def distributions_spanish_metadata_xlsx(_):
+    response = generate_xlsx_download_response('distribuciones.xlsx')
+    return write_distributions_metadata(response, DISTRIBUTIONS_SPANISH_FIELDS,
+                                        XLSXMetadataWriter)
