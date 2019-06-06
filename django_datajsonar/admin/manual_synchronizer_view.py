@@ -18,10 +18,14 @@ class ManualSynchronizerView(View):
 
     def post(self, request, synchro_id):
         synchro = Synchronizer.objects.get(id=synchro_id)
-        try:
-            synchro.node = Node.objects.get(id=request.POST.get('node'))
-            synchro.begin_stage()
-            messages.success(request, "Corriendo tarea!")
-        except Exception:
+        if synchro.status == Synchronizer.RUNNING:
             messages.error(request, "El synchronizer seleccionado ya está corriendo")
+            return redirect('admin:django_datajsonar_synchronizer_changelist')
+
+        node_id = request.POST.get('node')
+        node = Node.objects.get(id=node_id) if node_id else None
+        synchro.node = node
+
+        synchro.begin_stage()
+        messages.success(request, "Corriendo tarea!")
         return redirect('admin:django_datajsonar_synchronizer_changelist')

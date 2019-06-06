@@ -1,11 +1,8 @@
-import json
-
 from django.contrib.auth.models import User
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.urls import reverse
 from mock import patch
 
-from django_datajsonar.admin.manual_synchronizer_view import ManualSynchronizerView
 from django_datajsonar.models import Synchronizer, Stage, Node
 
 
@@ -22,18 +19,21 @@ class SynchronizerAdminTests(TestCase):
         # admin auth
         self.client.force_login(User.objects.create(username='test_user', is_staff=True))
 
+        self.url = reverse('admin:django_datajsonar_synchronizer_start_synchro',
+                           args=(self.synchro.id,))
+
     def test_start_manually_if_already_started_fails(self, begin_stage):
         self.synchro.status = Synchronizer.RUNNING
         self.synchro.save()
 
-        self.client.post(reverse('admin:django_datajsonar_synchronizer_start_synchro',
-                                 args=(self.synchro.id,)))
+        self.client.post(self.url)
 
         begin_stage.assert_not_called()
 
     def test_begin_stage_is_called(self, begin_stage):
-        url = reverse('admin:django_datajsonar_synchronizer_start_synchro',
-                                 args=(self.synchro.id,))
-        self.client.post(url, {'node': 1})
+        self.client.post(self.url, {'node': 1})
         begin_stage.assert_called_once()
 
+    def test_run_manually_with_no_node(self, begin_stage):
+        self.client.post(self.url)
+        begin_stage.assert_called_once()
