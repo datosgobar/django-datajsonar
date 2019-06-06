@@ -11,6 +11,7 @@ from django.forms import formset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
+from django_datajsonar.admin.manual_synchronizer_view import ManualSynchronizerView
 from django_datajsonar.forms.manual_synchronizer_form import ManualSynchronizerRunForm
 from django_datajsonar.forms.stage_form import StageForm
 from django_datajsonar.forms.synchro_form import SynchroForm
@@ -32,7 +33,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
         urls = super(SynchronizerAdmin, self).get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
         extra_urls = [url(r'^start_synchro/(?P<synchro_id>[0-9])$',
-                          self.admin_site.admin_view(self.manual_run),
+                          self.admin_site.admin_view(ManualSynchronizerView.as_view()),
                           name='%s_%s_start_synchro' % info), ]
         return extra_urls + urls
 
@@ -133,22 +134,3 @@ class SynchronizerAdmin(admin.ModelAdmin):
             synchronizer.name = "Copia de {}".format(synchronizer.name)
             synchronizer.save()
     duplicate.short_description = "Duplicar synchronizer"
-
-    def manual_run(self, request, synchro_id):
-        synchro = Synchronizer.objects.get(id=synchro_id)
-        if request.method == 'POST':
-            try:
-                synchro.node = Node.objects.get(id=request.POST.get('node'))
-                synchro.begin_stage()
-                messages.success(request, "Corriendo tarea!")
-            except Exception:
-                messages.error(request, "El synchronizer seleccionado ya está corriendo")
-            return redirect('admin:django_datajsonar_synchronizer_changelist')
-
-        context = {
-            'opts': self.model._meta,
-            'has_change_permission': self.has_change_permission(request),
-            'form': ManualSynchronizerRunForm(),
-            'object': synchro,
-        }
-        return render(request, 'synchronizer_manual_run.html', context=context)
