@@ -17,7 +17,8 @@ class DistributionMetadataGenerator(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.task = ReadDataJsonTask.objects.create()
+        cls.task = ReadDataJsonTask.objects.create(
+            indexing_mode=ReadDataJsonTask.METADATA_ONLY)
         cls.node = Node(catalog_id=cls.catalog_id, catalog_url=cls.catalog,
                         indexable=True)
         cls.node.save()
@@ -62,3 +63,42 @@ class DistributionMetadataGenerator(TestCase):
         result = get_distributions_metadata()
         distribution = result[0]
         self.assertIsNone(distribution['download_url'])
+
+    def test_distribution_metadata_field_values(self):
+        result = get_distributions_metadata()
+        distribution = result[0]
+        self.assertEqual('https://www.minhacienda.gob.ar/secretarias/'
+                         'politica-economica/programacion-macroeconomica/',
+                         distribution['accessURL'])
+        self.assertEqual('file', distribution['type'])
+        self.assertEqual('CSV', distribution['format'])
+        self.assertNotIn('metadata', distribution)
+
+    def test_dataset_metadata_field_values(self):
+        result = get_distributions_metadata()
+        distribution = result[0]
+        self.assertEqual('Componentes desestacionalizados de la oferta y '
+                         'demanda globales a precios de 1993.',
+                         distribution['dataset_description'])
+        self.assertEqual('Subsecretaría de Programación Macroeconómica.',
+                         distribution['dataset_publisher'])
+        self.assertEqual('datoseconomicos@mecon.gov.ar',
+                         distribution['dataset_publisher_mail'])
+        self.assertEqual('datoseconomicos@mecon.gov.ar',
+                         distribution['dataset_publisher_mail'])
+        self.assertEqual('Instituto Nacional de Estadística y Censos (INDEC)',
+                         distribution['dataset_source'])
+        self.assertEqual('actividad', distribution['dataset_theme'])
+        self.assertEqual('ECON', distribution['dataset_superTheme'])
+
+    def test_catalog_metadata_field_values(self):
+        result = get_distributions_metadata()
+        distribution = result[0]
+        self.assertEqual('Subsecretaría de Programación Macroeconómica.',
+                         distribution['catalog_publisher'])
+
+    def test_missing_metadata_values_passed_as_none(self):
+        result = get_distributions_metadata()
+        distribution = result[1]
+        self.assertIsNone(distribution['type'])
+        self.assertIsNone(distribution['dataset_license'])

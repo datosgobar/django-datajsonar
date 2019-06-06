@@ -138,6 +138,7 @@
           ],
           "draft": false,
           "identifier": "1.1",
+          "type": "file",
           "scrapingFileURL": "https://www.economia.gob.ar/download/infoeco/actividad_ied.xlsx"
         },
         {
