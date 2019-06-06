@@ -11,7 +11,6 @@ class ManualSynchronizerView(View):
         synchro = Synchronizer.objects.get(id=synchro_id)
         context = {
             'opts': Synchronizer._meta,
-            'has_change_permission': True,
             'form': ManualSynchronizerRunForm(),
             'object': synchro,
         }
