@@ -105,17 +105,16 @@ class DistributionMetadataGenerator(TestCase):
 
     def test_rows_ordered_by_catalog_identifier(self):
         result = get_distributions_metadata()
-        first_distribution = result[0]
-        second_distribution = result[1]
-        self.assertTrue(first_distribution['dataset__catalog__identifier']
-                        <= second_distribution['dataset__catalog__identifier'])
+        first = result[0]
+        second = result[1]
+        self.assertTrue(
+            first['dataset__catalog__identifier'] <= second['dataset__catalog__identifier'])
 
     def test_rows_ordered_by_dataset_identifier(self):
         result = get_distributions_metadata()
-        first_distribution = result[0]
-        second_distribution = result[1]
-        self.assertTrue(first_distribution['dataset__identifier']
-                        <= second_distribution['dataset__identifier'])
+        first = result[0]
+        second = result[1]
+        self.assertTrue(first['dataset__identifier'] <= second['dataset__identifier'])
 
     def test_rows_ordered_by_distribution_identifier(self):
         result = get_distributions_metadata()
