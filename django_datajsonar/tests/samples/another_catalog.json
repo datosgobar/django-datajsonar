@@ -1,0 +1,294 @@
+{
+    "publisher": {
+        "mbox": "aip@enargas.gov.ar",
+        "name": "Ente Nacional Regulador del Gas"
+    },
+    "license": "CC-BY-4.0",
+    "description": "Transparencia activa del Ente Nacional Regulador del Gas",
+    "language": [
+        "spa"
+    ],
+    "superThemeTaxonomy": "http://datos.gob.ar/superThemeTaxonomy.json",
+    "issued": "2018-08-27T00:00:00",
+    "title": "Datos abiertos del Ente Nacional Regulador del Gas",
+    "modified": "2018-09-10T13:08:42.382443",
+    "dataset": [
+        {
+            "publisher": {
+                "mbox": "fglitvac@enargas.gob.ar",
+                "name": "Fernando Gabriel Litvac"
+            },
+            "identifier": "1",
+            "description": "Información geográfica del ENARGAS",
+            "license": "Creative Commons Attribution",
+            "title": "Información geográfica del ENARGAS",
+            "issued": "2018-06-25T18:52:54.183571",
+            "modified": "2019-03-01T16:36:50.747542",
+            "theme": [
+                "datos-enargas"
+            ],
+            "keyword": [
+                "abastecidas",
+                "agencias",
+                "coberturas",
+                "compresoras",
+                "delegaciones",
+                "distribución",
+                "gasoductos",
+                "geográfica",
+                "información",
+                "localidades",
+                "peak",
+                "plantas",
+                "shaving",
+                "tarifarias",
+                "zonas",
+                "áreas"
+            ],
+            "accrualPeriodicity": "eventual",
+            "superTheme": [
+                "ENER"
+            ],
+            "contactPoint": {},
+            "landingPage": "http://transparencia.enargas.gov.ar/dataset/informacion-geografica",
+            "distribution": [
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/5e6c9241-7e3c-497f-aa15-5f09bd814450",
+                    "description": "Áreas de cobertura",
+                    "license": "CC-BY-4.0",
+                    "title": "Áreas de cobertura",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-10-08T16:21:02.988613",
+                    "format": "CSV",
+                    "modified": "2018-10-08T16:21:02.988613",
+                    "fileName": "areas-de-cobertura.csv",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/5e6c9241-7e3c-497f-aa15-5f09bd814450/download/areas-de-cobertura.csv",
+                    "identifier": "5e6c9241-7e3c-497f-aa15-5f09bd814450",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/527a9124-bf18-423f-80c0-a382dcd95ddd",
+                    "description": "Áreas de cobertura",
+                    "license": "cc-by",
+                    "title": "Áreas de cobertura",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-06-29T18:08:41.070499",
+                    "format": "RAR",
+                    "modified": "2018-09-07T15:01:09.020107",
+                    "fileName": "areascobertura.rar",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/527a9124-bf18-423f-80c0-a382dcd95ddd/download/areascobertura.rar",
+                    "identifier": "527a9124-bf18-423f-80c0-a382dcd95ddd",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/1a3dd2a8-901a-4b82-a6a3-58e805e297a9",
+                    "description": "Centros regionales",
+                    "license": "CC-BY-4.0",
+                    "title": "Centros regionales",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-10-09T12:09:22.450550",
+                    "format": "CSV",
+                    "modified": "2018-10-09T14:03:34.104707",
+                    "fileName": "centros-regionales.csv",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/1a3dd2a8-901a-4b82-a6a3-58e805e297a9/download/centros-regionales.csv",
+                    "identifier": "1a3dd2a8-901a-4b82-a6a3-58e805e297a9",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/1682da11-ec00-46f8-a676-03395e4e1d7e",
+                    "description": "Centros regionales",
+                    "license": "cc-by",
+                    "title": "Centros regionales",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-06-29T18:12:47.503053",
+                    "format": "RAR",
+                    "modified": "2018-09-07T15:02:07.894629",
+                    "fileName": "centrosregionales.rar",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/1682da11-ec00-46f8-a676-03395e4e1d7e/download/centrosregionales.rar",
+                    "identifier": "1682da11-ec00-46f8-a676-03395e4e1d7e",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/ff39efcb-f98e-4be4-936f-83a993f2eb5a",
+                    "description": "Gasoductos",
+                    "license": "CC-BY-4.0",
+                    "title": "Gasoductos",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-10-08T16:22:17.171443",
+                    "format": "CSV",
+                    "modified": "2018-10-08T16:22:17.171443",
+                    "fileName": "gasoductos.csv",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/ff39efcb-f98e-4be4-936f-83a993f2eb5a/download/gasoductos.csv",
+                    "identifier": "ff39efcb-f98e-4be4-936f-83a993f2eb5a",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/4adefeed-2f4a-42d5-975d-72c09edda79c",
+                    "description": "Gasoductos",
+                    "license": "cc-by",
+                    "title": "Gasoductos",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-06-29T18:15:02.284334",
+                    "format": "RAR",
+                    "modified": "2018-09-07T15:02:22.044307",
+                    "fileName": "gasoductos.rar",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/4adefeed-2f4a-42d5-975d-72c09edda79c/download/gasoductos.rar",
+                    "identifier": "4adefeed-2f4a-42d5-975d-72c09edda79c",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/cbec05cc-62ac-462d-b2be-90906b4619d1",
+                    "description": "Plantas compresoras",
+                    "license": "CC-BY-4.0",
+                    "title": "Plantas compresoras",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-10-08T16:23:43.376589",
+                    "format": "CSV",
+                    "modified": "2018-10-08T16:23:43.376589",
+                    "fileName": "plantas-compresoras.csv",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/cbec05cc-62ac-462d-b2be-90906b4619d1/download/plantas-compresoras.csv",
+                    "identifier": "cbec05cc-62ac-462d-b2be-90906b4619d1",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/9bcda87b-abc6-4d8c-9a44-467f41cddb1f",
+                    "description": "Plantas compresoras",
+                    "license": "cc-by",
+                    "title": "Plantas compresoras",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-06-25T18:53:52.718408",
+                    "format": "RAR",
+                    "modified": "2018-09-07T15:02:50.225140",
+                    "fileName": "plantas-compresoras.rar",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/9bcda87b-abc6-4d8c-9a44-467f41cddb1f/download/plantas-compresoras.rar",
+                    "identifier": "9bcda87b-abc6-4d8c-9a44-467f41cddb1f",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/97b6c424-ff45-48a2-b20d-b232cf658ef0",
+                    "description": "Zonas de Distribución",
+                    "license": "CC-BY-4.0",
+                    "title": "Zonas de Distribución",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-10-08T16:24:26.407750",
+                    "format": "CSV",
+                    "modified": "2018-10-08T16:24:26.407750",
+                    "fileName": "zonas-de-distribucion.csv",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/97b6c424-ff45-48a2-b20d-b232cf658ef0/download/zonas-de-distribucion.csv",
+                    "identifier": "97b6c424-ff45-48a2-b20d-b232cf658ef0",
+                    "type": "file.upload"
+                },
+                {
+                    "accessURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/7959032f-6fc0-4eda-9548-33a77603b7db",
+                    "description": "Zonas tarifarias",
+                    "license": "cc-by",
+                    "title": "Zonas tarifarias",
+                    "dataset_identifier": "75a00ec0-c606-4597-b31c-d1e75fd50b76",
+                    "issued": "2018-06-29T18:19:38.440842",
+                    "format": "RAR",
+                    "modified": "2018-09-07T15:03:22.535090",
+                    "fileName": "zonastarifarias.rar",
+                    "downloadURL": "https://10.1.6.8/dataset/75a00ec0-c606-4597-b31c-d1e75fd50b76/resource/7959032f-6fc0-4eda-9548-33a77603b7db/download/zonastarifarias.rar",
+                    "identifier": "7959032f-6fc0-4eda-9548-33a77603b7db",
+                    "type": "file.upload"
+                }
+            ]
+        },
+        {
+            "publisher": {
+                "name": "Ente Nacional Regulador del Gas"
+            },
+            "identifier": "2",
+            "description": "Listado de obras, mejoras y relevamientos obligatorios de las licenciatarias de Transporte y Distribución (\"Inversiones Obligatorias\") para el quinquenio 2017-2021.",
+            "license": "Creative Commons Attribution",
+            "title": "Plan de inversiones de las Licenciatarias de Transporte y Distribución de Gas",
+            "issued": "2018-06-25T18:44:19.051387",
+            "modified": "2019-02-06T10:40:44.681715",
+            "theme": [
+                "datos-enargas"
+            ],
+            "keyword": [
+                "distribución",
+                "inversiones",
+                "mejoras",
+                "obligatorias",
+                "obras",
+                "plan",
+                "transporte"
+            ],
+            "accrualPeriodicity": "eventual",
+            "superTheme": [
+                "ENER"
+            ],
+            "contactPoint": {},
+            "landingPage": "http://transparencia.enargas.gov.ar/dataset/plan-de-inversiones",
+            "distribution": [
+                {
+                    "accessURL": "https://10.1.6.8/dataset/5b592bf9-72d1-40fa-99bf-875930301aa9/resource/8dcdf0a7-e7db-4742-85d8-35a55d2b416b",
+                    "description": "Plan de inversiones",
+                    "license": "cc-by",
+                    "title": "Plan de inversiones",
+                    "dataset_identifier": "5b592bf9-72d1-40fa-99bf-875930301aa9",
+                    "issued": "2018-06-25T18:45:00.279878",
+                    "format": "url",
+                    "modified": "2018-06-25T18:45:00.279878",
+                    "downloadURL": "https://www.enargas.gob.ar/secciones/transporte-y-distribucion/plan-inversion.php",
+                    "identifier": "8dcdf0a7-e7db-4742-85d8-35a55d2b416b"
+                }
+            ]
+        }
+      ],
+    "identifier": "enargas",
+    "version": "1.1",
+    "spatial": [
+        "ARG"
+    ],
+    "themeTaxonomy": [
+        {
+            "description": "Acceso a la información pública",
+            "id": "acceso-a-la-informacion-publica",
+            "label": "Acceso a la información pública"
+        },
+        {
+            "description": "Administración y finanzas",
+            "id": "administracion-y-finanzas",
+            "label": "Administración y finanzas"
+        },
+        {
+            "description": "Auditorías",
+            "id": "auditorias",
+            "label": "Auditorías"
+        },
+        {
+            "description": "Conflicto de interés - Decreto 202/2017",
+            "id": "conflicto-de-interes-decreto-202-2017",
+            "label": "Conflicto de interés - Decreto 202/2017"
+        },
+        {
+            "description": "Datos ENARGAS",
+            "id": "datos-enargas",
+            "label": "Datos ENARGAS"
+        },
+        {
+            "description": "Información adicional",
+            "id": "informacion-adicional",
+            "label": "Información adicional"
+        },
+        {
+            "description": "Normativa",
+            "id": "normativa",
+            "label": "Normativa"
+        },
+        {
+            "description": "Recursos Humanos",
+            "id": "recursos-humanos",
+            "label": "Recursos Humanos"
+        },
+        {
+            "description": "Registro único de audiencia de gestión de intereses",
+            "id": "registro-unico-de-audiencia-de-gestion-de-intereses",
+            "label": "Registro único de audiencia de gestión de intereses"
+        }
+    ],
+    "homepage": "https://transparencia.enargas.gov.ar"
+}

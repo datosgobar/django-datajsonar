@@ -80,7 +80,8 @@ def jurisdiction_metadata(jurisdiction):
 
 
 def get_distributions_metadata():
-    metadata_list = list(Distribution.objects.all().select_related('dataset__catalog').values(
+    metadata_list = list(Distribution.objects.all().select_related('dataset__catalog').order_by(
+        'dataset__catalog__identifier', 'dataset__identifier', 'identifier').values(
         'identifier',
         'title',
         'download_url',
