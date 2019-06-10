@@ -72,6 +72,9 @@ class DistributionMetadataGenerator(TestCase):
                          distribution['accessURL'])
         self.assertEqual('file', distribution['type'])
         self.assertEqual('CSV', distribution['format'])
+        self.assertEqual('Oferta y Demanda Globales por componente, a precios de '
+                         'comprador, en millones de pesos de 1993 y valores anuales'
+                         ' desestacionalizados.', distribution['description'])
         self.assertNotIn('metadata', distribution)
 
     def test_dataset_metadata_field_values(self):
@@ -82,8 +85,6 @@ class DistributionMetadataGenerator(TestCase):
                          distribution['dataset_description'])
         self.assertEqual('Subsecretaría de Programación Macroeconómica.',
                          distribution['dataset_publisher'])
-        self.assertEqual('datoseconomicos@mecon.gov.ar',
-                         distribution['dataset_publisher_mail'])
         self.assertEqual('datoseconomicos@mecon.gov.ar',
                          distribution['dataset_publisher_mail'])
         self.assertEqual('Instituto Nacional de Estadística y Censos (INDEC)',
