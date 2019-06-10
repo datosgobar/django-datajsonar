@@ -25,3 +25,11 @@ class CatalogReaderTests(TestCase):
         task = ReadDataJsonTask.objects.create()
         CatalogReader().index(node, task)
         self.assertEqual(database_loader.call_args[1]['verify_ssl'], True)
+
+    def test_verify_ssl_also_read_from_node(self, database_loader):
+        node = create_node('sample_data.json')
+        node.verify_ssl = True
+        node.save()
+        task = ReadDataJsonTask.objects.create()
+        CatalogReader().index(node, task)
+        self.assertEqual(database_loader.call_args[1]['verify_ssl'], True)
