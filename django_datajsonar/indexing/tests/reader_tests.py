@@ -44,6 +44,7 @@ class ReaderTests(TestCase):
         self.node.catalog_url = mixed_catalog
         self.node.save()
         index_catalog(self.node, self.task, read_local=True, whitelist=True)
+        settings.DATAJSON_AR_TIME_SERIES_ONLY = False
 
         self.assertEqual(Distribution.objects.count(), 2)
         # La distribution ID 5.1 que no es serie de tiempo no fue creada

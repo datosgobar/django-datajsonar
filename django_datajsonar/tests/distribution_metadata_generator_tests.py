@@ -1,6 +1,7 @@
 #! coding: utf-8
 import os
 
+from django.conf import settings
 from django.test import TestCase
 
 from django_datajsonar.indexing.catalog_reader import index_catalog
