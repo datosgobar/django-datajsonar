@@ -5,6 +5,7 @@ from django.test import TestCase
 
 from django_datajsonar.indexing.catalog_reader import index_catalog
 from django_datajsonar.models import ReadDataJsonTask, Node, Distribution
+from django_datajsonar.tests.helpers import create_node
 from django_datajsonar.utils.metadata_generator import \
     get_distributions_metadata
 
@@ -14,6 +15,8 @@ SAMPLES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'samples
 class DistributionMetadataGenerator(TestCase):
     catalog = os.path.join(SAMPLES_DIR, 'sample_data.json')
     catalog_id = 'catalog_id'
+    catalog_two = os.path.join(SAMPLES_DIR, 'another_catalog.json')
+    catalog_two_id = 'enargas'
 
     @classmethod
     def setUpTestData(cls):
@@ -24,21 +27,40 @@ class DistributionMetadataGenerator(TestCase):
         cls.node.save()
         index_catalog(cls.node, cls.task, read_local=True, whitelist=True)
 
+        cls.node_two = create_node(cls.catalog_two, cls.catalog_two_id)
+        index_catalog(cls.node_two, cls.task, read_local=True, whitelist=True)
+
     def test_catalog_model_values(self):
         result = get_distributions_metadata()
-        for distribution in result:
+        for distribution in result[:2]:
             self.assertEqual('Datos Programación Macroeconómica',
                              distribution['dataset__catalog__title'])
             self.assertEqual('catalog_id',
                              distribution['dataset__catalog__identifier'])
+        for distribution in result[2:]:
+            self.assertEqual('Datos abiertos del Ente Nacional Regulador del Gas',
+                             distribution['dataset__catalog__title'])
+            self.assertEqual('enargas',
+                             distribution['dataset__catalog__identifier'])
 
     def test_dataset_model_values(self):
         result = get_distributions_metadata()
-        for distribution in result:
+        for distribution in result[:2]:
             self.assertEqual('Oferta y Demanda Globales. '
                              'Datos desestacionalizados. Base 1993',
                              distribution['dataset__title'])
             self.assertEqual('1',
+                             distribution['dataset__identifier'])
+        for distribution in result[2:12]:
+            self.assertEqual('Información geográfica del ENARGAS',
+                             distribution['dataset__title'])
+            self.assertEqual('1',
+                             distribution['dataset__identifier'])
+        for distribution in result[12:]:
+            self.assertEqual('Plan de inversiones de las Licenciatarias de '
+                             'Transporte y Distribución de Gas',
+                             distribution['dataset__title'])
+            self.assertEqual('2',
                              distribution['dataset__identifier'])
 
     def test_distribution_model_values(self):
@@ -105,19 +127,19 @@ class DistributionMetadataGenerator(TestCase):
 
     def test_rows_ordered_by_catalog_identifier(self):
         result = get_distributions_metadata()
-        first = result[0]
-        second = result[1]
+        first = result[1]
+        second = result[2]
         self.assertTrue(
-            first['dataset__catalog__identifier'] <= second['dataset__catalog__identifier'])
+            first['dataset__catalog__identifier'] < second['dataset__catalog__identifier'])
 
     def test_rows_ordered_by_dataset_identifier(self):
         result = get_distributions_metadata()
-        first = result[0]
-        second = result[1]
-        self.assertTrue(first['dataset__identifier'] <= second['dataset__identifier'])
+        first = result[11]
+        second = result[12]
+        self.assertTrue(first['dataset__identifier'] < second['dataset__identifier'])
 
     def test_rows_ordered_by_distribution_identifier(self):
         result = get_distributions_metadata()
-        first_distribution = result[0]
-        second_distribution = result[1]
+        first_distribution = result[5]
+        second_distribution = result[6]
         self.assertTrue(first_distribution['identifier'] <= second_distribution['identifier'])
