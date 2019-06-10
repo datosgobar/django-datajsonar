@@ -44,7 +44,7 @@ class CatalogReader:
         self._index_catalog(catalog, node, task)
 
     def _index_catalog(self, catalog, node, task):
-        verify_ssl = self.indexing_config.verify_ssl
+        verify_ssl = self.indexing_config.verify_ssl or node.verify_ssl
         try:
             loader = DatabaseLoader(task, read_local=self.read_local,
                                     default_whitelist=self.whitelist,

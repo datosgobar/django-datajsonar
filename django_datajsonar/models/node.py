@@ -90,6 +90,8 @@ class Node(models.Model):
     register_date = models.DateField(default=timezone.now)
     release_date = models.DateField(null=True, blank=True)
 
+    verify_ssl = models.BooleanField(default=False)
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.release_date is None and self.indexable is True:
