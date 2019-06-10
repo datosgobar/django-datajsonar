@@ -130,5 +130,11 @@ class NodeTests(TestCase):
             test_node.save()
         self.assertEqual(test_node.release_date, first_time.date())
 
+    def test_node_has_verify_flag_false_by_default(self):
+        test_node = Node.objects.create(
+            catalog_id='sspm', catalog_url='url', indexable=True)
+
+        self.assertFalse(test_node.verify_ssl)
+
     def tearDown(self):
         self.user.delete()
