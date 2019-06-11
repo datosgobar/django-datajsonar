@@ -97,6 +97,7 @@ def get_distributions_metadata():
     for distribution in metadata_list:
         distribution_metadata = json.loads(distribution.pop('metadata')) \
             if distribution.get('metadata') else {}
+        distribution['description'] = distribution_metadata.get('description')
         distribution['accessURL'] = distribution_metadata.get('accessURL')
         distribution['type'] = distribution_metadata.get('type')
         distribution['format'] = distribution_metadata.get('format')
