@@ -67,19 +67,8 @@ Luego de guardar la instancia deberiamos tener algo como:
 
 ### Lectura periodica
 
-Para que la lectura de los catalogos se ejecute periodicamente, debemos crear un `RepeatableJob`.
+Para que la lectura de los catalogos se ejecute periodicamente, debemos crear un `Synchronizer`
 
-Para eso vamos a la ruta `/admin/scheduler/repeatablejob/`.
-
-En el campo **nombre** podemos poner lo que deseemos (como "New Read Datajson Task"), en el campo **callable** debemos
-poner `django_datajsonar.tasks.schedule_new_read_datajson_task`.
-En el campo **Queue** ponemos `indexing`.
-Habilitar el campo **Enabled**.
-En los campos **fecha** y **hora** de **scheduled time** hacemos click en "Hoy" y "Ahora".
-Finalmente en **interval** ponemos `1` y en **interval unit** `days`.
-Luego de guardar la instancia deberiamos tener algo como:
-
-![New Read DataJson Task](images/new_read_datajson_task.png)
 
 Una alternativa a este método es usar un management command. Los comandos `schedule_indexation` y
 `schedule_task_finisher` permiten planificar trabajos que se ejecutarán de manera periódica. Es posible definir un
@@ -236,3 +225,18 @@ Por último, los nombres de las claves se utilizarán para identificar las tarea
 ### Definir un storage para las distribuciones 
 
 En los settings se puede definir una clase que herede de `Storage` de django para guardar los archivos de distribuciones: `DATAJSON_AR_DISTRIBUTION_STORAGE`
+
+
+### URLs disponibles
+
+La librería ofrece varias URLs de consulta en formato CSV XLSX, o JSON de los nodos y distribuciones cargadas en la base.
+Se pueden agregar a la aplicación cliente de django_datajsonar incluyendo `django_datajsonar.urls` en alguna ruta. Ejemplo para agregar todas las rutas en el `root (/)` de la aplicación:
+
+`urls.py` de Django
+```
+urlpatterns = [
+    ...  # URLs de la aplicación
+    url(r'', include('django_datajsonar.urls', namespace="django_datajsonar")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
+Los recursos definidos son `nodes.json`, `nodes.csv`, `nodos.csv` (columnas en Español), `nodes.xlsx`, `nodos.xlsx` (columnas en Español), `distribuciones.csv`, `distribuciones.xlsx`. Cada una lista los nodos o distribuciones cargados, junto con sus metadatos más relevantes.
