@@ -100,6 +100,10 @@ Los comandos toman los siguientes parámetros:
 En caso de querer registrar un trabajo con callable e intervalo iguales a un trabajo ya registrado, se notificará la
 situación y se preservará el trabajo original sin guardar el nuevo.
 
+### Verficación de SSL durante la lectura
+
+Existen dos variables que manejan la verificación de certificados SSL para la descarga de recursos: Un flag global en `/admin/django_datajsonar/indexingconfig/`, que al activarse verificará SSL en toda descarga efectuada, sin excepciones, y un flag particular a nivel nodo, en el detalle de cada nodo encontrado en `/admin/django_datajsonar/node/`, que activa la verificación para ese nodo en particular. **La configuración global toma precedencia.**
+
 ### Configuración de datasets indexables
 
 Hay 2 formas de marcar un nodo como indexable, manualmente o cargando un csv de configuración. Para el caso manual, se
