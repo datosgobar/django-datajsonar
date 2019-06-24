@@ -46,6 +46,3 @@ class SynchroForm(forms.Form):
         frequency = cleaned_data['frequency']
         if frequency == self.WEEK_DAYS and not days:
             self.add_error('week_days', 'Days of week not selected')
-
-        if Synchronizer.objects.filter(name=cleaned_data['name']):
-            self.add_error('name', 'Synchronizer with this name already exists')

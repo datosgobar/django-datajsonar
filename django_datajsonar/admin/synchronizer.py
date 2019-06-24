@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
+from django.db import IntegrityError
 from django.forms import formset_factory
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -111,8 +112,11 @@ class SynchronizerAdmin(admin.ModelAdmin):
             'scheduled_time': synchro_form.cleaned_data['scheduled_time'],
             'week_days': json.dumps(synchro_form.cleaned_data['week_days']),
         }
-        create_or_update_synchro(object_id, stages, data)
-
+        try:
+            create_or_update_synchro(object_id, stages, data)
+        except IntegrityError:
+            messages.error(request, 'Synchronizer with this name already exists')
+            return render(request, 'synchronizer.html', self.add_synchro_context(request, synchro_form, synchro))
         return redirect('admin:django_datajsonar_synchronizer_changelist')
 
     def get_stage_choice(self, stage_name):
