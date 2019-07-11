@@ -44,6 +44,7 @@ class CatalogAdmin(admin.ModelAdmin):
     search_fields = ('identifier', 'present', 'updated')
     readonly_fields = ('identifier',)
     list_filter = ('present', 'updated')
+    list_select_related = True
 
     inlines = (
         EnhancedMetaAdmin,
@@ -72,6 +73,7 @@ class DatasetAdmin(admin.ModelAdmin):
                'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
 
     list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
+    list_select_related = True
 
     def landing_page_links(self, obj):
         landing_page = obj.landing_page
@@ -136,6 +138,9 @@ class DistributionAdmin(admin.ModelAdmin):
     inlines = (
         EnhancedMetaAdmin,
     )
+    list_select_related = True
+
+    readonly_fields = ('dataset', )
 
     def get_dataset_title(self, obj):
         return obj.dataset.title
@@ -176,6 +181,9 @@ class FieldAdmin(admin.ModelAdmin):
     inlines = (
         EnhancedMetaAdmin,
     )
+
+    list_select_related = True
+    readonly_fields = ('distribution', )
 
     def get_catalog_id(self, obj):
         return obj.distribution.dataset.catalog.identifier

@@ -132,6 +132,86 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    "formatters": {
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        }
+    },
+    'handlers': {
+        "rq_console": {
+            "level": "DEBUG",
+            "class": "rq.utils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
+        },
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+        },
+        'apps': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            "formatter": "simple",
+        },
+        'production': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
+            "formatter": "verbose",
+        },
+    },
+    'loggers': {
+        'django.security.DisallowedHost': {
+            'handlers': ['null'],
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'series_tiempo_ar_api': {
+            'handlers': ['apps', 'production'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        "rq.worker": {
+            "handlers": ["rq_console", ],
+            "level": "DEBUG"
+        },
+    }
+}
+
+
 DEFAULT_REDIS_HOST = env("DEFAULT_REDIS_HOST", default="localhost")
 DEFAULT_REDIS_PORT = env("DEFAULT_REDIS_PORT", default="6379")
 DEFAULT_REDIS_DB = env("DEFAULT_REDIS_DB", default="0")
