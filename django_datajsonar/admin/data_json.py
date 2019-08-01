@@ -66,7 +66,7 @@ class CatalogAdmin(admin.ModelAdmin):
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'identifier', 'catalog', 'landing_page_links', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
+    list_display = ('title', 'identifier', 'catalogo', 'landing', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
     readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed')
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
@@ -75,10 +75,18 @@ class DatasetAdmin(admin.ModelAdmin):
     list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
     list_select_related = True
 
-    def landing_page_links(self, obj):
+    class Media:
+        css = {
+            'all': ('django_datajsonar/css/dataset.css',)
+        }
+
+    def catalogo(self, obj):
+        return obj.catalog.identifier
+
+    def landing(self, obj):
         landing_page = obj.landing_page
         if landing_page:
-            return format_html("<a href='{url}'>{url}</a>", url=landing_page)
+            return format_html("<a href='{url}'>link</a>", url=landing_page)
         return '-'
 
     def mark_as_reviewed(self, _, queryset):
