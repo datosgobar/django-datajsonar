@@ -1,6 +1,7 @@
 #! coding: utf-8
 import os
 import datetime
+import requests_mock
 
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -135,6 +136,16 @@ class NodeTests(TestCase):
             catalog_id='sspm', catalog_url='url', indexable=True)
 
         self.assertFalse(test_node.verify_ssl)
+
+    @requests_mock.Mocker()
+    def test_node_read_catalog_returns_catalog_data(self, m):
+        filepath = os.path.join(dir_path, 'sample_data.json')
+        with open(filepath, 'rb') as f:
+            m.get('http://infra.datos.gob.ar/catalog/sspm/data.json', content=f.read())
+            test_node = Node.objects.create(
+                catalog_id='sspm', catalog_url='http://infra.datos.gob.ar/catalog/sspm/data.json', indexable=True)
+            catalog_data = test_node.read_catalog()
+            self.assertEqual(catalog_data['identifier'], 'sspm')
 
     def tearDown(self):
         self.user.delete()
