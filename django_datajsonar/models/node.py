@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from pydatajson import DataJson
 
 
 class BaseRegisterFile(models.Model):
@@ -97,6 +98,9 @@ class Node(models.Model):
         if self.release_date is None and self.indexable is True:
             self.release_date = timezone.now().date()
         super(Node, self).save(force_insert, force_update, using, update_fields)
+
+    def read_catalog(self):
+        return DataJson(self.catalog_url, catalog_format=self.catalog_format)
 
     def __unicode__(self):
         return self.catalog_id
