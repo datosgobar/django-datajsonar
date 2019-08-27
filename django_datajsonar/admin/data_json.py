@@ -72,7 +72,7 @@ class DatasetAdmin(admin.ModelAdmin):
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
                'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
 
-    list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
+    list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed', 'starred')
     list_select_related = True
 
     class Media:
