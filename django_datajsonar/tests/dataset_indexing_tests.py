@@ -123,6 +123,11 @@ class BulkIndexingTests(TestCase):
         model_indexables = list(Dataset.objects.filter(indexable=True).values_list("identifier", flat=True))
         self.assertListEqual(sorted(csv_indexables), sorted(model_indexables))
 
+    def test_new_datasets_are_not_starred(self):
+        dataset = Dataset.objects.get(catalog__identifier=self.test_catalog, identifier='1')
+
+        self.assertFalse(dataset.starred)
+
     def tearDown(self):
         for catalog in self.catalogs:
             Catalog.objects.get(identifier=catalog).delete()

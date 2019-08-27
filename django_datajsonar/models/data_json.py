@@ -50,6 +50,7 @@ class Dataset(models.Model):
     updated = models.BooleanField(default=True)
     error = models.BooleanField(default=False)
     new = models.BooleanField(default=False)
+    starred = models.BooleanField(default=False)
     reviewed = models.CharField(max_length=20, choices=REVIEWED_STATUS,
                                 default=NOT_REVIEWED)
     last_reviewed = models.DateField(null=True, blank=True, default=None)
