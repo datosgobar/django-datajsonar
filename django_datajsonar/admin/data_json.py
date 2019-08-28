@@ -70,7 +70,8 @@ class DatasetAdmin(admin.ModelAdmin):
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable', 'starred')
     readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed')
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
-               'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
+               'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed',
+               'make_starred', 'make_not_starred']
 
     list_filter = ('catalog__identifier', 'starred', 'present', 'indexable', 'reviewed')
     list_select_related = True
