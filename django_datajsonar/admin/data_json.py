@@ -66,13 +66,14 @@ class CatalogAdmin(admin.ModelAdmin):
 
 @admin.register(Dataset)
 class DatasetAdmin(admin.ModelAdmin):
-    list_display = ('title', 'identifier', 'catalogo', 'landing', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
+    list_display = ('title', 'identifier', 'catalogo', 'landing', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed', 'newly_reported')
     search_fields = ('identifier', 'catalog__identifier', 'present', 'updated', 'indexable')
     readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed')
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
-               'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed']
+               'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed',
+               'mark_as_newly_reported', 'mark_as_not_newly_reported']
 
-    list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed')
+    list_filter = ('catalog__identifier', 'present', 'indexable', 'reviewed', 'newly_reported')
     list_select_related = True
 
     class Media:
@@ -112,6 +113,14 @@ class DatasetAdmin(admin.ModelAdmin):
     def make_indexable(self, _, queryset):
         queryset.update(indexable=True)
     make_indexable.short_description = 'Marcar como federable'
+
+    def mark_as_newly_reported(self, _, queryset):
+        pass
+    mark_as_newly_reported.short_description = 'Marcar como novedad'
+
+    def mark_as_not_newly_reported(self, _, queryset):
+        pass
+    mark_as_not_newly_reported.short_description = 'Desmarcar como novedad'
 
     def generate_config_file(self, _, queryset):
         indexables = queryset.filter(indexable=True)
