@@ -113,6 +113,14 @@ class DatasetAdmin(admin.ModelAdmin):
         queryset.update(indexable=True)
     make_indexable.short_description = 'Marcar como federable'
 
+    def make_starred(self, _, queryset):
+        queryset.update(starred=True)
+    make_starred.short_description = 'Marcar como destacado'
+
+    def make_not_starred(self, _, queryset):
+        queryset.update(starred=False)
+    make_not_starred.short_description = 'Marcar como no destacado'
+
     def generate_config_file(self, _, queryset):
         indexables = queryset.filter(indexable=True)
         return download_config_csv(indexables)
