@@ -43,3 +43,18 @@ Los campos definidos en esas listas no se cargan a la hora de generar los modelo
 ## Uso
 
 Ver [docs/uso.md](./docs/uso.md)
+
+## Desarrollo
+
+Se provee para pruebas manuales una aplicación ejemplo de Django con el `settings.py` configurado correctamente. Para levantarla:
+
+- Levantar postgres y redis. Se provee un `docker-compose` ejemplo para ello, en el directorio raíz. `docker-compose up -d`
+- Copiar los archivos `conf/settings/.env.example` a `conf/settings/.env`, `conf/settings/local_example.py` a `conf/settings/local.py`
+- Exportar variable de configuración: `expot DJANGO_SETTINGS_MODULE=conf.settings.local`
+- Correr migraciones: `./manage.py migrate`
+- Levantar la aplicación: `./manage.py runserver`
+
+## Tests
+
+- `pip install -r requirements/testing.txt`
+- `./scripts/tests.sh` 
