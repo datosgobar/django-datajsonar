@@ -16,10 +16,5 @@ class Migration(migrations.Migration):
             model_name='dataset',
             name='starred',
             field=models.BooleanField(default=False),
-        ),
-        migrations.AlterField(
-            model_name='indexingconfig',
-            name='verify_ssl',
-            field=models.BooleanField(default=False, verbose_name='Verify SSL'),
-        ),
+        )
     ]
