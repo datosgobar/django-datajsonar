@@ -51,6 +51,7 @@ class Dataset(models.Model):
     error = models.BooleanField(default=False)
     new = models.BooleanField(default=False)
     date_created = models.DateField(auto_now_add=True)
+    starred = models.BooleanField(default=False)
     reviewed = models.CharField(max_length=20, choices=REVIEWED_STATUS,
                                 default=NOT_REVIEWED)
     last_reviewed = models.DateField(null=True, blank=True, default=None)
