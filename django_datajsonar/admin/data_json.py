@@ -68,7 +68,7 @@ class CatalogAdmin(admin.ModelAdmin):
 class DatasetAdmin(admin.ModelAdmin):
     list_display = ('title', 'identifier', 'catalogo', 'landing', 'starred', 'present', 'updated', 'indexable', 'reviewed', 'last_reviewed')
     search_fields = ['identifier', 'catalog__identifier', 'present', 'updated', 'indexable']
-    readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed', 'date_created')
+    readonly_fields = ('identifier', 'catalog', 'reviewed', 'last_reviewed', 'time_created')
     actions = ['make_indexable', 'make_unindexable', 'generate_config_file',
                'mark_as_reviewed', 'mark_on_revision', 'mark_as_not_reviewed',
                'make_starred', 'make_not_starred']
