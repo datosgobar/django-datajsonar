@@ -51,7 +51,7 @@ class InlineNodeMetadata(admin.StackedInline):
 
 @admin.register(Node)
 class NodeAdmin(admin.ModelAdmin):
-    list_display = ('catalog_id', 'indexable')
+    list_display = ('catalog_id', 'indexable', 'timezone')
     exclude = ('catalog',)
     inlines = (InlineNodeMetadata,)
     actions = ('make_indexable', 'make_unindexable')
