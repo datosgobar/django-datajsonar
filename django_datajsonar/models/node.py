@@ -93,6 +93,8 @@ class Node(models.Model):
 
     verify_ssl = models.BooleanField(default=False)
 
+    timezone = models.CharField(max_length=100, default="America/Buenos_Aires")
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.release_date is None and self.indexable is True:
