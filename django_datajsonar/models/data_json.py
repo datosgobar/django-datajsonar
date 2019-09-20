@@ -4,22 +4,15 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
+from django_datajsonar.models.data_json_entity_mixin import DataJsonEntityMixin
 from .metadata import Metadata
 from .utils import filepath, get_distribution_storage
 
 
-class Catalog(models.Model):
+class Catalog(DataJsonEntityMixin):
     title = models.CharField(max_length=200)
     identifier = models.CharField(max_length=200, unique=True)
-    metadata = models.TextField()
-    present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=True)
-    error = models.BooleanField(default=False)
-    new = models.BooleanField(default=False)
-
     enhanced_meta = GenericRelation(Metadata, null=True)
-
-    error_msg = models.TextField(default='')
 
     def __unicode__(self):
         return u'%s (%s)' % (self.title, self.identifier)
@@ -28,7 +21,7 @@ class Catalog(models.Model):
         return self.__unicode__()
 
 
-class Dataset(models.Model):
+class Dataset(DataJsonEntityMixin):
 
     REVIEWED = "REVIEWED"
     ON_REVISION = "ON_REVISION"
@@ -42,14 +35,9 @@ class Dataset(models.Model):
 
     title = models.CharField(max_length=200)
     identifier = models.CharField(max_length=200)
-    metadata = models.TextField()
     catalog = models.ForeignKey(to=Catalog, on_delete=models.CASCADE)
     landing_page = models.URLField(blank=True, null=True)
     indexable = models.BooleanField(default=False, verbose_name='federable')
-    present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=True)
-    error = models.BooleanField(default=False)
-    new = models.BooleanField(default=False)
     time_created = models.DateTimeField(auto_now_add=True)
     starred = models.BooleanField(default=False)
     reviewed = models.CharField(max_length=20, choices=REVIEWED_STATUS,
@@ -60,8 +48,6 @@ class Dataset(models.Model):
 
     enhanced_meta = GenericRelation(Metadata)
 
-    error_msg = models.TextField(default='')
-
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.catalog.identifier)
 
@@ -69,10 +55,9 @@ class Dataset(models.Model):
         return self.__unicode__()
 
 
-class Distribution(models.Model):
+class Distribution(DataJsonEntityMixin):
     identifier = models.CharField(max_length=200)
     title = models.CharField(max_length=200)
-    metadata = models.TextField()
     dataset = models.ForeignKey(to=Dataset, on_delete=models.CASCADE)
     download_url = models.URLField(max_length=1024, null=True)
     data_hash = models.CharField(max_length=128, default='')
@@ -84,14 +69,7 @@ class Distribution(models.Model):
         upload_to=filepath,
         blank=True
     )
-    present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=True)
-    error = models.BooleanField(default=False)
-
     enhanced_meta = GenericRelation(Metadata)
-    new = models.BooleanField(default=False)
-
-    error_msg = models.TextField(default='')
 
     def __unicode__(self):
         return u'%s (%s)' % (self.identifier, self.dataset.catalog.identifier)
@@ -100,19 +78,12 @@ class Distribution(models.Model):
         return self.__unicode__()
 
 
-class Field(models.Model):
+class Field(DataJsonEntityMixin):
     title = models.CharField(max_length=200, null=True)
     identifier = models.CharField(max_length=200, null=True)
-    metadata = models.TextField()
     distribution = models.ForeignKey(to=Distribution, on_delete=models.CASCADE)
-    present = models.BooleanField(default=True)
-    updated = models.BooleanField(default=True)
-    error = models.BooleanField(default=False)
 
     enhanced_meta = GenericRelation(Metadata)
-    new = models.BooleanField(default=False)
-
-    error_msg = models.TextField(default='')
 
     def __unicode__(self):
         return u'%s (%s)' %\
