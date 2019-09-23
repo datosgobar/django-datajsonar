@@ -15,15 +15,6 @@ def log_exception(task, msg, model, field_kw):
         return None
 
 
-def update_model(created, trimmed_dict, model, updated_children=False, data_change=False):
-    try:
-        previous_meta = json.loads(model.metadata)
-    except ValueError:
-        previous_meta = {}
-    updated = (trimmed_dict != previous_meta or data_change or updated_children)
-    if created or updated:
-        model.metadata = json.dumps(trimmed_dict)
-        model.updated = True
-    model.new = created
-    model.present = True
+def update_model(trimmed_dict, model, updated_children=False, data_change=False):
+    model.update_metadata(trimmed_dict, updated_children, data_change)
     model.save()

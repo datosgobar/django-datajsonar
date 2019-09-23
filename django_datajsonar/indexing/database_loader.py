@@ -71,7 +71,7 @@ class DatabaseLoader:
             msg = u"No fueron encontrados series de tiempo en el catálogo {}".format(catalog_id)
             ReadDataJsonTask.info(self.task, msg)
 
-        update_model(created, trimmed_catalog, catalog_model, updated_children=updated_datasets)
+        update_model(trimmed_catalog, catalog_model, updated_children=updated_datasets)
         return catalog_model
 
     def _dataset_model(self, dataset, catalog_model):
@@ -107,7 +107,7 @@ class DatabaseLoader:
                 log_exception(self.task, msg, Distribution, model_fields)
                 continue
 
-        update_model(created, trimmed_dataset, dataset_model, updated_children=updated_distributions)
+        update_model(trimmed_dataset, dataset_model, updated_children=updated_distributions)
         # Si se actualizó y está en revisión lo marco como no revisado
         if dataset_model.updated and dataset_model.reviewed == Dataset.ON_REVISION:
             dataset_model.reviewed = Dataset.NOT_REVIEWED
@@ -151,7 +151,7 @@ class DatabaseLoader:
         if not distribution_model.download_url:
             raise ValueError("DownloadURL no encontrado")
 
-        update_model(created, trimmed_distribution, distribution_model,
+        update_model(trimmed_distribution, distribution_model,
                      updated_children=updated_fields, data_change=data_change)
         return distribution_model
 
