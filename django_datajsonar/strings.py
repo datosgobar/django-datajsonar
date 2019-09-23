@@ -15,3 +15,5 @@ THU = 'THU'
 FRI = 'FRI'
 SAT = 'SAT'
 SUN = 'SUN'
+
+DEFAULT_TIME_ZONE = 'America/Buenos_Aires'
