@@ -89,7 +89,6 @@
                     "description": "PIB Servicios Comunales, Sociales y Personales en millones de pesos de 1960. 1970-1980",
                     "format": "CSV",
                     "dataset_identifier": "212",
-                    "issued": "2017-09-28T00:00:00",
                     "title": "Producto Interno Bruto Servicios Comunales, Sociales y Personales Millones de pesos constantes. Base 1960. Valores trimestrales",
                     "modified": "2017-09-28T00:00:00",
                     "fileName": "pib-servicios-comunales-sociales-personales-millones-pesos-1960-trimestral.csv",

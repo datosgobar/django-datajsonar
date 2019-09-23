@@ -5,6 +5,7 @@ import shutil
 from datetime import datetime
 
 from django.conf import settings
+from django.db.models import Min
 from django.test import TestCase
 from freezegun import freeze_time
 from iso8601 import iso8601
@@ -59,7 +60,7 @@ class DatabaseLoaderTests(TestCase):
                 dataset_model.save()
 
     def tearDown(self):
-        Catalog.objects.filter(identifier=self.catalog_id).delete()
+        Catalog.objects.all().delete()
 
     def test_blacklisted_catalog_meta(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
@@ -288,12 +289,3 @@ class DatabaseLoaderTests(TestCase):
         issued = Dataset.objects.first().issued
         self.assertEqual(issued.date(),
                          iso8601.parse_date(catalog.get_datasets()[0]['issued']).date())
-
-    @freeze_time("2019-01-01")
-    def test_issued_metadata_inferred(self):
-        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
-        del catalog["dataset"][0]['issued']
-        self.loader.run(catalog, self.catalog_id)
-        issued = Dataset.objects.first().issued
-        self.assertEqual(issued.date(),
-                         datetime.now().date())
