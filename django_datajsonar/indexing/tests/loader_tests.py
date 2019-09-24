@@ -240,6 +240,15 @@ class DatabaseLoaderTests(TestCase):
         for updated in distribution.field_set.values_list('updated', flat=True):
             self.assertEqual(True, updated)
 
+    def test_set_distribution_has_file_size_in_data_file(self):
+        distribution_id = '212.1'  # Sacado del catálogo full_ts_data.json
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+
+        distribution = Distribution.objects.get(identifier=distribution_id)
+        # 1189 bytes "django_datajsonar/indexing/tests/samples/one_distribution_data.csv"
+        self.assertAlmostEqual(distribution.data_file.size, 1189)
+
     def test_dataset_theme(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
         self.loader.run(catalog, self.catalog_id)
