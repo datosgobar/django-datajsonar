@@ -74,7 +74,9 @@ class DatabaseLoader:
             msg = u"No fueron encontrados series de tiempo en el catálogo {}".format(catalog_id)
             ReadDataJsonTask.info(self.task, msg)
 
-        trimmed_catalog['issued'] = trimmed_catalog.get('issued') or min(issued_dates)
+        if not trimmed_catalog.get('issued') and issued_dates:
+            trimmed_catalog['issued'] = min(issued_dates)
+
         update_model(trimmed_catalog, catalog_model, updated_children=updated_datasets)
         return catalog_model
 
@@ -112,7 +114,9 @@ class DatabaseLoader:
                               {'identifier': distribution.get('identifier'),
                                'dataset': dataset_model})
                 continue
-        trimmed_dataset['issued'] = trimmed_dataset.get('issued') or min(issued_dates)
+
+        if not trimmed_dataset.get('issued') and issued_dates:
+            trimmed_dataset['issued'] = min(issued_dates)
 
         update_model(trimmed_dataset, dataset_model, updated_children=updated_distributions)
         # Si se actualizó y está en revisión lo marco como no revisado
@@ -173,7 +177,7 @@ class DatabaseLoader:
             identifier=field.get('id'),
             defaults={'metadata': field_meta}
         )
-        update_model(created, trimmed_field, field_model)
+        update_model(trimmed_field, field_model)
         return field_model
 
     def _read_file(self, distribution_model):

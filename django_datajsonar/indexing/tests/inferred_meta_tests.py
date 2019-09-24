@@ -4,6 +4,7 @@ from datetime import datetime
 from django.db.models import Min
 from django.test import TestCase
 from freezegun import freeze_time
+from iso8601 import iso8601
 from pydatajson import DataJson
 
 from django_datajsonar.indexing.database_loader import DatabaseLoader
@@ -39,10 +40,64 @@ class InferredMetadataTests(TestCase):
                          distribution_issued.date())
 
     @freeze_time("2019-01-01")
-    def test_issued_metadata_inferred(self):
+    def test_issued_dataset_metadata_inferred(self):
         catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
         del catalog["dataset"][0]['issued']
         self.loader.run(catalog, self.catalog_id)
         issued = Dataset.objects.first().issued
+        self.assertEqual(issued.date(),
+                         datetime.now().date())
+
+    @freeze_time("2019-01-01")
+    def test_issued_distributed_metadata_inferred(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+        issued = Distribution.objects.first().issued
+        self.assertEqual(issued.date(),
+                         datetime.now().date())
+
+    def test_catalog_issued_no_inference(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+        issued = Catalog.objects.first().issued
+        self.assertEqual(issued.date(),
+                         iso8601.parse_date(catalog['issued']).date())
+
+    def test_dataset_issued_no_inference(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        self.loader.run(catalog, self.catalog_id)
+        issued = Dataset.objects.first().issued
+        self.assertEqual(issued.date(),
+                         iso8601.parse_date(catalog.get_datasets()[0]['issued']).date())
+
+    def test_distribution_issued_no_inference(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'full_ts_data.json'))
+        catalog.get_datasets()[0]['distribution'][0]['issued'] = '2016-04-14'
+        self.loader.run(catalog, self.catalog_id)
+        issued = Distribution.objects.first().issued
+        self.assertEqual(issued.date(),
+                         datetime(2016, 4, 14).date())
+
+    @freeze_time("2019-01-01")
+    def test_catalog_without_issued_dates(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'no_issued_dates.json'))
+        self.loader.run(catalog, self.catalog_id)
+        issued = Catalog.objects.first().issued
+        self.assertEqual(issued.date(),
+                         datetime.now().date())
+
+    @freeze_time("2019-01-01")
+    def test_dataset_without_issued_dates(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'no_issued_dates.json'))
+        self.loader.run(catalog, self.catalog_id)
+        issued = Dataset.objects.first().issued
+        self.assertEqual(issued.date(),
+                         datetime.now().date())
+
+    @freeze_time("2019-01-01")
+    def test_distribution_without_issued_dates(self):
+        catalog = DataJson(os.path.join(SAMPLES_DIR, 'no_issued_dates.json'))
+        self.loader.run(catalog, self.catalog_id)
+        issued = Distribution.objects.first().issued
         self.assertEqual(issued.date(),
                          datetime.now().date())
