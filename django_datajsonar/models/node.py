@@ -6,6 +6,8 @@ from django.db import models
 from django.utils import timezone
 from pydatajson import DataJson
 
+from django_datajsonar.strings import DEFAULT_TIME_ZONE
+
 
 class BaseRegisterFile(models.Model):
     """Base de los archivos de registro de datasets y de nodos.
@@ -93,7 +95,7 @@ class Node(models.Model):
 
     verify_ssl = models.BooleanField(default=False)
 
-    timezone = models.CharField(max_length=100, default="America/Buenos_Aires")
+    timezone = models.CharField(max_length=100, default=DEFAULT_TIME_ZONE)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

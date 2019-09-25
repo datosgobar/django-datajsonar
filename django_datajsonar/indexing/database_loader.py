@@ -55,21 +55,27 @@ class DatabaseLoader:
         only_time_series = getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False)
         datasets = catalog.get_datasets(only_time_series=only_time_series)
         updated_datasets = False
+        issued_dates = []
         for dataset in datasets:
             try:
                 dataset_model = self._dataset_model(dataset, catalog_model)
                 updated_datasets = updated_datasets or dataset_model.updated
+                issued_dates.append(dataset_model.issued.strftime("%Y-%m-%dT%H:%M:%S"))
             except Exception as e:
-                msg = u"Excepción en dataset {}: {}"\
+                msg = u"Excepción en dataset {}: {}" \
                     .format(dataset.get('identifier'), e)
-                model_fields = {'identifier': dataset.get('identifier'),
-                                'catalog': catalog_model}
-                log_exception(self.task, msg, Dataset, model_fields)
+                log_exception(self.task, msg, Dataset,
+                              {'identifier': dataset.get('identifier'),
+                               'catalog': catalog_model}
+                              )
                 continue
 
         if not datasets and only_time_series:
             msg = u"No fueron encontrados series de tiempo en el catálogo {}".format(catalog_id)
             ReadDataJsonTask.info(self.task, msg)
+
+        if not trimmed_catalog.get('issued') and issued_dates:
+            trimmed_catalog['issued'] = min(issued_dates)
 
         update_model(trimmed_catalog, catalog_model, updated_children=updated_datasets)
         return catalog_model
@@ -95,17 +101,22 @@ class DatabaseLoader:
             dataset_model.indexable = True
         if getattr(settings, 'DATAJSON_AR_TIME_SERIES_ONLY', False):
             distributions = filter(distribution_has_time_index, distributions)
+        issued_dates = []
         for distribution in distributions:
             try:
                 distribution_model = self._distribution_model(distribution, dataset_model)
                 updated_distributions = updated_distributions or distribution_model.updated
+                issued_dates.append(distribution_model.issued.strftime("%Y-%m-%dT%H:%M:%S"))
             except Exception as e:
-                msg = u"Excepción en distribución {}: {}"\
+                msg = u"Excepción en distribución {}: {}" \
                     .format(distribution.get('identifier'), e)
-                model_fields = {'identifier': distribution.get('identifier'),
-                                'dataset': dataset_model}
-                log_exception(self.task, msg, Distribution, model_fields)
+                log_exception(self.task, msg, Distribution,
+                              {'identifier': distribution.get('identifier'),
+                               'dataset': dataset_model})
                 continue
+
+        if not trimmed_dataset.get('issued') and issued_dates:
+            trimmed_dataset['issued'] = min(issued_dates)
 
         update_model(trimmed_dataset, dataset_model, updated_children=updated_distributions)
         # Si se actualizó y está en revisión lo marco como no revisado
@@ -136,7 +147,7 @@ class DatabaseLoader:
                 field_model = self._field_model(field, distribution_model)
                 updated_fields = updated_fields or field_model.updated
             except Exception as e:
-                msg = u"Excepción en field {}: {}"\
+                msg = u"Excepción en field {}: {}" \
                     .format(field.get('title'), e)
                 model_fields = {'identifier': field.get('identifier'),
                                 'distribution': distribution_model}
@@ -166,7 +177,7 @@ class DatabaseLoader:
             identifier=field.get('id'),
             defaults={'metadata': field_meta}
         )
-        update_model(created, trimmed_field, field_model)
+        update_model(trimmed_field, field_model)
         return field_model
 
     def _read_file(self, distribution_model):
