@@ -37,3 +37,13 @@ class SynchronizerAdminTests(TestCase):
     def test_run_manually_with_no_node(self, begin_stage):
         self.client.post(self.url)
         begin_stage.assert_called_once()
+
+    def test_id_bigger_than_ten(self, begin_stage):
+        self.synchro.id = 999
+        self.synchro.name = "Other name!"  # Avoids name unique constraint
+        self.synchro.save()
+
+        new_url = reverse('admin:django_datajsonar_synchronizer_start_synchro',
+                          args=(self.synchro.id,))
+        self.client.post(new_url)
+        begin_stage.assert_called_once()
