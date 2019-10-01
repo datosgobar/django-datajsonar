@@ -33,7 +33,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(SynchronizerAdmin, self).get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
-        extra_urls = [url(r'^start_synchro/(?P<synchro_id>[0-9])$',
+        extra_urls = [url(r'^start_synchro/(?P<synchro_id>[0-9]+)$',
                           self.admin_site.admin_view(ManualSynchronizerView.as_view()),
                           name='%s_%s_start_synchro' % info), ]
         return extra_urls + urls
