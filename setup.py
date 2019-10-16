@@ -10,7 +10,7 @@ with open(os.path.join("requirements", "testing.txt")) as f:
 
 setup(
     name='django_datajsonar',
-    version='0.4.8',
+    version='0.4.9',
     description="Paquete de django con herramientas para administrar modelos de catalogos.",
     author="Datos Argentina",
     author_email='datos@modernizacion.gob.ar',
