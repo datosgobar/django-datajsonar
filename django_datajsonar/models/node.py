@@ -97,6 +97,8 @@ class Node(models.Model):
 
     timezone = models.CharField(max_length=100, default=DEFAULT_TIME_ZONE)
 
+    validate_catalog_urls = models.BooleanField(default=True)
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.release_date is None and self.indexable is True:
