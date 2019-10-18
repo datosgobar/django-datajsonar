@@ -24,7 +24,6 @@ class CatalogReader:
         if indexing_config is None:
             indexing_config = IndexingConfig.get_solo()
         self.indexing_config = indexing_config
-        self.file_generator = CatalogFileGenerator()
 
     def index(self, node, task):
         self._reset_catalog_if_exists(node)
@@ -45,7 +44,8 @@ class CatalogReader:
 
         self._index_catalog(catalog, node, task)
 
-        self.file_generator.generate_files(catalog, node)
+        file_generator = CatalogFileGenerator(node)
+        file_generator.generate_files()
 
     def _index_catalog(self, catalog, node, task):
         verify_ssl = self.indexing_config.verify_ssl or node.verify_ssl

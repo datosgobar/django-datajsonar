@@ -99,6 +99,9 @@ class Node(models.Model):
 
     validate_catalog_urls = models.BooleanField(default=True)
 
+    json_catalog_file = models.FileField(null=True, blank=True)
+    xlsx_catalog_file = models.FileField(null=True, blank=True)
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.release_date is None and self.indexable is True:
