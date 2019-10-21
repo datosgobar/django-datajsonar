@@ -1,12 +1,15 @@
 #! coding: utf-8
 from __future__ import unicode_literals
 
+import os
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from pydatajson import DataJson
 
 from django_datajsonar.strings import DEFAULT_TIME_ZONE
+from django_datajsonar.storage.custom_catalog_storage import CustomCatalogStorage
 
 
 class BaseRegisterFile(models.Model):
@@ -73,6 +76,21 @@ class Jurisdiction(models.Model):
         return self.__unicode__()
 
 
+def catalog_file_path(instance, filename=None):
+
+    return os.path.join('catalog',
+                        instance.catalog_id,
+                        f'{filename}')
+
+
+def json_catalog_file_path(instance, _filename=None):
+    return catalog_file_path(instance, filename='data.json')
+
+
+def xlsx_catalog_file_path(instance, _filename=None):
+    return catalog_file_path(instance, filename='catalog.xlsx')
+
+
 class Node(models.Model):
     CKAN = "ckan"
     XLSX = "xlsx"
@@ -99,8 +117,12 @@ class Node(models.Model):
 
     validate_catalog_urls = models.BooleanField(default=True)
 
-    json_catalog_file = models.FileField(null=True, blank=True)
-    xlsx_catalog_file = models.FileField(null=True, blank=True)
+    json_catalog_file = models.FileField(upload_to=catalog_file_path,
+                                         storage=CustomCatalogStorage(),
+                                         null=True, blank=True)
+    xlsx_catalog_file = models.FileField(upload_to=catalog_file_path,
+                                         storage=CustomCatalogStorage(),
+                                         null=True, blank=True)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):

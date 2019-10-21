@@ -15,15 +15,15 @@ class CatalogFileGenerator:
         self.json_catalog_dir = os.path.join(MEDIA_ROOT, 'catalog', self.node.catalog_id, 'data.json')
 
     def generate_files(self):
-        format = self.node.catalog_format
+        catalog_format = self.node.catalog_format
 
         catalog = DataJson(self.node.catalog_url)
         catalog_url = self.node.catalog_url
 
-        if format == Node.JSON:
+        if catalog_format == Node.JSON:
             self._save_json_file_from_catalog(catalog)
             self._generate_xlsx_file_into_model(catalog)
-        if format == Node.XLSX:
+        if catalog_format == Node.XLSX:
             self._save_xlsx_file_from_url(catalog_url)
             self._generate_json_file_into_model(catalog)
         else:
