@@ -10,6 +10,7 @@ from pydatajson import DataJson
 
 from django_datajsonar.strings import DEFAULT_TIME_ZONE
 from django_datajsonar.storage.custom_catalog_storage import CustomCatalogStorage
+from django_datajsonar.indexing.constants import CATALOG_ROOT
 
 
 class BaseRegisterFile(models.Model):
@@ -78,7 +79,7 @@ class Jurisdiction(models.Model):
 
 def catalog_file_path(instance, filename=None):
 
-    return os.path.join('catalog',
+    return os.path.join(CATALOG_ROOT,
                         instance.catalog_id,
                         f'{filename}')
 
