@@ -10,6 +10,7 @@ from pydatajson.custom_exceptions import NonParseableCatalog
 from django_datajsonar.models import Dataset, Catalog, Distribution, Field
 from django_datajsonar.models import ReadDataJsonTask
 from django_datajsonar.models.config import IndexingConfig
+from django_datajsonar.utils.catalog_file_generator import CatalogFileGenerator
 from .database_loader import DatabaseLoader
 from .strings import READ_ERROR
 from .utils import log_exception
@@ -42,6 +43,9 @@ class CatalogReader:
         self.reset_fields(node)
 
         self._index_catalog(catalog, node, task)
+
+        file_generator = CatalogFileGenerator(node)
+        file_generator.generate_files()
 
     def _index_catalog(self, catalog, node, task):
         verify_ssl = self.indexing_config.verify_ssl or node.verify_ssl

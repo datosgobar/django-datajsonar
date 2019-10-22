@@ -32,3 +32,5 @@ REACTIVATE_REFRESH_BODY = {
         'refresh_interval': "30s"
     }
 }
+
+CATALOG_ROOT = 'catalog'
