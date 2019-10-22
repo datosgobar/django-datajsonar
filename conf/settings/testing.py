@@ -49,3 +49,5 @@ RQ_QUEUES = {
         'ASYNC': False,
     },
 }
+
+MEDIA_ROOT = '/tmp/test_media_root/'

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -79,17 +80,10 @@ class Jurisdiction(models.Model):
 
 def catalog_file_path(instance, filename=None):
 
-    return os.path.join(CATALOG_ROOT,
+    return os.path.join(settings.MEDIA_ROOT,
+                        CATALOG_ROOT,
                         instance.catalog_id,
                         f'{filename}')
-
-
-def json_catalog_file_path(instance, _filename=None):
-    return catalog_file_path(instance, filename='data.json')
-
-
-def xlsx_catalog_file_path(instance, _filename=None):
-    return catalog_file_path(instance, filename='catalog.xlsx')
 
 
 class Node(models.Model):

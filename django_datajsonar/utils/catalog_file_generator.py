@@ -1,18 +1,21 @@
+import json
 import os
 import requests
+from django.conf import settings
 from django.core.files import File
+from django.core.files.base import ContentFile
 
 from pydatajson import DataJson
 from pydatajson.writers import write_xlsx_catalog, write_json_catalog
-from conf.settings.base import MEDIA_ROOT
+
 from django_datajsonar.models import Node
 
 
 class CatalogFileGenerator:
     def __init__(self, node):
         self.node = node
-        self.xlsx_catalog_dir = os.path.join(MEDIA_ROOT, 'catalog', self.node.catalog_id, 'catalog.xlsx')
-        self.json_catalog_dir = os.path.join(MEDIA_ROOT, 'catalog', self.node.catalog_id, 'data.json')
+        self.xlsx_catalog_dir = os.path.join(settings.MEDIA_ROOT, 'catalog', self.node.catalog_id, 'catalog.xlsx')
+        self.json_catalog_dir = os.path.join(settings.MEDIA_ROOT, 'catalog', self.node.catalog_id, 'data.json')
 
     def generate_files(self):
         catalog_format = self.node.catalog_format
@@ -21,24 +24,27 @@ class CatalogFileGenerator:
         catalog_url = self.node.catalog_url
 
         if catalog_format == Node.JSON:
-            self._save_json_file_from_catalog(catalog)
+            self._save_json_file_from_url(catalog_url)
             self._generate_xlsx_file_into_model(catalog)
-        if catalog_format == Node.XLSX:
+        elif catalog_format == Node.XLSX:
             self._save_xlsx_file_from_url(catalog_url)
             self._generate_json_file_into_model(catalog)
         else:
             self._generate_json_file_into_model(catalog)
             self._generate_xlsx_file_into_model(catalog)
 
-    def _save_json_file_from_catalog(self, catalog):
-        self.node.json_catalog_file.save('data.json', catalog)
+    def _save_json_file_from_url(self, url):
+        file_content = self._get_catalog_content_from_url(url).decode('utf-8')
+        self.node.json_catalog_file.save('data.json', ContentFile(file_content))
 
     def _save_xlsx_file_from_url(self, url):
+        file_content = self._get_catalog_content_from_url(url)
+        self.node.xlsx_catalog_file.save('catalog.xlsx', ContentFile(file_content))
+
+    def _get_catalog_content_from_url(self, url):
         response = requests.get(url)
         response.raise_for_status()
-        file_content = response.content
-
-        self.node.xlsx_catalog_file('catalog.xlsx', file_content)
+        return response.content
 
     def _generate_json_file_into_model(self, catalog):
         write_json_catalog(catalog, self.json_catalog_dir)
