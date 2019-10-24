@@ -12,7 +12,7 @@ from django_datajsonar.utils.catalog_file_generator import CatalogFileGenerator
 
 
 class CatalogFileGeneratorTests(TestCase):
-    def test_creates_files_in_json_and_xlsx_format(self):
+    def test_create_files_in_json_and_xlsx_format(self):
         node = create_node('sample_data.json')
         file_generator = CatalogFileGenerator(node)
         file_generator.generate_files()

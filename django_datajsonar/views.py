@@ -4,6 +4,8 @@ import os
 from django.http import JsonResponse, HttpResponseBadRequest, FileResponse
 
 from django.conf import settings
+
+from django_datajsonar.models import Node
 from django_datajsonar.models.data_json import Dataset
 from django_datajsonar.utils.download_response_writer import \
     write_node_metadata, write_distributions_metadata
@@ -66,13 +68,15 @@ def distributions_spanish_metadata_xlsx(_):
 
 def json_catalog(_request, catalog_id):
     filename = 'data.json'
-    path = os.path.join(settings.MEDIA_ROOT, 'catalog', catalog_id, filename)
+    node = Node.objects.get(catalog_id=catalog_id)
+    path = node.json_catalog_file.path
     return catalog_file_response(filename, path, "application/json")
 
 
 def xlsx_catalog(_request, catalog_id):
     filename = 'catalog.xlsx'
-    path = os.path.join(settings.MEDIA_ROOT, 'catalog', catalog_id, filename)
+    node = Node.objects.get(catalog_id=catalog_id)
+    path = node.xlsx_catalog_file.path
     return catalog_file_response(filename, path,
                                  "application/vnd.openxmlformats-officedocument."
                                  "spreadsheetml.sheet")
