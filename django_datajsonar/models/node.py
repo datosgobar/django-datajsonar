@@ -80,8 +80,7 @@ class Jurisdiction(models.Model):
 
 def catalog_file_path(instance, filename=None):
 
-    return os.path.join(settings.MEDIA_ROOT,
-                        CATALOG_ROOT,
+    return os.path.join(CATALOG_ROOT,
                         instance.catalog_id,
                         f'{filename}')
 
