@@ -55,5 +55,7 @@ class CatalogFileGenerator:
         self._save_generated_file_to_model(self.xlsx_catalog_dir, 'catalog.xlsx')
 
     def _save_generated_file_to_model(self, file_dir, new_file_name):
+        file_field = self.node.json_catalog_file if new_file_name == 'data.json' \
+            else self.node.xlsx_catalog_file
         with open(file_dir, 'rb') as file:
-            self.node.json_catalog_file.save(new_file_name, File(file))
+            file_field.save(new_file_name, File(file))

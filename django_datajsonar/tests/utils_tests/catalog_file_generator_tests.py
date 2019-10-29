@@ -12,7 +12,7 @@ from django_datajsonar.utils.catalog_file_generator import CatalogFileGenerator
 
 
 class CatalogFileGeneratorTests(TestCase):
-    def test_creates_files_in_json_and_xlsx(self):
+    def test_create_files_in_json_and_xlsx_format(self):
         node = create_node('sample_data.json')
         file_generator = CatalogFileGenerator(node)
         file_generator.generate_files()
@@ -22,6 +22,25 @@ class CatalogFileGeneratorTests(TestCase):
                                       node.catalog_id, 'catalog.xlsx')
         self.assertTrue(os.path.exists(json_file_path))
         self.assertTrue(os.path.exists(xlsx_file_path))
+
+    def test_created_files_are_saved_in_node_model(self):
+        node = create_node('sample_data.json')
+        CatalogFileGenerator(node).generate_files()
+
+        json_file_path = os.path.join(settings.MEDIA_ROOT, CATALOG_ROOT,
+                                      node.catalog_id, 'data.json')
+        xlsx_file_path = os.path.join(settings.MEDIA_ROOT, CATALOG_ROOT,
+                                      node.catalog_id, 'catalog.xlsx')
+        with open(json_file_path, 'rb') as json_sample:
+            json_file_content = json_sample.read()
+        with open(xlsx_file_path, 'rb') as xlsx_sample:
+            xlsx_file_content = xlsx_sample.read()
+
+        node_json_file_content = node.json_catalog_file.read()
+        node_xlsx_file_content = node.xlsx_catalog_file.read()
+
+        self.assertEquals(json_file_content, node_json_file_content)
+        self.assertEquals(xlsx_file_content, node_xlsx_file_content)
 
     @patch('django_datajsonar.utils.catalog_file_generator.CatalogFileGenerator._generate_xlsx_file_into_model')
     def test_creates_new_xlsx_file_if_node_format_is_json(self, mock):
