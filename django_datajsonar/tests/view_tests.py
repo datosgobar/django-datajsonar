@@ -6,6 +6,7 @@ from django.urls import reverse
 from django_datajsonar.utils.catalog_file_generator import CatalogFileGenerator
 from .helpers import create_node, open_catalog
 
+
 class ViewTests(TestCase):
     def setUp(self):
         self.client = Client()
