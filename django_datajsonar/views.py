@@ -70,7 +70,7 @@ def json_catalog(_request, catalog_id):
     filename = 'data.json'
     node = Node.objects.get(catalog_id=catalog_id)
     path = node.json_catalog_file.path
-    return catalog_file_response(filename, path, "application/json")
+    return catalog_file_response(filename, path, "application/json", with_attachment=False)
 
 
 def xlsx_catalog(_request, catalog_id):
@@ -82,10 +82,11 @@ def xlsx_catalog(_request, catalog_id):
                                  "spreadsheetml.sheet")
 
 
-def catalog_file_response(filename, path, content_type):
+def catalog_file_response(filename, path, content_type, with_attachment=True):
     if not os.path.exists(path):
         return HttpResponseBadRequest("No hay un archivo generado con ese nombre.")
     response = FileResponse(open(path, 'rb'), content_type=content_type)
-    response["Content-Disposition"] = 'attachment; filename={}'.format(
-        filename)
+    response["Content-Disposition"] = 'filename={}'.format(filename)
+    if with_attachment:
+        response["Content-Disposition"] = "attachment; " + response["Content-Disposition"]
     return response
