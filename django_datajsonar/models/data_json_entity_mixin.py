@@ -17,7 +17,7 @@ class DataJsonEntityMixin(models.Model):
     error = models.BooleanField(default=False)
     new = models.BooleanField(default=False)
 
-    error_msg = models.TextField(default='')
+    error_msg = models.TextField(default='', blank=True)
 
     issued = models.DateTimeField(null=True, blank=True)
 
