@@ -84,4 +84,5 @@ class CatalogReader:
 
 @job('indexing', timeout=getattr(settings, 'INDEX_CATALOG_TIMEOUT', 1800))
 def index_catalog(node, task, read_local=False, whitelist=False):
+    whitelist = whitelist or node.new_datasets_auto_indexable
     CatalogReader(read_local, whitelist).index(node, task)

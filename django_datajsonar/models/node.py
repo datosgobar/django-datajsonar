@@ -118,6 +118,10 @@ class Node(models.Model):
                                          storage=CustomCatalogStorage(),
                                          null=True, blank=True)
 
+    new_datasets_auto_indexable = models.BooleanField(default=False,
+                                                      verbose_name="Federación automática "
+                                                                   "para nuevos Datasets")
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.release_date is None and self.indexable is True:
