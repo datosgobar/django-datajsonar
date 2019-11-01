@@ -66,21 +66,18 @@ class ReaderTests(TestCase):
 
     def test_node_does_not_automatically_index_new_datasets_by_default(self):
         index_catalog(self.node, self.task)
-        datasets = Catalog.objects.get(identifier=self.catalog_id).dataset_set.all()
-        for dataset in datasets:
-            self.assertFalse(dataset.indexable)
+        dataset = Catalog.objects.get(identifier=self.catalog_id).dataset_set.first()
+        self.assertFalse(dataset.indexable)
 
     def test_whitelisted_node_automatically_indexes_new_datasets(self):
         index_catalog(self.node, self.task, whitelist=True)
-        datasets = Catalog.objects.get(identifier=self.catalog_id).dataset_set.all()
-        for dataset in datasets:
-            self.assertTrue(dataset.indexable)
+        dataset = Catalog.objects.get(identifier=self.catalog_id).dataset_set.first()
+        self.assertTrue(dataset.indexable)
 
     def test_node_with_automatic_indexation_enabled_indexes_new_datasets(self):
         auto_index_node = Node(catalog_id='text_id', catalog_url=self.catalog,
                                indexable=True, new_datasets_auto_indexable=True)
         auto_index_node.save()
         index_catalog(auto_index_node, self.task)
-        datasets = Catalog.objects.get(identifier=auto_index_node.catalog_id).dataset_set.all()
-        for dataset in datasets:
-            self.assertTrue(dataset.indexable)
+        dataset = Catalog.objects.get(identifier=auto_index_node.catalog_id).dataset_set.first()
+        self.assertTrue(dataset.indexable)
