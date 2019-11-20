@@ -34,7 +34,7 @@ class RestoreDefaultSynchronizerView(View):
             top_stage = None
             for stage in synchro['stages'][::-1]:
                 fields = {
-                    'name': stage,
+                    'name': synchro['title'] + ': ' + stage,
                     'callable_str': stage_dict[stage]['callable_str'],
                     'queue': stage_dict[stage]['queue'],
                     'next_stage': top_stage,
