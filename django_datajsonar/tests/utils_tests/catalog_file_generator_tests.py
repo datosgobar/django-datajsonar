@@ -81,3 +81,18 @@ class CatalogFileGeneratorTests(TestCase):
             CatalogFileGenerator(node).generate_files()
         json_gen_mock.assert_called_once()
         xlsx_gen_mock.assert_called_once()
+
+    @patch('django_datajsonar.utils.catalog_file_generator.DataJson')
+    def test_creates_datajson_with_arguments_specified_in_node(self, datajson_mock):
+        node = Node.objects.create(catalog_id='test_catalog',
+                                   catalog_format='json',
+                                   catalog_url='https://fakeurl.com/without_format',
+                                   indexable=True,
+                                   verify_ssl=True)
+        with open_catalog('sample_data.json') as sample:
+            text = sample.read()
+        with requests_mock.Mocker() as m:
+            m.get('https://fakeurl.com/without_format', status_code=200, content=text)
+            CatalogFileGenerator(node).generate_files()
+        datajson_mock.assert_called_once_with(node.catalog_url, catalog_format='json',
+                                              verify_ssl=True)

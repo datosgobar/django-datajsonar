@@ -19,9 +19,10 @@ class CatalogFileGenerator:
 
     def generate_files(self):
         catalog_format = self.node.catalog_format
-
-        catalog = DataJson(self.node.catalog_url)
         catalog_url = self.node.catalog_url
+
+        catalog = DataJson(catalog_url, catalog_format=catalog_format,
+                           verify_ssl=self.node.verify_ssl)
 
         if catalog_format == Node.JSON:
             self._save_json_file_from_url(catalog_url)
