@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static admin_urls %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ app_label|capfirst|escape }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo; {% trans 'Restaurar synchronizers' %}
+    </div>
+{% endblock %}
+
+{% block content %}
+<div id="content" class="colM delete-confirmation">
+    <form action="{% url 'admin:'|add:opts.app_label|add:'_'|add:opts.model_name|add:'_restore_defaults'%}" method="post">
+        {% csrf_token %}
+        <div>
+            <p>¿Desea descartar los synchronizers existentes y restaurar la configuración default?</p>
+        </div>
+        <input type="submit" value="Si, estoy seguro">
+        <a href="{% url 'admin:django_datajsonar_synchronizer_changelist' %}" class="button cancel-link">No, regresar</a>
+    </form>    
+    <br class="clear">
+    <div id="footer"></div>
+</div>
+{% endblock %}
