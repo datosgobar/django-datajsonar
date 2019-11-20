@@ -307,15 +307,33 @@ DEFAULT_PROCESSES = [
     }
 ]
 
+STAGES_TITLES = {
+    'METADATA_READ': 'Read Datajson (metadata only)',
+    'COMPLETE_READ': 'Read Datajson (complete)',
+}
+
 DATAJSONAR_STAGES = {
-    'Read Datajson (complete)': {
+    STAGES_TITLES['COMPLETE_READ']: {
         'callable_str': 'django_datajsonar.tasks.schedule_full_read_task',
         'queue': 'indexing',
         'task': 'django_datajsonar.models.ReadDataJsonTask',
     },
-    'Read Datajson (metadata only)': {
+    STAGES_TITLES['METADATA_READ']: {
         'callable_str': 'django_datajsonar.tasks.schedule_metadata_read_task',
         'queue': 'indexing',
         'task': 'django_datajsonar.models.ReadDataJsonTask',
     },
 }
+
+SYNCHRO_DEFAULT_CONF = [
+    {
+        'title': 'Lectura de metadata de red',
+        'stages': [STAGES_TITLES['METADATA_READ']],
+        'scheduled_time': '04:00'
+    },
+    {
+        'title': 'Lectura completa de red',
+        'stages': [STAGES_TITLES['COMPLETE_READ']],
+        'scheduled_time': '15:00'
+    },
+]

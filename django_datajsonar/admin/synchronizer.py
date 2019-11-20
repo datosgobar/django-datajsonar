@@ -9,14 +9,13 @@ from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.db import IntegrityError
 from django.forms import formset_factory
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from django_datajsonar.admin.manual_synchronizer_view import ManualSynchronizerView
-from django_datajsonar.forms.manual_synchronizer_form import ManualSynchronizerRunForm
+from django_datajsonar.admin.restore_default_synchronizers_view import RestoreDefaultSynchronizerView
 from django_datajsonar.forms.stage_form import StageForm
 from django_datajsonar.forms.synchro_form import SynchroForm
-from django_datajsonar.models import Synchronizer, Node
+from django_datajsonar.models import Synchronizer, Stage
 from django_datajsonar.synchronizer import create_or_update_synchro
 from django_datajsonar.utils.utils import generate_stages
 
@@ -26,6 +25,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'frequency', 'scheduled_time', 'weekdays')
     actions = ('duplicate',)
     StageFormset = formset_factory(StageForm, extra=0)
+    change_list_template = 'synchronizer_change_list.html'
 
     def add_view(self, request, form_url='', extra_context=None):
         return self._synchro_view(request, extra_context=extra_context)
@@ -33,9 +33,14 @@ class SynchronizerAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(SynchronizerAdmin, self).get_urls()
         info = self.model._meta.app_label, self.model._meta.model_name
-        extra_urls = [url(r'^start_synchro/(?P<synchro_id>[0-9]+)$',
-                          self.admin_site.admin_view(ManualSynchronizerView.as_view()),
-                          name='%s_%s_start_synchro' % info), ]
+        extra_urls = [
+            url(r'^start_synchro/(?P<synchro_id>[0-9]+)$',
+                self.admin_site.admin_view(ManualSynchronizerView.as_view()),
+                name='%s_%s_start_synchro' % info),
+            url(r'^restore_defaults$',
+                self.admin_site.admin_view(RestoreDefaultSynchronizerView.as_view()),
+                name='%s_%s_restore_defaults' % info),
+        ]
         return extra_urls + urls
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
