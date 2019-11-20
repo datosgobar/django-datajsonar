@@ -13,6 +13,10 @@ class RestoreDefaultSynchronizerView(View):
     model = Synchronizer
 
     def get(self, request):
+        if not hasattr(settings, 'SYNCHRO_DEFAULT_CONF'):
+            messages.error(request, "No hay definida una configuración default para los synchronizers")
+            return redirect('admin:django_datajsonar_synchronizer_changelist')
+
         context = {
             'title': 'Restore default synchronizers',
             'app_label': self.model._meta.app_label,
@@ -24,17 +28,15 @@ class RestoreDefaultSynchronizerView(View):
         Synchronizer.objects.all().delete()
         Stage.objects.all().delete()
 
-        # Crear nuevos synchros
         synchro_list = settings.SYNCHRO_DEFAULT_CONF
         stage_dict = settings.DATAJSONAR_STAGES
         for synchro in synchro_list:
             top_stage = None
             for stage in synchro['stages'][::-1]:
-                stage_name = settings.STAGES_TITLES[stage]
                 fields = {
-                    'name': stage_name,
-                    'callable_str': stage_dict[stage_name]['callable_str'],
-                    'queue': stage_dict[stage_name]['queue'],
+                    'name': stage,
+                    'callable_str': stage_dict[stage]['callable_str'],
+                    'queue': stage_dict[stage]['queue'],
                     'next_stage': top_stage,
                 }
                 top_stage = Stage.objects.create(**fields)

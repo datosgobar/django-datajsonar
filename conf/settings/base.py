@@ -328,12 +328,12 @@ DATAJSONAR_STAGES = {
 SYNCHRO_DEFAULT_CONF = [
     {
         'title': 'Lectura de metadata de red',
-        'stages': ['METADATA_READ'],
+        'stages': [STAGES_TITLES['METADATA_READ']],
         'scheduled_time': '04:00'
     },
     {
         'title': 'Lectura completa de red',
-        'stages': ['COMPLETE_READ'],
+        'stages': [STAGES_TITLES['COMPLETE_READ']],
         'scheduled_time': '15:00'
     },
 ]
