@@ -16,4 +16,6 @@ FRI = 'FRI'
 SAT = 'SAT'
 SUN = 'SUN'
 
+WEEK_DAYS = [MON, TUE, WED, THU, FRI]
+
 DEFAULT_TIME_ZONE = 'America/Buenos_Aires'

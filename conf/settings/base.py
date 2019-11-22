@@ -3,6 +3,8 @@ import os
 import environ
 from os.path import dirname
 
+from django_datajsonar import strings
+
 SETTINGS_DIR = environ.Path(__file__) - 1
 ROOT_DIR = environ.Path(__file__) - 3  # (/a/b/myfile.py - 3 = /)
 APPS_DIR = ROOT_DIR.path(dirname(dirname(dirname(__file__))))
@@ -329,11 +331,12 @@ SYNCHRO_DEFAULT_CONF = [
     {
         'title': 'Lectura de metadata de red',
         'stages': [STAGES_TITLES['METADATA_READ']],
-        'scheduled_time': '04:00'
+        'scheduled_time': '04:00',
     },
     {
         'title': 'Lectura completa de red',
         'stages': [STAGES_TITLES['COMPLETE_READ']],
-        'scheduled_time': '15:00'
+        'scheduled_time': '15:00',
+        'week_days': strings.WEEK_DAYS
     },
 ]
