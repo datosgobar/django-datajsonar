@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from django.conf import settings
@@ -33,15 +34,26 @@ class RestoreDefaultSynchronizerView(View):
         for synchro in synchro_list:
             top_stage = None
             for stage in synchro['stages'][::-1]:
-                fields = {
+                stage_fields = {
                     'name': synchro['title'] + ': ' + stage,
                     'callable_str': stage_dict[stage]['callable_str'],
                     'queue': stage_dict[stage]['queue'],
                     'next_stage': top_stage,
                 }
-                top_stage = Stage.objects.create(**fields)
+                top_stage = Stage.objects.create(**stage_fields)
+
             scheduled_time = datetime.strptime(synchro['scheduled_time'], '%H:%M')
-            Synchronizer.objects.create(name=synchro['title'], start_stage=top_stage, actual_stage=None,
-                                        scheduled_time=scheduled_time)
+            synchro_fields = {
+                'name': synchro['title'],
+                'start_stage': top_stage,
+                'actual_stage': None,
+                'scheduled_time': scheduled_time,
+            }
+            if 'week_days' in synchro:
+                synchro_fields.update({
+                    'frequency': Synchronizer.WEEK_DAYS,
+                    'week_days': json.dumps(synchro['week_days'])
+                })
+            Synchronizer.objects.create(**synchro_fields)
         messages.success(request, "Restaurados synchronizers defaults!")
         return redirect('admin:django_datajsonar_synchronizer_changelist')
