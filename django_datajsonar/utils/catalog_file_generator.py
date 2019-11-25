@@ -14,6 +14,7 @@ from django_datajsonar.models import Node
 class CatalogFileGenerator:
     def __init__(self, node):
         self.node = node
+        self.verify_ssl = node.verify_ssl
         self.xlsx_catalog_dir = os.path.join(settings.MEDIA_ROOT, 'catalog', self.node.catalog_id, 'catalog.xlsx')
         self.json_catalog_dir = os.path.join(settings.MEDIA_ROOT, 'catalog', self.node.catalog_id, 'data.json')
 
@@ -22,7 +23,7 @@ class CatalogFileGenerator:
         catalog_url = self.node.catalog_url
 
         catalog = DataJson(catalog_url, catalog_format=catalog_format,
-                           verify_ssl=self.node.verify_ssl)
+                           verify_ssl=self.verify_ssl)
 
         if catalog_format == Node.JSON:
             self._save_json_file_from_url(catalog_url)
@@ -43,7 +44,7 @@ class CatalogFileGenerator:
         self.node.xlsx_catalog_file.save('catalog.xlsx', ContentFile(file_content))
 
     def _get_catalog_content_from_url(self, url):
-        response = requests.get(url)
+        response = requests.get(url, verify=self.verify_ssl)
         response.raise_for_status()
         return response.content
 
