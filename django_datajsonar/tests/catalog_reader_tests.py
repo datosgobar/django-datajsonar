@@ -60,7 +60,7 @@ class CatalogReaderTests(TestCase):
             CatalogFileGenerator(node).generate_files()
             self.assertEqual(2, len(m.request_history))
             for request in m.request_history:
-                self.assertTrue(request.verify)
+                self.assertFalse(request.verify)
 
     def test_catalog_url_request_verifies_ssl_according_to_node(self, _database_loader):
         node = Node.objects.create(catalog_id='test_catalog',
