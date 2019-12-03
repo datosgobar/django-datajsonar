@@ -4,7 +4,10 @@ import os
 from django.http import JsonResponse, HttpResponseBadRequest, FileResponse
 
 from django.conf import settings
+from django.urls import reverse
+from django.views.generic import FormView
 
+from django_datajsonar.forms.validator_form import ValidatorForm
 from django_datajsonar.models import Node
 from django_datajsonar.models.data_json import Dataset
 from django_datajsonar.utils.download_response_writer import \
@@ -90,3 +93,10 @@ def catalog_file_response(filename, path, content_type, with_attachment=True):
     if with_attachment:
         response["Content-Disposition"] = "attachment; " + response["Content-Disposition"]
     return response
+
+
+class ValidatorView(FormView):
+    template_name = "validator.html"
+    form_class = ValidatorForm
+
+
