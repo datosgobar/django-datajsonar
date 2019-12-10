@@ -1,11 +1,11 @@
 import logging
 
 import requests
+from requests import RequestException
 from django import forms
 from django.core.exceptions import ValidationError
 from pydatajson import DataJson
 from pydatajson.custom_exceptions import NonParseableCatalog
-from requests import RequestException
 
 
 class ValidatorForm(forms.Form):
@@ -21,7 +21,7 @@ class ValidatorForm(forms.Form):
     def validate_fields(self):
         cleaned_data = super().clean()
         url = cleaned_data.get('catalog_url')
-        format = cleaned_data.get('format')
+        catalog_format = cleaned_data.get('format')
 
         try:
             requests.head(url).raise_for_status()
@@ -30,7 +30,7 @@ class ValidatorForm(forms.Form):
 
         format_error_message = "El formato ingresado y el del catálogo deben coincidir"
         try:
-            DataJson(url, catalog_format=format)
+            DataJson(url, catalog_format=catalog_format)
         except NonParseableCatalog:
             raise ValidationError(format_error_message)
         except Exception as e:
@@ -39,8 +39,8 @@ class ValidatorForm(forms.Form):
 
     def get_error_messages(self):
         catalog_url = self.cleaned_data['catalog_url']
-        format = self.cleaned_data['format']
-        catalog = DataJson(catalog=catalog_url, catalog_format=format)
+        catalog_format = self.cleaned_data['format']
+        catalog = DataJson(catalog=catalog_url, catalog_format=catalog_format)
 
         all_errors = catalog.validate_catalog(only_errors=True)
         error_messages = []

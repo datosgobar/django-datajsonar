@@ -122,6 +122,3 @@ class ValidatorView(FormView):
         for error_message in error_messages:
             messages.info(request, error_message)
         return self.form_valid(form)
-
-
-
