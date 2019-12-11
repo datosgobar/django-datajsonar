@@ -50,7 +50,7 @@ class ValidatorTests(TestCase):
             expected_validation_message = "En dataset Forestales - Tamaño y cantidad de focos" \
                                           " de incendios: 'cantidad-de-focos-por-tamaño-y-por" \
                                           "-año .csv' is not valid under any of the given schemas"
-            self.assertEqual(expected_validation_message, message)
+            self.assertIn(expected_validation_message, message)
 
     def test_invalid_url_redirects_to_form(self):
         form_data = {
