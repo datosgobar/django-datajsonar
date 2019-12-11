@@ -46,7 +46,7 @@ class ValidatorTests(TestCase):
             self.assertEqual(response.context['request'].get_full_path(),
                              self.validator_success_url)
 
-            message = list(response.context['messages'])[0].message
+            message = str(list(response.context['messages'])[0])
             expected_validation_message = "En dataset Forestales - Tamaño y cantidad de focos" \
                                           " de incendios: 'cantidad-de-focos-por-tamaño-y-por" \
                                           "-año .csv' is not valid under any of the given schemas"
