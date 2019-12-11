@@ -46,11 +46,13 @@ class ValidatorTests(TestCase):
             self.assertEqual(response.context['request'].get_full_path(),
                              self.validator_success_url)
 
-            message = str(list(response.context['messages'])[0])
-            expected_validation_message = "En dataset Forestales - Tamaño y cantidad de focos" \
-                                          " de incendios: 'cantidad-de-focos-por-tamaño-y-por" \
-                                          "-año .csv' is not valid under any of the given schemas"
-            self.assertIn(expected_validation_message, message)
+            messages = list(response.context['messages'])
+            messages = [message.message for message in messages]
+            expected_validation_message = "En dataset Lácteos - Porcentaje de Sólidos en Leche" \
+                                          " Cruda: 'porcentaje_grasa_butirosa_kg_solidos_leche_" \
+                                          "cruda_nivel_nacional' is not valid under any of the" \
+                                          " given schemas"
+            self.assertIn(expected_validation_message, messages)
 
     def test_invalid_url_redirects_to_form(self):
         form_data = {
