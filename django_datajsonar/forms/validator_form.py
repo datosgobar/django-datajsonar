@@ -28,14 +28,14 @@ class ValidatorForm(forms.Form):
         except RequestException:
             raise ValidationError("Error descargando el catálogo")
 
-        format_error_message = "El formato ingresado y el del catálogo deben coincidir"
+        parse_error_message = "No se pudo parsear el catálogo ingresado"
         try:
             DataJson(url, catalog_format=catalog_format)
         except NonParseableCatalog:
-            raise ValidationError(format_error_message)
+            raise ValidationError(parse_error_message)
         except Exception as e:
             logging.getLogger(__file__).error(e)
-            raise ValidationError(format_error_message)
+            raise ValidationError(parse_error_message)
 
     def get_error_messages(self):
         catalog_url = self.cleaned_data['catalog_url']

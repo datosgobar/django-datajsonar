@@ -81,4 +81,4 @@ class ValidatorTests(TestCase):
             self.assertIn('validator.html', response.template_name)
 
             message = str(list(response.context['messages'])[0])
-            self.assertIn("El formato ingresado y el del catálogo deben coincidir", message)
+            self.assertIn("No se pudo parsear el catálogo ingresado", message)
