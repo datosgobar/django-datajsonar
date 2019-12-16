@@ -10,6 +10,7 @@ from django.contrib.admin import helpers
 from django.db import IntegrityError
 from django.forms import formset_factory
 from django.shortcuts import render, redirect
+from django.utils.html import format_html
 
 from django_datajsonar.admin.manual_synchronizer_view import ManualSynchronizerView
 from django_datajsonar.admin.restore_default_synchronizers_view import RestoreDefaultSynchronizerView
@@ -22,7 +23,7 @@ from django_datajsonar.utils.utils import generate_stages
 
 @admin.register(Synchronizer)
 class SynchronizerAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'frequency', 'scheduled_time', 'weekdays')
+    list_display = ('__str__', 'frequency', 'scheduled_time', 'weekdays', "run_manually")
     actions = ('duplicate',)
     StageFormset = formset_factory(StageForm, extra=0)
     change_list_template = 'synchronizer_change_list.html'
@@ -143,3 +144,7 @@ class SynchronizerAdmin(admin.ModelAdmin):
             synchronizer.name = "Copia de {}".format(synchronizer.name)
             synchronizer.save()
     duplicate.short_description = "Duplicar synchronizer"
+
+    def run_manually(self, obj):
+        return format_html("<a href='start_synchro/{0}'>Correr</a>", obj.id)
+    run_manually.short_description = 'Correr todas las tareas'
