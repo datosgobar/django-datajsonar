@@ -147,4 +147,4 @@ class SynchronizerAdmin(admin.ModelAdmin):
 
     def run_manually(self, obj):
         return format_html("<a href='start_synchro/{0}'>Correr</a>", obj.id)
-    run_manually.short_description = 'Corrida manual'
+    run_manually.short_description = 'Correr todas las tareas'
