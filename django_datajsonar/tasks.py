@@ -27,8 +27,7 @@ def read_datajson(task, whitelist=False, read_local=False):
     for node in nodes:
         index_one_catalog(task, node, read_local, whitelist)
 
-    if not settings.RQ_QUEUES['indexing'].get('ASYNC'):
-        close_read_datajson_task()
+    close_read_datajson_task.delay()
 
 
 def index_one_catalog(task, node, read_local, whitelist):
