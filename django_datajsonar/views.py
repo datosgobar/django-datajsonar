@@ -1,10 +1,16 @@
 #!coding=utf8
 import os
 
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse, HttpResponseBadRequest, FileResponse
 
 from django.conf import settings
+from django.shortcuts import render
+from django.urls import reverse
+from django.views.generic import FormView
 
+from django_datajsonar.forms.validator_form import ValidatorForm
 from django_datajsonar.models import Node
 from django_datajsonar.models.data_json import Dataset
 from django_datajsonar.utils.download_response_writer import \
@@ -90,3 +96,29 @@ def catalog_file_response(filename, path, content_type, with_attachment=True):
     if with_attachment:
         response["Content-Disposition"] = "attachment; " + response["Content-Disposition"]
     return response
+
+
+def validator_success(request):
+    return render(request, 'validator_success.html')
+
+
+class ValidatorView(FormView):
+    template_name = "validator.html"
+    form_class = ValidatorForm
+    success_url = '/validator_success/'
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if not form.is_valid():
+            return self.form_invalid(form)
+
+        try:
+            form.validate_fields()
+        except ValidationError as e:
+            messages.error(request, e)
+            return self.form_invalid(form)
+
+        error_messages = form.get_error_messages()
+        for error_message in error_messages:
+            messages.info(request, error_message)
+        return self.form_valid(form)
